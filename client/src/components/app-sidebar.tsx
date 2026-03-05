@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/theme-provider";
-import verifoneLogo from "@assets/verifone_logo_1772712551074.png";
+import verifoneLogo from "@assets/Screenshot_2026-03-05_at_5.47.46_PM_1772713069961.png";
 
 const navItems = [
   { title: "Calls", url: "/", icon: Phone },
@@ -28,19 +28,14 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-lg flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 mint-glow-sm p-1.5">
-            <img
-              src={verifoneLogo}
-              alt="Verifone"
-              className="h-full w-full object-contain dark:invert"
-              data-testid="img-logo"
-            />
-          </div>
-          <div>
-            <h1 className="text-sm font-semibold tracking-tight" data-testid="text-app-title">Verifone Assist</h1>
-            <p className="text-xs text-muted-foreground">Agent Console</p>
-          </div>
+        <div className="space-y-1">
+          <img
+            src={verifoneLogo}
+            alt="Verifone"
+            className="h-8 w-auto object-contain"
+            data-testid="img-logo"
+          />
+          <p className="text-xs text-muted-foreground pl-0.5">Agent Console</p>
         </div>
       </SidebarHeader>
       <SidebarContent>
