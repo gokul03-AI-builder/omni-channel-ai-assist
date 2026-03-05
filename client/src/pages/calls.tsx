@@ -13,7 +13,6 @@ import {
   User,
   Clock,
   Shield,
-  Wifi,
   Cpu,
   Calendar,
   AlertCircle,
@@ -23,6 +22,12 @@ import {
   BookOpen,
   Headphones,
   Volume2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
+  ListEnd,
+  UserCircle,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,11 +37,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useSidebar } from "@/components/ui/sidebar";
 import type {
   Call,
   TranscriptEntry,
@@ -314,7 +316,7 @@ function AISuggestionsPanel({
       <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-semibold">AI Assist</h3>
+          <h3 className="text-sm font-semibold">AI KB Assist</h3>
         </div>
         <Badge variant="secondary" className="text-xs">
           RAG
@@ -746,6 +748,39 @@ function EmptyState() {
   );
 }
 
+function ToggleButton({
+  active,
+  onClick,
+  icon: Icon,
+  label,
+  testId,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: typeof Phone;
+  label: string;
+  testId: string;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          size="sm"
+          variant={active ? "secondary" : "ghost"}
+          onClick={onClick}
+          className={`h-7 w-7 p-0 ${active ? "text-primary" : "text-muted-foreground"}`}
+          data-testid={testId}
+        >
+          <Icon className="w-3.5 h-3.5" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom" className="text-xs">
+        {active ? `Hide ${label}` : `Show ${label}`}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 export default function CallsPage() {
   const [calls, setCalls] = useState<Call[]>(initialCalls);
   const [selectedCallId, setSelectedCallId] = useState<string | null>("call-001");
@@ -756,6 +791,17 @@ export default function CallsPage() {
   const [isOnHold, setIsOnHold] = useState(false);
   const [transcriptIndex, setTranscriptIndex] = useState(0);
   const [callElapsed, setCallElapsed] = useState<Record<string, number>>({ "call-001": 187 });
+
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [showCallQueue, setShowCallQueue] = useState(true);
+  const [showProfile, setShowProfile] = useState(true);
+
+  const { toggleSidebar, open: sidebarOpen } = useSidebar();
+
+  const handleToggleSidebar = useCallback(() => {
+    toggleSidebar();
+    setShowSidebar((prev) => !prev);
+  }, [toggleSidebar]);
 
   const selectedCall = calls.find((c) => c.id === selectedCallId);
   const incomingCall = calls.find((c) => c.status === "incoming");
@@ -870,141 +916,179 @@ export default function CallsPage() {
     }, 1500);
   };
 
+  const hasActiveCall = selectedCall && selectedCall.status !== "ended";
+
   return (
     <div className="h-full flex flex-col" data-testid="page-calls">
-      <ResizablePanelGroup direction="horizontal" className="flex-1">
-        <ResizablePanel defaultSize={18} minSize={14} maxSize={25}>
-          <div className="flex flex-col h-full border-r border-border/50">
-            <div className="px-4 py-3 glass-header">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold">Call Queue</h2>
-                <Badge variant="secondary" className="text-xs">
-                  {activeCalls.length}
+      <div className="flex items-center justify-between px-3 py-1.5 glass-header">
+        <div className="flex items-center gap-1">
+          <ToggleButton
+            active={sidebarOpen}
+            onClick={handleToggleSidebar}
+            icon={sidebarOpen ? PanelLeftClose : PanelLeftOpen}
+            label="Agent Console"
+            testId="button-toggle-sidebar"
+          />
+          <ToggleButton
+            active={showCallQueue}
+            onClick={() => setShowCallQueue(!showCallQueue)}
+            icon={ListEnd}
+            label="Call Queue"
+            testId="button-toggle-queue"
+          />
+        </div>
+
+        <div className="flex items-center gap-1">
+          <ToggleButton
+            active={showProfile}
+            onClick={() => setShowProfile(!showProfile)}
+            icon={UserCircle}
+            label="Profile & Device"
+            testId="button-toggle-profile"
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+        <AnimatePresence initial={false}>
+          {showCallQueue && (
+            <motion.div
+              key="call-queue"
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 260, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="shrink-0 overflow-hidden"
+            >
+              <div className="flex flex-col h-full w-[260px] border-r border-border/50">
+                <div className="px-4 py-3 glass-header">
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="text-sm font-semibold">Call Queue</h2>
+                    <Badge variant="secondary" className="text-xs">
+                      {activeCalls.length}
+                    </Badge>
+                  </div>
+                </div>
+
+                <ScrollArea className="flex-1">
+                  <AnimatePresence>
+                    {incomingCall && customers[incomingCall.customerId] && (
+                      <IncomingCallAlert
+                        call={incomingCall}
+                        customer={customers[incomingCall.customerId]}
+                        onAccept={() => handleAcceptCall(incomingCall.id)}
+                        onDecline={() => handleDeclineCall(incomingCall.id)}
+                      />
+                    )}
+                  </AnimatePresence>
+
+                  <div className="py-1 space-y-1">
+                    {activeCalls.map((call) => (
+                      <CallQueueItem
+                        key={call.id}
+                        call={call}
+                        isSelected={call.id === selectedCallId}
+                        onClick={() => {
+                          if (call.id !== selectedCallId) {
+                            setSelectedCallId(call.id);
+                            setTranscript([]);
+                            setAiSuggestions([]);
+                            setAiChatMessages([]);
+                            setTranscriptIndex(0);
+                          }
+                        }}
+                        elapsed={callElapsed[call.id] || 0}
+                      />
+                    ))}
+                  </div>
+
+                  {activeCalls.length === 0 && !incomingCall && (
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                      <Phone className="w-6 h-6 mb-2 opacity-20" />
+                      <p className="text-xs">No calls in queue</p>
+                    </div>
+                  )}
+                </ScrollArea>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {hasActiveCall ? (
+          <div className="flex flex-col flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2 px-4 py-2 glass-header">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-sm font-medium">{selectedCall!.customerName}</span>
+                </div>
+                <Badge variant="secondary" className="text-xs capitalize">
+                  {selectedCall!.status}
                 </Badge>
               </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-muted-foreground font-mono" data-testid="text-call-duration">
+                  {formatDuration(callElapsed[selectedCall!.id] || 0)}
+                </span>
+              </div>
             </div>
 
-            <ScrollArea className="flex-1">
-              <AnimatePresence>
-                {incomingCall && customers[incomingCall.customerId] && (
-                  <IncomingCallAlert
-                    call={incomingCall}
-                    customer={customers[incomingCall.customerId]}
-                    onAccept={() => handleAcceptCall(incomingCall.id)}
-                    onDecline={() => handleDeclineCall(incomingCall.id)}
+            <div className="flex flex-1 min-h-0">
+              <div className="flex-1 flex flex-col min-w-0 border-r border-border/30">
+                <div className="flex-[6] min-h-0">
+                  <LiveTranscription
+                    entries={transcript}
+                    isLive={selectedCall!.status === "active"}
                   />
-                )}
-              </AnimatePresence>
-
-              <div className="py-1 space-y-1">
-                {activeCalls.map((call) => (
-                  <CallQueueItem
-                    key={call.id}
-                    call={call}
-                    isSelected={call.id === selectedCallId}
-                    onClick={() => {
-                      if (call.id !== selectedCallId) {
-                        setSelectedCallId(call.id);
-                        setTranscript([]);
-                        setAiSuggestions([]);
-                        setAiChatMessages([]);
-                        setTranscriptIndex(0);
-                      }
-                    }}
-                    elapsed={callElapsed[call.id] || 0}
-                  />
-                ))}
-              </div>
-
-              {activeCalls.length === 0 && !incomingCall && (
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                  <Phone className="w-6 h-6 mb-2 opacity-20" />
-                  <p className="text-xs">No calls in queue</p>
                 </div>
-              )}
-            </ScrollArea>
-          </div>
-        </ResizablePanel>
-
-        <ResizableHandle />
-
-        <ResizablePanel defaultSize={52} minSize={35}>
-          {selectedCall && selectedCall.status !== "ended" ? (
-            <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between gap-2 px-4 py-2 glass-header">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-primary" />
-                    <span className="text-sm font-medium">{selectedCall.customerName}</span>
-                  </div>
-                  <Badge variant="secondary" className="text-xs capitalize">
-                    {selectedCall.status}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-muted-foreground font-mono" data-testid="text-call-duration">
-                    {formatDuration(callElapsed[selectedCall.id] || 0)}
-                  </span>
-                </div>
-              </div>
-
-              <ResizablePanelGroup direction="horizontal" className="flex-1">
-                <ResizablePanel defaultSize={60} minSize={40}>
-                  <ResizablePanelGroup direction="vertical">
-                    <ResizablePanel defaultSize={65} minSize={30}>
-                      <LiveTranscription
-                        entries={transcript}
-                        isLive={selectedCall.status === "active"}
-                      />
-                    </ResizablePanel>
-                    <ResizableHandle />
-                    <ResizablePanel defaultSize={35} minSize={20}>
-                      <AgentAIChat
-                        messages={aiChatMessages}
-                        onSendMessage={handleSendAIChat}
-                      />
-                    </ResizablePanel>
-                  </ResizablePanelGroup>
-                </ResizablePanel>
-                <ResizableHandle />
-                <ResizablePanel defaultSize={40} minSize={25}>
+                <div className="border-t border-border/30 flex-[4] min-h-0">
                   <AISuggestionsPanel suggestions={aiSuggestions} />
-                </ResizablePanel>
-              </ResizablePanelGroup>
-
-              <CallControls
-                isMuted={isMuted}
-                isOnHold={isOnHold}
-                onToggleMute={() => setIsMuted(!isMuted)}
-                onToggleHold={handleToggleHold}
-                onEndCall={handleEndCall}
-              />
-            </div>
-          ) : (
-            <EmptyState />
-          )}
-        </ResizablePanel>
-
-        <ResizableHandle />
-
-        <ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
-          {currentCustomer && currentDevice ? (
-            <CustomerProfilePanel
-              customer={currentCustomer}
-              device={currentDevice}
-              tickets={currentTickets}
-              pastCalls={currentPastCalls}
-            />
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-              <div className="w-12 h-12 rounded-xl glass flex items-center justify-center mb-3">
-                <Shield className="w-6 h-6 opacity-30 text-primary" />
+                </div>
               </div>
-              <p className="text-sm">Select a call to view customer details</p>
+
+              <div className="flex flex-col shrink-0" style={{ width: showProfile ? 340 : 300 }}>
+                <div className={`min-h-0 ${showProfile ? "flex-1" : "h-full"} flex flex-col`}>
+                  <AgentAIChat
+                    messages={aiChatMessages}
+                    onSendMessage={handleSendAIChat}
+                  />
+                </div>
+                <AnimatePresence initial={false}>
+                  {showProfile && currentCustomer && currentDevice && (
+                    <motion.div
+                      key="profile-panel"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "50%", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="border-t border-border/30 overflow-hidden"
+                    >
+                      <CustomerProfilePanel
+                        customer={currentCustomer}
+                        device={currentDevice}
+                        tickets={currentTickets}
+                        pastCalls={currentPastCalls}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
-          )}
-        </ResizablePanel>
-      </ResizablePanelGroup>
+
+            <CallControls
+              isMuted={isMuted}
+              isOnHold={isOnHold}
+              onToggleMute={() => setIsMuted(!isMuted)}
+              onToggleHold={handleToggleHold}
+              onEndCall={handleEndCall}
+            />
+          </div>
+        ) : (
+          <div className="flex-1">
+            <EmptyState />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
