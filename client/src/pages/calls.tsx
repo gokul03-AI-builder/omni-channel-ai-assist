@@ -76,61 +76,61 @@ function IncomingCallAlert({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95, y: -8 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95, y: -8 }}
-      className="p-3"
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      className="px-3 py-3 space-y-2.5"
     >
-      <div className="glass-panel rounded-xl p-4 space-y-3">
-        <div className="flex items-center gap-1.5 text-primary">
-          <PhoneIncoming className="w-4 h-4 animate-pulse" />
-          <span className="text-xs font-semibold uppercase tracking-wider">Incoming Call</span>
-        </div>
+      <div className="flex items-center gap-1.5 text-primary">
+        <PhoneIncoming className="w-4 h-4 animate-pulse" />
+        <span className="text-xs font-semibold uppercase tracking-wider">Incoming Call</span>
+      </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Avatar className="h-11 w-11 border border-primary/20">
-              <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-                {customer.avatarInitials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-primary rounded-full animate-pulse-ring" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm truncate" data-testid="text-incoming-caller">{customer.name}</p>
-            <p className="text-xs text-muted-foreground truncate">{customer.company}</p>
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">{call.topic}</p>
-          </div>
+      <div className="flex items-center gap-3">
+        <div className="relative">
+          <Avatar className="h-10 w-10 border border-primary/20">
+            <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
+              {customer.avatarInitials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full animate-pulse-ring" />
         </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm truncate" data-testid="text-incoming-caller">{customer.name}</p>
+          <p className="text-xs text-muted-foreground truncate">{customer.company}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">{call.topic}</p>
+        </div>
+      </div>
 
-        <div className="flex items-center gap-1.5">
-          <Badge variant="secondary" className="text-xs">
-            {call.priority.charAt(0).toUpperCase() + call.priority.slice(1)}
-          </Badge>
-          <Badge variant="secondary" className="text-xs">
-            {customer.accountType}
-          </Badge>
-        </div>
+      <div className="flex items-center gap-1.5">
+        <Badge variant="secondary" className="text-xs">
+          {call.priority.charAt(0).toUpperCase() + call.priority.slice(1)}
+        </Badge>
+        <Badge variant="secondary" className="text-xs">
+          {customer.accountType}
+        </Badge>
+      </div>
 
-        <div className="flex gap-2">
-          <Button
-            onClick={onAccept}
-            className="flex-1 gap-2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-sm hover:bg-emerald-500/30 transition-all"
-            data-testid="button-accept-call"
-          >
-            <Phone className="w-4 h-4" />
-            Accept
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={onDecline}
-            className="flex-1 gap-2 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 backdrop-blur-sm hover:bg-red-500/30 transition-all"
-            data-testid="button-decline-call"
-          >
-            <PhoneOff className="w-4 h-4" />
-            Decline
-          </Button>
-        </div>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          onClick={onAccept}
+          className="flex-1 gap-1.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-sm hover:bg-emerald-500/30 transition-all"
+          data-testid="button-accept-call"
+        >
+          <Phone className="w-3.5 h-3.5" />
+          Accept
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={onDecline}
+          className="flex-1 gap-1.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 backdrop-blur-sm hover:bg-red-500/30 transition-all"
+          data-testid="button-decline-call"
+        >
+          <PhoneOff className="w-3.5 h-3.5" />
+          Decline
+        </Button>
       </div>
     </motion.div>
   );
