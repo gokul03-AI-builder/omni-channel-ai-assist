@@ -973,12 +973,12 @@ export default function CallsPage() {
             <motion.div
               key="call-queue"
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 260, opacity: 1 }}
+              animate={{ width: 300, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="shrink-0 overflow-hidden"
             >
-              <div className="flex flex-col h-full w-[260px] glass-panel rounded-xl overflow-hidden">
+              <div className="flex flex-col h-full w-[300px] glass-panel rounded-xl overflow-hidden">
                 <div className="px-4 py-3 glass-header">
                   <div className="flex items-center justify-between gap-2">
                     <h2 className="text-sm font-semibold">Call Queue</h2>
