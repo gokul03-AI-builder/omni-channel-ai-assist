@@ -6,12 +6,11 @@ export default {
   theme: {
     extend: {
       borderRadius: {
-        lg: ".5625rem", /* 9px */
-        md: ".375rem", /* 6px */
-        sm: ".1875rem", /* 3px */
+        lg: ".5625rem",
+        md: ".375rem",
+        sm: ".1875rem",
       },
       colors: {
-        // Flat / base colors (regular buttons)
         background: "hsl(var(--background) / <alpha-value>)",
         foreground: "hsl(var(--foreground) / <alpha-value>)",
         border: "hsl(var(--border) / <alpha-value>)",
@@ -81,6 +80,14 @@ export default {
           busy: "rgb(239 68 68)",
           offline: "rgb(156 163 175)",
         },
+        verifone: {
+          green: "hsl(148 100% 40%)",
+          "green-light": "hsl(148 100% 50%)",
+          "green-dim": "hsl(148 60% 20%)",
+          black: "hsl(0 0% 4%)",
+          "dark-gray": "hsl(0 0% 8%)",
+          "mid-gray": "hsl(0 0% 14%)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)"],
@@ -96,10 +103,31 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "pulse-ring": {
+          "0%": { boxShadow: "0 0 0 0 hsl(148 100% 40% / 0.6)" },
+          "70%": { boxShadow: "0 0 0 12px hsl(148 100% 40% / 0)" },
+          "100%": { boxShadow: "0 0 0 0 hsl(148 100% 40% / 0)" },
+        },
+        "fade-in-up": {
+          from: { opacity: "0", transform: "translateY(8px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "slide-in-right": {
+          from: { opacity: "0", transform: "translateX(16px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+        "breathing": {
+          "0%, 100%": { opacity: "0.4" },
+          "50%": { opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-ring": "pulse-ring 1.5s ease-in-out infinite",
+        "fade-in-up": "fade-in-up 0.3s ease-out",
+        "slide-in-right": "slide-in-right 0.3s ease-out",
+        "breathing": "breathing 2s ease-in-out infinite",
       },
     },
   },
