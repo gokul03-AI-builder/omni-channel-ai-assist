@@ -1034,11 +1034,15 @@ export default function CallsPage() {
             </div>
 
             <div className="flex flex-1 min-h-0">
-              <div className="flex-1 flex flex-col min-w-0">
+              <div className="flex-1 flex flex-col min-w-0 border-r border-border/30">
                 <LiveTranscription
                   entries={transcript}
                   isLive={selectedCall!.status === "active"}
                 />
+              </div>
+
+              <div className="flex-1 flex flex-col min-w-0 border-r border-border/30">
+                <AISuggestionsPanel suggestions={aiSuggestions} />
               </div>
 
               <AnimatePresence initial={false}>
@@ -1046,15 +1050,12 @@ export default function CallsPage() {
                   <motion.div
                     key="right-panel"
                     initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 320, opacity: 1 }}
+                    animate={{ width: 300, opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="shrink-0 overflow-hidden border-l border-border/30"
+                    className="shrink-0 overflow-hidden"
                   >
-                    <div className="flex flex-col h-full w-[320px]">
-                      <div className="flex-1 min-h-0 border-b border-border/30">
-                        <AISuggestionsPanel suggestions={aiSuggestions} />
-                      </div>
+                    <div className="flex flex-col h-full w-[300px]">
                       <div className="flex-1 min-h-0 border-b border-border/30">
                         <AgentAIChat
                           messages={aiChatMessages}
@@ -1062,7 +1063,7 @@ export default function CallsPage() {
                         />
                       </div>
                       {currentCustomer && currentDevice && (
-                        <div className="flex-1 min-h-0">
+                        <div className="h-[45%] min-h-0 shrink-0">
                           <CustomerProfilePanel
                             customer={currentCustomer}
                             device={currentDevice}
