@@ -29,11 +29,11 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-primary/80 to-primary/40 mint-glow-sm p-1">
+          <div className="h-9 w-9 rounded-lg flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 mint-glow-sm p-1.5">
             <img
               src={verifoneLogo}
               alt="Verifone"
-              className="h-full w-full object-contain brightness-0 invert"
+              className="h-full w-full object-contain dark:invert"
               data-testid="img-logo"
             />
           </div>
