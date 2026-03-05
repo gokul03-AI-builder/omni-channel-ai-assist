@@ -1034,25 +1034,37 @@ export default function CallsPage() {
             </div>
 
             <div className="flex flex-1 min-h-0">
+              <div className="flex-1 flex flex-col min-w-0">
+                <LiveTranscription
+                  entries={transcript}
+                  isLive={selectedCall!.status === "active"}
+                />
+              </div>
+
               <AnimatePresence initial={false}>
                 {showProfile && (
                   <motion.div
-                    key="left-panel"
+                    key="right-panel"
                     initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 300, opacity: 1 }}
+                    animate={{ width: 640, opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="shrink-0 overflow-hidden border-r border-border/30"
+                    className="shrink-0 overflow-hidden border-l border-border/30"
                   >
-                    <div className="flex flex-col h-full w-[300px]">
-                      <div className="flex-1 min-h-0 flex flex-col">
-                        <AgentAIChat
-                          messages={aiChatMessages}
-                          onSendMessage={handleSendAIChat}
-                        />
+                    <div className="flex h-full w-[640px]">
+                      <div className="flex-1 flex flex-col min-w-0 border-r border-border/30">
+                        <div className="flex-1 min-h-0">
+                          <AISuggestionsPanel suggestions={aiSuggestions} />
+                        </div>
+                        <div className="border-t border-border/30 flex-1 min-h-0">
+                          <AgentAIChat
+                            messages={aiChatMessages}
+                            onSendMessage={handleSendAIChat}
+                          />
+                        </div>
                       </div>
                       {currentCustomer && currentDevice && (
-                        <div className="border-t border-border/30 h-[45%] min-h-0">
+                        <div className="w-[280px] shrink-0">
                           <CustomerProfilePanel
                             customer={currentCustomer}
                             device={currentDevice}
@@ -1065,19 +1077,6 @@ export default function CallsPage() {
                   </motion.div>
                 )}
               </AnimatePresence>
-
-              <div className="flex-1 flex flex-col min-w-0">
-                <div className="flex-[6] min-h-0">
-                  <LiveTranscription
-                    entries={transcript}
-                    isLive={selectedCall!.status === "active"}
-                  />
-                </div>
-              </div>
-
-              <div className="shrink-0 border-l border-border/30" style={{ width: 320 }}>
-                <AISuggestionsPanel suggestions={aiSuggestions} />
-              </div>
             </div>
 
             <CallControls
