@@ -35,9 +35,9 @@ function App() {
           <SidebarProvider style={sidebarStyle as React.CSSProperties}>
             <div className="flex h-screen w-full relative">
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-mint-50 dark:bg-mint-50 blur-3xl" />
-                <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-mint-50 dark:bg-mint-50 blur-3xl" />
-                <div className="absolute top-1/2 left-1/3 w-64 h-64 rounded-full bg-mint-50 dark:bg-mint-50 blur-3xl opacity-50" />
+                <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-mint-100/40 dark:bg-primary/[0.07] blur-3xl" />
+                <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-mint-100/40 dark:bg-primary/[0.05] blur-3xl" />
+                <div className="absolute top-1/2 left-1/3 w-64 h-64 rounded-full bg-mint-100/30 dark:bg-primary/[0.04] blur-3xl" />
               </div>
               <AppSidebar />
               <main className="flex-1 h-full relative z-10">
