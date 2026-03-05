@@ -512,9 +512,9 @@ function RightPanel({
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <Tabs defaultValue="ai-chat" className="flex flex-col h-full">
-        <div className="px-3 pt-3">
+    <div className="flex flex-col h-full overflow-hidden">
+      <Tabs defaultValue="ai-chat" className="flex flex-col h-full overflow-hidden">
+        <div className="px-3 pt-3 shrink-0">
           <TabsList className="w-full glass-subtle">
             <TabsTrigger value="ai-chat" className="flex-1 text-xs" data-testid="tab-ai-chat">
               AI Chat
@@ -531,14 +531,14 @@ function RightPanel({
           </TabsList>
         </div>
 
-        <TabsContent value="ai-chat" className="flex-1 mt-0 flex flex-col min-h-0">
+        <TabsContent value="ai-chat" className="flex-1 mt-0 flex flex-col min-h-0 overflow-hidden">
           <AgentAIChatInline
             messages={aiChatMessages}
             onSendMessage={onSendAIChat}
           />
         </TabsContent>
 
-        <TabsContent value="profile" className="flex-1 mt-0">
+        <TabsContent value="profile" className="flex-1 mt-0 overflow-hidden">
           <ScrollArea className="h-full">
             <div className="p-4 space-y-4">
               <div className="flex flex-col items-center text-center space-y-3">
@@ -571,7 +571,7 @@ function RightPanel({
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="device" className="flex-1 mt-0">
+        <TabsContent value="device" className="flex-1 mt-0 overflow-hidden">
           <ScrollArea className="h-full">
             <div className="p-4 space-y-4">
               <div className="flex items-center gap-3 mb-2">
@@ -614,7 +614,7 @@ function RightPanel({
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="history" className="flex-1 mt-0">
+        <TabsContent value="history" className="flex-1 mt-0 overflow-hidden">
           <ScrollArea className="h-full">
             <div className="p-4 space-y-4">
               <div>
