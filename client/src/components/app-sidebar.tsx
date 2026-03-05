@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/theme-provider";
-import verifoneLogo from "@assets/Screenshot_2026-03-05_at_5.47.46_PM_1772713069961.png";
+import verifoneLogo from "@assets/Screenshot_2026-03-05_at_5.50.17_PM_1772713220675.png";
 
 const navItems = [
   { title: "Calls", url: "/", icon: Phone },
