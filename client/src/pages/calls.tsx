@@ -792,7 +792,7 @@ function ToggleButton({
           <Icon className="w-3.5 h-3.5" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="bottom" className="text-xs">
+      <TooltipContent side="bottom" className="text-xs z-50">
         {active ? `Hide ${label}` : `Show ${label}`}
       </TooltipContent>
     </Tooltip>
@@ -938,7 +938,7 @@ export default function CallsPage() {
 
   return (
     <div className="h-full flex flex-col" data-testid="page-calls">
-      <div className="flex items-center justify-between px-3 py-1.5 mx-2 mt-2 glass-panel rounded-xl">
+      <div className="flex items-center justify-between px-3 py-1.5 mx-2 mt-2 glass-panel rounded-xl overflow-visible relative z-20">
         <div className="flex items-center gap-1">
           <ToggleButton
             active={sidebarOpen}
