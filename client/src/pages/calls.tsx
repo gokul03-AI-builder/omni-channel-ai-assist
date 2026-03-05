@@ -938,7 +938,7 @@ export default function CallsPage() {
 
   return (
     <div className="h-full flex flex-col" data-testid="page-calls">
-      <div className="flex items-center justify-between px-3 py-1.5 glass-header">
+      <div className="flex items-center justify-between px-3 py-1.5 mx-2 mt-2 glass-panel rounded-xl">
         <div className="flex items-center gap-1">
           <ToggleButton
             active={sidebarOpen}
@@ -967,7 +967,7 @@ export default function CallsPage() {
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden gap-2 p-2">
         <AnimatePresence initial={false}>
           {showCallQueue && (
             <motion.div
@@ -978,7 +978,7 @@ export default function CallsPage() {
               transition={{ duration: 0.2 }}
               className="shrink-0 overflow-hidden"
             >
-              <div className="flex flex-col h-full w-[260px] border-r border-border/50">
+              <div className="flex flex-col h-full w-[260px] glass-panel rounded-xl overflow-hidden">
                 <div className="px-4 py-3 glass-header">
                   <div className="flex items-center justify-between gap-2">
                     <h2 className="text-sm font-semibold">Call Queue</h2>
@@ -1035,8 +1035,8 @@ export default function CallsPage() {
         </AnimatePresence>
 
         {hasActiveCall ? (
-          <div className="flex flex-col flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2 px-4 py-2 glass-header">
+          <div className="flex flex-col flex-1 min-w-0 gap-2">
+            <div className="flex items-center justify-between gap-2 px-4 py-2 glass-panel rounded-xl">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1.5">
                   <Phone className="w-3.5 h-3.5 text-primary" />
@@ -1053,15 +1053,15 @@ export default function CallsPage() {
               </div>
             </div>
 
-            <div className="flex flex-1 min-h-0">
-              <div className="flex-1 flex flex-col min-w-0 border-r border-border/30">
+            <div className="flex flex-1 min-h-0 gap-2">
+              <div className="flex-1 flex flex-col min-w-0 glass-panel rounded-xl overflow-hidden">
                 <LiveTranscription
                   entries={transcript}
                   isLive={selectedCall!.status === "active"}
                 />
               </div>
 
-              <div className="flex-1 flex flex-col min-w-0 border-r border-border/30">
+              <div className="flex-1 flex flex-col min-w-0 glass-panel rounded-xl overflow-hidden">
                 <AISuggestionsPanel suggestions={aiSuggestions} />
               </div>
 
@@ -1075,7 +1075,7 @@ export default function CallsPage() {
                     transition={{ duration: 0.2 }}
                     className="shrink-0 overflow-hidden"
                   >
-                    <div className="h-full w-[300px]">
+                    <div className="h-full w-[300px] glass-panel rounded-xl overflow-hidden">
                       <RightPanel
                         customer={currentCustomer}
                         device={currentDevice}
@@ -1090,13 +1090,15 @@ export default function CallsPage() {
               </AnimatePresence>
             </div>
 
-            <CallControls
-              isMuted={isMuted}
-              isOnHold={isOnHold}
-              onToggleMute={() => setIsMuted(!isMuted)}
-              onToggleHold={handleToggleHold}
-              onEndCall={handleEndCall}
-            />
+            <div className="glass-panel rounded-xl overflow-hidden">
+              <CallControls
+                isMuted={isMuted}
+                isOnHold={isOnHold}
+                onToggleMute={() => setIsMuted(!isMuted)}
+                onToggleHold={handleToggleHold}
+                onEndCall={handleEndCall}
+              />
+            </div>
           </div>
         ) : (
           <div className="flex-1">
