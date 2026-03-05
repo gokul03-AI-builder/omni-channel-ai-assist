@@ -371,7 +371,7 @@ function AISuggestionsPanel({
   );
 }
 
-function AgentAIChat({
+function AgentAIChatInline({
   messages,
   onSendMessage,
 }: {
@@ -403,12 +403,6 @@ function AgentAIChat({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header">
-        <div className="flex items-center gap-2">
-          <Bot className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-semibold">AI Chat Assistant</h3>
-        </div>
-      </div>
       <ScrollArea className="flex-1">
         <div className="p-3 space-y-3">
           {messages.length === 0 && (
@@ -459,7 +453,7 @@ function AgentAIChat({
           <div ref={bottomRef} />
         </div>
       </ScrollArea>
-      <div className="p-3 glass-header" style={{ borderBottom: "none" }}>
+      <div className="p-3 border-t border-border/30">
         <div className="flex gap-2">
           <Input
             type="text"
@@ -485,16 +479,20 @@ function AgentAIChat({
   );
 }
 
-function CustomerProfilePanel({
+function RightPanel({
   customer,
   device,
   tickets,
   pastCalls,
+  aiChatMessages,
+  onSendAIChat,
 }: {
   customer: Customer;
   device: DeviceInfo;
   tickets: Ticket[];
   pastCalls: PastCall[];
+  aiChatMessages: ChatMessage[];
+  onSendAIChat: (text: string) => void;
 }) {
   const statusColor =
     device.status === "active"
@@ -515,9 +513,12 @@ function CustomerProfilePanel({
 
   return (
     <div className="flex flex-col h-full">
-      <Tabs defaultValue="profile" className="flex flex-col h-full">
+      <Tabs defaultValue="ai-chat" className="flex flex-col h-full">
         <div className="px-3 pt-3">
           <TabsList className="w-full glass-subtle">
+            <TabsTrigger value="ai-chat" className="flex-1 text-xs" data-testid="tab-ai-chat">
+              AI Chat
+            </TabsTrigger>
             <TabsTrigger value="profile" className="flex-1 text-xs" data-testid="tab-profile">
               Profile
             </TabsTrigger>
@@ -529,6 +530,13 @@ function CustomerProfilePanel({
             </TabsTrigger>
           </TabsList>
         </div>
+
+        <TabsContent value="ai-chat" className="flex-1 mt-0 flex flex-col min-h-0">
+          <AgentAIChatInline
+            messages={aiChatMessages}
+            onSendMessage={onSendAIChat}
+          />
+        </TabsContent>
 
         <TabsContent value="profile" className="flex-1 mt-0">
           <ScrollArea className="h-full">
@@ -1046,7 +1054,7 @@ export default function CallsPage() {
               </div>
 
               <AnimatePresence initial={false}>
-                {showProfile && (
+                {showProfile && currentCustomer && currentDevice && (
                   <motion.div
                     key="right-panel"
                     initial={{ width: 0, opacity: 0 }}
@@ -1055,23 +1063,15 @@ export default function CallsPage() {
                     transition={{ duration: 0.2 }}
                     className="shrink-0 overflow-hidden"
                   >
-                    <div className="flex flex-col h-full w-[300px]">
-                      <div className="flex-1 min-h-0 border-b border-border/30">
-                        <AgentAIChat
-                          messages={aiChatMessages}
-                          onSendMessage={handleSendAIChat}
-                        />
-                      </div>
-                      {currentCustomer && currentDevice && (
-                        <div className="h-[45%] min-h-0 shrink-0">
-                          <CustomerProfilePanel
-                            customer={currentCustomer}
-                            device={currentDevice}
-                            tickets={currentTickets}
-                            pastCalls={currentPastCalls}
-                          />
-                        </div>
-                      )}
+                    <div className="h-full w-[300px]">
+                      <RightPanel
+                        customer={currentCustomer}
+                        device={currentDevice}
+                        tickets={currentTickets}
+                        pastCalls={currentPastCalls}
+                        aiChatMessages={aiChatMessages}
+                        onSendAIChat={handleSendAIChat}
+                      />
                     </div>
                   </motion.div>
                 )}
