@@ -166,20 +166,26 @@
 
   body {
     @apply font-sans antialiased text-foreground;
-    background:
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px),
       radial-gradient(ellipse 80% 50% at 5% 5%, var(--mint-glow-subtle), transparent 60%),
       radial-gradient(ellipse 60% 40% at 95% 95%, var(--mint-glow-subtle), transparent 60%),
-      radial-gradient(ellipse 40% 30% at 50% 50%, rgba(110,255,210,0.02), transparent 70%),
-      hsl(var(--background));
+      radial-gradient(ellipse 40% 30% at 50% 50%, rgba(110,255,210,0.02), transparent 70%);
+    background-size: 24px 24px, 100% 100%, 100% 100%, 100% 100%;
+    background-position: 0 0, 0 0, 0 0, 0 0;
     min-height: 100vh;
   }
 
   .dark body {
-    background:
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px),
       radial-gradient(ellipse 80% 50% at 0% 0%, rgba(110,255,210,0.05), transparent 50%),
       radial-gradient(ellipse 50% 40% at 100% 100%, rgba(110,255,210,0.03), transparent 50%),
-      radial-gradient(ellipse 60% 60% at 40% 60%, rgba(30,40,60,0.3), transparent 60%),
-      hsl(var(--background));
+      radial-gradient(ellipse 60% 60% at 40% 60%, rgba(30,40,60,0.3), transparent 60%);
+    background-size: 24px 24px, 100% 100%, 100% 100%, 100% 100%;
+    background-position: 0 0, 0 0, 0 0, 0 0;
   }
 }
 
