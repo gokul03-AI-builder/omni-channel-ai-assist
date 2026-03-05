@@ -986,18 +986,20 @@ export default function CallsPage() {
                   </div>
                 </div>
 
-                <ScrollArea className="flex-1">
-                  <AnimatePresence>
-                    {incomingCall && customers[incomingCall.customerId] && (
+                <AnimatePresence>
+                  {incomingCall && customers[incomingCall.customerId] && (
+                    <div className="shrink-0 border-b border-border/30">
                       <IncomingCallAlert
                         call={incomingCall}
                         customer={customers[incomingCall.customerId]}
                         onAccept={() => handleAcceptCall(incomingCall.id)}
                         onDecline={() => handleDeclineCall(incomingCall.id)}
                       />
-                    )}
-                  </AnimatePresence>
+                    </div>
+                  )}
+                </AnimatePresence>
 
+                <ScrollArea className="flex-1">
                   <div className="py-1 space-y-1">
                     {activeCalls.map((call) => (
                       <CallQueueItem
