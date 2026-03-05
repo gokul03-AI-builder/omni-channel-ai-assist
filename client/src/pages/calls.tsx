@@ -1046,25 +1046,23 @@ export default function CallsPage() {
                   <motion.div
                     key="right-panel"
                     initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 640, opacity: 1 }}
+                    animate={{ width: 320, opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                     className="shrink-0 overflow-hidden border-l border-border/30"
                   >
-                    <div className="flex h-full w-[640px]">
-                      <div className="flex-1 flex flex-col min-w-0 border-r border-border/30">
-                        <div className="flex-1 min-h-0">
-                          <AISuggestionsPanel suggestions={aiSuggestions} />
-                        </div>
-                        <div className="border-t border-border/30 flex-1 min-h-0">
-                          <AgentAIChat
-                            messages={aiChatMessages}
-                            onSendMessage={handleSendAIChat}
-                          />
-                        </div>
+                    <div className="flex flex-col h-full w-[320px]">
+                      <div className="flex-1 min-h-0 border-b border-border/30">
+                        <AISuggestionsPanel suggestions={aiSuggestions} />
+                      </div>
+                      <div className="flex-1 min-h-0 border-b border-border/30">
+                        <AgentAIChat
+                          messages={aiChatMessages}
+                          onSendMessage={handleSendAIChat}
+                        />
                       </div>
                       {currentCustomer && currentDevice && (
-                        <div className="w-[280px] shrink-0">
+                        <div className="flex-1 min-h-0">
                           <CustomerProfilePanel
                             customer={currentCustomer}
                             device={currentDevice}
