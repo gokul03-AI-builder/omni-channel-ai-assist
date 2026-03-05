@@ -74,34 +74,34 @@ function IncomingCallAlert({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="p-4"
+      initial={{ opacity: 0, scale: 0.95, y: -8 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, y: -8 }}
+      className="p-3"
     >
-      <Card className="border-primary/30 bg-card p-4 space-y-4">
-        <div className="flex items-center gap-1 text-primary">
+      <div className="glass-panel rounded-xl p-4 space-y-3">
+        <div className="flex items-center gap-1.5 text-primary">
           <PhoneIncoming className="w-4 h-4 animate-pulse" />
           <span className="text-xs font-semibold uppercase tracking-wider">Incoming Call</span>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Avatar className="h-12 w-12 border-2 border-primary/40">
+            <Avatar className="h-11 w-11 border border-primary/20">
               <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
                 {customer.avatarInitials}
               </AvatarFallback>
             </Avatar>
-            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-primary rounded-full animate-pulse-ring" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-primary rounded-full animate-pulse-ring" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm truncate" data-testid="text-incoming-caller">{customer.name}</p>
             <p className="text-xs text-muted-foreground truncate">{customer.company}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{call.topic}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">{call.topic}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <Badge variant="secondary" className="text-xs">
             {call.priority.charAt(0).toUpperCase() + call.priority.slice(1)}
           </Badge>
@@ -113,7 +113,7 @@ function IncomingCallAlert({
         <div className="flex gap-2">
           <Button
             onClick={onAccept}
-            className="flex-1 gap-2 bg-primary text-primary-foreground"
+            className="flex-1 gap-2 mint-glow-sm"
             data-testid="button-accept-call"
           >
             <Phone className="w-4 h-4" />
@@ -129,7 +129,7 @@ function IncomingCallAlert({
             Decline
           </Button>
         </div>
-      </Card>
+      </div>
     </motion.div>
   );
 }
@@ -157,9 +157,9 @@ function CallQueueItem({
 
   return (
     <div
-      className={`p-3 mx-2 rounded-md cursor-pointer transition-colors ${
+      className={`p-3 mx-2 rounded-lg cursor-pointer transition-all duration-200 ${
         isSelected
-          ? "bg-primary/10 border border-primary/20"
+          ? "glass-bubble-primary"
           : "hover-elevate"
       }`}
       onClick={onClick}
@@ -167,7 +167,7 @@ function CallQueueItem({
     >
       <div className="flex items-center gap-3">
         <Avatar className="h-9 w-9">
-          <AvatarFallback className="bg-muted text-xs font-medium">
+          <AvatarFallback className={`text-xs font-medium ${isSelected ? "bg-primary/15 text-primary" : "bg-muted"}`}>
             {customer?.avatarInitials || "?"}
           </AvatarFallback>
         </Avatar>
@@ -213,7 +213,7 @@ function LiveTranscription({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between gap-2 px-4 py-3 border-b">
+      <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header">
         <div className="flex items-center gap-2">
           <Headphones className="w-4 h-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold">Live Transcription</h3>
@@ -229,7 +229,7 @@ function LiveTranscription({
         <div className="p-4 space-y-3">
           {entries.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <Volume2 className="w-8 h-8 mb-2 opacity-30" />
+              <Volume2 className="w-8 h-8 mb-2 opacity-20" />
               <p className="text-sm">Waiting for conversation...</p>
             </div>
           )}
@@ -249,7 +249,7 @@ function LiveTranscription({
                     className={`text-xs ${
                       entry.speaker === "agent"
                         ? "bg-primary/15 text-primary"
-                        : "bg-muted text-muted-foreground"
+                        : "bg-muted/80 text-muted-foreground"
                     }`}
                   >
                     {entry.speaker === "agent" ? (
@@ -274,10 +274,10 @@ function LiveTranscription({
                     </span>
                   </div>
                   <div
-                    className={`rounded-md px-3 py-2 text-sm leading-relaxed ${
+                    className={`rounded-lg px-3 py-2 text-sm leading-relaxed ${
                       entry.speaker === "agent"
-                        ? "bg-primary/10 text-foreground"
-                        : "bg-muted text-foreground"
+                        ? "glass-bubble-primary"
+                        : "glass-bubble"
                     }`}
                     data-testid={`text-transcript-${entry.id}`}
                   >
@@ -290,9 +290,9 @@ function LiveTranscription({
           {isLive && entries.length > 0 && (
             <div className="flex items-center gap-2 text-muted-foreground pl-10">
               <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "300ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
               <span className="text-xs">Listening...</span>
             </div>
@@ -311,7 +311,7 @@ function AISuggestionsPanel({
 }) {
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between gap-2 px-4 py-3 border-b">
+      <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-semibold">AI Assist</h3>
@@ -324,7 +324,7 @@ function AISuggestionsPanel({
         <div className="p-3 space-y-3">
           {suggestions.length === 0 && (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-              <Bot className="w-8 h-8 mb-2 opacity-30" />
+              <Bot className="w-8 h-8 mb-2 opacity-20" />
               <p className="text-sm text-center">AI suggestions will appear here based on the conversation</p>
             </div>
           )}
@@ -336,7 +336,7 @@ function AISuggestionsPanel({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="p-3 space-y-2 border-primary/10" data-testid={`card-suggestion-${suggestion.id}`}>
+                <Card className="p-3 space-y-2" data-testid={`card-suggestion-${suggestion.id}`}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-1.5">
                       <BookOpen className="w-3.5 h-3.5 text-primary shrink-0" />
@@ -401,7 +401,7 @@ function AgentAIChat({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between gap-2 px-4 py-3 border-b">
+      <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header">
         <div className="flex items-center gap-2">
           <Bot className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-semibold">AI Chat Assistant</h3>
@@ -424,15 +424,15 @@ function AgentAIChat({
               className={`flex gap-2 ${msg.sender === "agent" ? "flex-row-reverse" : ""}`}
             >
               <Avatar className="h-6 w-6 shrink-0 mt-0.5">
-                <AvatarFallback className={`text-xs ${msg.sender === "ai" ? "bg-primary/15 text-primary" : "bg-muted"}`}>
+                <AvatarFallback className={`text-xs ${msg.sender === "ai" ? "bg-primary/15 text-primary" : "bg-muted/80"}`}>
                   {msg.sender === "ai" ? <Bot className="w-3 h-3" /> : <User className="w-3 h-3" />}
                 </AvatarFallback>
               </Avatar>
               <div
-                className={`rounded-md px-3 py-2 text-xs leading-relaxed max-w-[85%] ${
+                className={`rounded-lg px-3 py-2 text-xs leading-relaxed max-w-[85%] ${
                   msg.sender === "ai"
-                    ? "bg-primary/10 text-foreground"
-                    : "bg-muted text-foreground"
+                    ? "glass-bubble-primary"
+                    : "glass-bubble"
                 }`}
                 data-testid={`text-chat-${msg.id}`}
               >
@@ -447,7 +447,7 @@ function AgentAIChat({
                   <Bot className="w-3 h-3" />
                 </AvatarFallback>
               </Avatar>
-              <div className="bg-primary/10 rounded-md px-3 py-2 flex items-center gap-1">
+              <div className="glass-bubble-primary rounded-lg px-3 py-2 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce" style={{ animationDelay: "0ms" }} />
                 <span className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce" style={{ animationDelay: "150ms" }} />
                 <span className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce" style={{ animationDelay: "300ms" }} />
@@ -457,7 +457,7 @@ function AgentAIChat({
           <div ref={bottomRef} />
         </div>
       </ScrollArea>
-      <div className="p-3 border-t">
+      <div className="p-3 glass-header" style={{ borderBottom: "none" }}>
         <div className="flex gap-2">
           <Input
             type="text"
@@ -465,13 +465,14 @@ function AgentAIChat({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             placeholder="Ask AI assistant..."
-            className="flex-1"
+            className="flex-1 glass-input"
             data-testid="input-ai-chat"
           />
           <Button
             size="icon"
             onClick={handleSend}
             disabled={!input.trim()}
+            className="mint-glow-sm"
             data-testid="button-send-ai-chat"
           >
             <Send className="w-4 h-4" />
@@ -503,7 +504,7 @@ function CustomerProfilePanel({
   const ticketStatusColor = (status: string) => {
     switch (status) {
       case "open": return "bg-blue-500/15 text-blue-400";
-      case "closed": return "bg-green-500/15 text-green-400";
+      case "closed": return "bg-emerald-500/15 text-emerald-400";
       case "pending": return "bg-yellow-500/15 text-yellow-400";
       case "escalated": return "bg-red-500/15 text-red-400";
       default: return "bg-muted text-muted-foreground";
@@ -514,7 +515,7 @@ function CustomerProfilePanel({
     <div className="flex flex-col h-full">
       <Tabs defaultValue="profile" className="flex flex-col h-full">
         <div className="px-3 pt-3">
-          <TabsList className="w-full">
+          <TabsList className="w-full glass-subtle">
             <TabsTrigger value="profile" className="flex-1 text-xs" data-testid="tab-profile">
               Profile
             </TabsTrigger>
@@ -531,11 +532,14 @@ function CustomerProfilePanel({
           <ScrollArea className="h-full">
             <div className="p-4 space-y-4">
               <div className="flex flex-col items-center text-center space-y-3">
-                <Avatar className="h-16 w-16">
-                  <AvatarFallback className="bg-primary/15 text-primary font-semibold text-lg">
-                    {customer.avatarInitials}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="h-16 w-16 border border-primary/20">
+                    <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
+                      {customer.avatarInitials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-status-online border-2 border-background" />
+                </div>
                 <div>
                   <h3 className="font-semibold" data-testid="text-customer-name">{customer.name}</h3>
                   <p className="text-sm text-muted-foreground">{customer.company}</p>
@@ -545,7 +549,7 @@ function CustomerProfilePanel({
                 </Badge>
               </div>
 
-              <Separator />
+              <Separator className="bg-border/50" />
 
               <div className="space-y-3">
                 <InfoRow label="Email" value={customer.email} />
@@ -561,7 +565,7 @@ function CustomerProfilePanel({
           <ScrollArea className="h-full">
             <div className="p-4 space-y-4">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center">
                   <Cpu className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -573,7 +577,7 @@ function CustomerProfilePanel({
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-border/50" />
 
               <div className="space-y-3">
                 <InfoRow label="Serial Number" value={device.serialNumber} mono />
@@ -584,7 +588,7 @@ function CustomerProfilePanel({
               </div>
 
               {device.firmwareVersion !== "v4.2.1" && device.model.includes("P400") && (
-                <Card className="p-3 border-primary/20 bg-primary/5">
+                <Card className="p-3">
                   <div className="flex items-start gap-2">
                     <AlertCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                     <div>
@@ -632,7 +636,7 @@ function CustomerProfilePanel({
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-border/50" />
 
               <div>
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
@@ -695,7 +699,7 @@ function CallControls({
   onEndCall: () => void;
 }) {
   return (
-    <div className="flex items-center justify-center gap-2 px-4 py-2 border-t bg-card/50">
+    <div className="flex items-center justify-center gap-2 px-4 py-2 glass-controls">
       <Button
         size="sm"
         variant={isMuted ? "destructive" : "secondary"}
@@ -733,8 +737,8 @@ function CallControls({
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-      <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-        <Phone className="w-7 h-7 opacity-40" />
+      <div className="w-16 h-16 rounded-2xl glass flex items-center justify-center mb-4">
+        <Phone className="w-7 h-7 opacity-40 text-primary" />
       </div>
       <h3 className="font-semibold text-foreground mb-1" data-testid="text-empty-state">No active calls</h3>
       <p className="text-sm">Waiting for incoming calls...</p>
@@ -870,8 +874,8 @@ export default function CallsPage() {
     <div className="h-full flex flex-col" data-testid="page-calls">
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={18} minSize={14} maxSize={25}>
-          <div className="flex flex-col h-full border-r">
-            <div className="px-4 py-3 border-b">
+          <div className="flex flex-col h-full border-r border-border/50">
+            <div className="px-4 py-3 glass-header">
               <div className="flex items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold">Call Queue</h2>
                 <Badge variant="secondary" className="text-xs">
@@ -914,7 +918,7 @@ export default function CallsPage() {
 
               {activeCalls.length === 0 && !incomingCall && (
                 <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                  <Phone className="w-6 h-6 mb-2 opacity-30" />
+                  <Phone className="w-6 h-6 mb-2 opacity-20" />
                   <p className="text-xs">No calls in queue</p>
                 </div>
               )}
@@ -927,7 +931,7 @@ export default function CallsPage() {
         <ResizablePanel defaultSize={52} minSize={35}>
           {selectedCall && selectedCall.status !== "ended" ? (
             <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between gap-2 px-4 py-2 border-b bg-card/30">
+              <div className="flex items-center justify-between gap-2 px-4 py-2 glass-header">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5 text-primary" />
@@ -993,7 +997,9 @@ export default function CallsPage() {
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-              <Shield className="w-8 h-8 mb-2 opacity-30" />
+              <div className="w-12 h-12 rounded-xl glass flex items-center justify-center mb-3">
+                <Shield className="w-6 h-6 opacity-30 text-primary" />
+              </div>
               <p className="text-sm">Select a call to view customer details</p>
             </div>
           )}

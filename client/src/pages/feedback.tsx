@@ -43,7 +43,7 @@ export default function FeedbackPage() {
 
   return (
     <div className="flex flex-col h-full" data-testid="page-feedback">
-      <div className="px-6 py-4 border-b">
+      <div className="px-6 py-4 glass-header">
         <h2 className="text-lg font-semibold">Customer Feedback</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Post-call satisfaction ratings and comments</p>
       </div>
@@ -51,7 +51,7 @@ export default function FeedbackPage() {
       <div className="px-6 py-4 grid grid-cols-3 gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center">
               <Star className="w-5 h-5 text-primary" />
             </div>
             <div>
@@ -62,7 +62,7 @@ export default function FeedbackPage() {
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center">
               <MessageCircle className="w-5 h-5 text-primary" />
             </div>
             <div>
@@ -73,7 +73,7 @@ export default function FeedbackPage() {
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-primary" />
             </div>
             <div>
@@ -100,7 +100,7 @@ export default function FeedbackPage() {
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-3.5 h-3.5 ${i < item.rating ? "text-yellow-500 fill-yellow-500" : "text-muted"}`}
+                        className={`w-3.5 h-3.5 ${i < item.rating ? "text-yellow-500 fill-yellow-500" : "text-muted/60"}`}
                       />
                     ))}
                     <span className="text-xs text-muted-foreground ml-2">{item.date}</span>

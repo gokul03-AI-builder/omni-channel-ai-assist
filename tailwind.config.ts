@@ -6,9 +6,9 @@ export default {
   theme: {
     extend: {
       borderRadius: {
-        lg: ".5625rem",
-        md: ".375rem",
-        sm: ".1875rem",
+        lg: ".625rem",
+        md: ".4375rem",
+        sm: ".25rem",
       },
       colors: {
         background: "hsl(var(--background) / <alpha-value>)",
@@ -80,13 +80,18 @@ export default {
           busy: "rgb(239 68 68)",
           offline: "rgb(156 163 175)",
         },
-        verifone: {
-          green: "hsl(148 100% 40%)",
-          "green-light": "hsl(148 100% 50%)",
-          "green-dim": "hsl(148 60% 20%)",
-          black: "hsl(0 0% 4%)",
-          "dark-gray": "hsl(0 0% 8%)",
-          "mid-gray": "hsl(0 0% 14%)",
+        mint: {
+          DEFAULT: "#6effd2",
+          50: "rgba(110,255,210,0.05)",
+          100: "rgba(110,255,210,0.1)",
+          200: "rgba(110,255,210,0.2)",
+          300: "rgba(110,255,210,0.3)",
+          400: "rgba(110,255,210,0.5)",
+          500: "#6effd2",
+          600: "#4de6b8",
+          700: "#2cb893",
+          800: "#1a8c6e",
+          900: "#0d5f4a",
         },
       },
       fontFamily: {
@@ -104,9 +109,9 @@ export default {
           to: { height: "0" },
         },
         "pulse-ring": {
-          "0%": { boxShadow: "0 0 0 0 hsl(148 100% 40% / 0.6)" },
-          "70%": { boxShadow: "0 0 0 12px hsl(148 100% 40% / 0)" },
-          "100%": { boxShadow: "0 0 0 0 hsl(148 100% 40% / 0)" },
+          "0%": { boxShadow: "0 0 0 0 rgba(110,255,210,0.6)" },
+          "70%": { boxShadow: "0 0 0 12px rgba(110,255,210,0)" },
+          "100%": { boxShadow: "0 0 0 0 rgba(110,255,210,0)" },
         },
         "fade-in-up": {
           from: { opacity: "0", transform: "translateY(8px)" },
@@ -120,6 +125,10 @@ export default {
           "0%, 100%": { opacity: "0.4" },
           "50%": { opacity: "1" },
         },
+        "glass-shimmer": {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -128,6 +137,7 @@ export default {
         "fade-in-up": "fade-in-up 0.3s ease-out",
         "slide-in-right": "slide-in-right 0.3s ease-out",
         "breathing": "breathing 2s ease-in-out infinite",
+        "glass-shimmer": "glass-shimmer 3s ease-in-out infinite",
       },
     },
   },

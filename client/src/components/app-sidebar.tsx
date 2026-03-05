@@ -27,8 +27,8 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-primary/90 flex items-center justify-center mint-glow-sm">
             <span className="text-primary-foreground font-bold text-sm" data-testid="text-logo">V</span>
           </div>
           <div>
@@ -42,16 +42,20 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
-                const isActive = location === item.url || (item.url === "/" && location === "/");
+                const isActive = location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
                       data-active={isActive}
-                      className={isActive ? "bg-sidebar-accent text-primary font-medium" : ""}
+                      className={
+                        isActive
+                          ? "bg-primary/10 text-primary font-medium border border-primary/15"
+                          : ""
+                      }
                     >
                       <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase()}`}>
-                        <item.icon className={isActive ? "text-primary" : ""} />
+                        <item.icon className={isActive ? "text-primary" : "opacity-60"} />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
