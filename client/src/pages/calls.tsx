@@ -115,16 +115,16 @@ function IncomingCallAlert({
         <div className="flex gap-2">
           <Button
             onClick={onAccept}
-            className="flex-1 gap-2 mint-glow-sm"
+            className="flex-1 gap-2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-sm hover:bg-emerald-500/30 transition-all"
             data-testid="button-accept-call"
           >
             <Phone className="w-4 h-4" />
             Accept
           </Button>
           <Button
-            variant="destructive"
+            variant="ghost"
             onClick={onDecline}
-            className="flex-1 gap-2"
+            className="flex-1 gap-2 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 backdrop-blur-sm hover:bg-red-500/30 transition-all"
             data-testid="button-decline-call"
           >
             <PhoneOff className="w-4 h-4" />
@@ -709,12 +709,16 @@ function CallControls({
   onEndCall: () => void;
 }) {
   return (
-    <div className="flex items-center justify-center gap-2 px-4 py-2 glass-controls">
+    <div className="flex items-center justify-center gap-3 px-4 py-2.5 glass-controls">
       <Button
         size="sm"
-        variant={isMuted ? "destructive" : "secondary"}
+        variant="ghost"
         onClick={onToggleMute}
-        className="gap-1.5"
+        className={`gap-1.5 rounded-full backdrop-blur-sm border transition-all ${
+          isMuted
+            ? "bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30"
+            : "bg-white/10 text-foreground border-white/15 hover:bg-white/20"
+        }`}
         data-testid="button-mute"
       >
         {isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
@@ -722,9 +726,13 @@ function CallControls({
       </Button>
       <Button
         size="sm"
-        variant={isOnHold ? "default" : "secondary"}
+        variant="ghost"
         onClick={onToggleHold}
-        className="gap-1.5"
+        className={`gap-1.5 rounded-full backdrop-blur-sm border transition-all ${
+          isOnHold
+            ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/30"
+            : "bg-white/10 text-foreground border-white/15 hover:bg-white/20"
+        }`}
         data-testid="button-hold"
       >
         {isOnHold ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
@@ -732,9 +740,9 @@ function CallControls({
       </Button>
       <Button
         size="sm"
-        variant="destructive"
+        variant="ghost"
         onClick={onEndCall}
-        className="gap-1.5"
+        className="gap-1.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 backdrop-blur-sm hover:bg-red-500/30 transition-all"
         data-testid="button-end-call"
       >
         <PhoneOff className="w-3.5 h-3.5" />
