@@ -1034,44 +1034,49 @@ export default function CallsPage() {
             </div>
 
             <div className="flex flex-1 min-h-0">
-              <div className="flex-1 flex flex-col min-w-0 border-r border-border/30">
+              <AnimatePresence initial={false}>
+                {showProfile && (
+                  <motion.div
+                    key="left-panel"
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: 300, opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="shrink-0 overflow-hidden border-r border-border/30"
+                  >
+                    <div className="flex flex-col h-full w-[300px]">
+                      <div className="flex-1 min-h-0 flex flex-col">
+                        <AgentAIChat
+                          messages={aiChatMessages}
+                          onSendMessage={handleSendAIChat}
+                        />
+                      </div>
+                      {currentCustomer && currentDevice && (
+                        <div className="border-t border-border/30 h-[45%] min-h-0">
+                          <CustomerProfilePanel
+                            customer={currentCustomer}
+                            device={currentDevice}
+                            tickets={currentTickets}
+                            pastCalls={currentPastCalls}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="flex-1 flex flex-col min-w-0">
                 <div className="flex-[6] min-h-0">
                   <LiveTranscription
                     entries={transcript}
                     isLive={selectedCall!.status === "active"}
                   />
                 </div>
-                <div className="border-t border-border/30 flex-[4] min-h-0">
-                  <AISuggestionsPanel suggestions={aiSuggestions} />
-                </div>
               </div>
 
-              <div className="flex flex-col shrink-0" style={{ width: showProfile ? 340 : 300 }}>
-                <div className={`min-h-0 ${showProfile ? "flex-1" : "h-full"} flex flex-col`}>
-                  <AgentAIChat
-                    messages={aiChatMessages}
-                    onSendMessage={handleSendAIChat}
-                  />
-                </div>
-                <AnimatePresence initial={false}>
-                  {showProfile && currentCustomer && currentDevice && (
-                    <motion.div
-                      key="profile-panel"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "50%", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="border-t border-border/30 overflow-hidden"
-                    >
-                      <CustomerProfilePanel
-                        customer={currentCustomer}
-                        device={currentDevice}
-                        tickets={currentTickets}
-                        pastCalls={currentPastCalls}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+              <div className="shrink-0 border-l border-border/30" style={{ width: 320 }}>
+                <AISuggestionsPanel suggestions={aiSuggestions} />
               </div>
             </div>
 
