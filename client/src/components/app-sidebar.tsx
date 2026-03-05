@@ -32,7 +32,7 @@ export function AppSidebar() {
           <img
             src={verifoneLogo}
             alt="Verifone"
-            className="h-8 w-auto object-contain"
+            className="h-12 w-auto object-contain"
             data-testid="img-logo"
           />
           <p className="text-xs text-muted-foreground pl-0.5">Agent Console</p>
