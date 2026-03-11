@@ -47,6 +47,7 @@ import {
   Pencil,
   Check,
   MessageSquare,
+  Plus,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -89,6 +90,7 @@ import {
   addKbFeedback,
   getChatHistory,
   saveChatHistory,
+  clearChatHistory,
 } from "@/lib/store";
 
 function generateCallSummary(
@@ -683,11 +685,13 @@ function AgentAIChatInline({
   onSendMessage,
   prefillText,
   onPrefillConsumed,
+  onNewChat,
 }: {
   messages: ChatMessage[];
   onSendMessage: (text: string) => void;
   prefillText?: string;
   onPrefillConsumed?: () => void;
+  onNewChat?: () => void;
 }) {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -721,10 +725,20 @@ function AgentAIChatInline({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-3 pt-2 pb-0 flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">Chat History</span>
-        {messages.length > 0 && (
-          <span className="text-xs text-muted-foreground">{messages.length} messages</span>
+      <div className="px-3 pt-2 pb-0 flex items-center justify-between shrink-0">
+        <span className="text-xs text-muted-foreground">
+          {messages.length > 0 ? `${messages.length} messages` : "AI Chat"}
+        </span>
+        {onNewChat && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs gap-1 text-muted-foreground hover:text-primary hover:bg-primary/10"
+            onClick={onNewChat}
+            data-testid="button-new-chat"
+          >
+            <Plus className="w-3 h-3" /> New Chat
+          </Button>
         )}
       </div>
       <ScrollArea className="flex-1">
@@ -826,6 +840,7 @@ function RightPanel({
   hasFirmwareSuggestion,
   hasActiveSuggestions,
   onQuickAction,
+  onNewChat,
 }: {
   customer: Customer;
   device: DeviceInfo;
@@ -838,6 +853,7 @@ function RightPanel({
   hasFirmwareSuggestion?: boolean;
   hasActiveSuggestions?: boolean;
   onQuickAction?: (action: string) => void;
+  onNewChat?: () => void;
 }) {
   const statusColor =
     device.status === "active"
@@ -928,6 +944,7 @@ function RightPanel({
               onSendMessage={onSendAIChat}
               prefillText={chatPrefill}
               onPrefillConsumed={onChatPrefillConsumed}
+              onNewChat={onNewChat}
             />
           </TabsContent>
 
@@ -1598,6 +1615,8 @@ export default function CallsPage() {
     setAiSuggestions([]);
     setTranscriptIndex(0);
     setEndedCallSummary(summaryData);
+    setAiChatMessages([]);
+    clearChatHistory();
   };
 
   const handleToggleHold = () => {
@@ -1677,6 +1696,11 @@ export default function CallsPage() {
   const handleTicketCreated = (ticket: CreatedTicket) => {
     setCreatedTicket(ticket);
     setTicketCreated(true);
+  };
+
+  const handleNewChat = () => {
+    setAiChatMessages([]);
+    clearChatHistory();
   };
 
   const handleOpenArticle = (s: AISuggestion) => {
@@ -1843,6 +1867,7 @@ export default function CallsPage() {
                         hasFirmwareSuggestion={aiSuggestions.some((s) => s.category === "Firmware")}
                         hasActiveSuggestions={aiSuggestions.length > 0}
                         onQuickAction={handleQuickAction}
+                        onNewChat={handleNewChat}
                       />
                     </div>
                   </motion.div>
