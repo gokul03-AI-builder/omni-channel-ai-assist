@@ -44,6 +44,9 @@ import {
   FileText,
   ChevronDown,
   ChevronUp,
+  Pencil,
+  Check,
+  MessageSquare,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -54,7 +57,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useToast } from "@/hooks/use-toast";
 import type {
@@ -86,6 +90,38 @@ import {
   getChatHistory,
   saveChatHistory,
 } from "@/lib/store";
+
+function generateCallSummary(
+  call: Call,
+  customer: Customer | null,
+  transcript: TranscriptEntry[],
+  suggestions: AISuggestion[],
+  duration: number
+): string {
+  const date = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const customerLines = transcript.filter((e) => e.speaker === "customer");
+  const agentLines = transcript.filter((e) => e.speaker === "agent");
+
+  const issueText = customerLines.slice(0, 2).map((e) => e.text).join(" ");
+  const stepsText = agentLines.slice(0, 2).map((e) => `• ${e.text.slice(0, 120)}${e.text.length > 120 ? "…" : ""}`).join("\n") || "• Steps provided during call";
+  const kbText = suggestions.length > 0 ? suggestions.map((s) => `• ${s.source}: ${s.title}`).join("\n") : "• None";
+
+  return `Call Date: ${date}
+Duration: ${formatDuration(duration)}
+Customer: ${customer?.name ?? call.customerName}${customer?.company ? ` (${customer.company})` : ""}
+Account Type: ${customer?.accountType ?? ""}
+Topic: ${call.topic}
+Priority: ${call.priority.charAt(0).toUpperCase() + call.priority.slice(1)}
+
+Issue Summary:
+${issueText || "Customer contacted support regarding " + call.topic}
+
+Troubleshooting Steps Taken:
+${stepsText}
+
+KB Articles Referenced:
+${kbText}`;
+}
 
 function analyzeSentiment(entries: TranscriptEntry[]): "positive" | "neutral" | "concerned" | "frustrated" {
   const recentCustomer = entries.filter((e) => e.speaker === "customer").slice(-3);
@@ -402,9 +438,11 @@ function CallQueueItem({
 function LiveTranscription({
   entries,
   isLive,
+  showSentiment,
 }: {
   entries: TranscriptEntry[];
   isLive: boolean;
+  showSentiment?: boolean;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const sentiment = analyzeSentiment(entries);
@@ -429,7 +467,7 @@ function LiveTranscription({
           <h3 className="text-sm font-semibold">Live Transcription</h3>
         </div>
         <div className="flex items-center gap-3">
-          {entries.length > 0 && (
+          {showSentiment && entries.length > 0 && (
             <div className={`flex items-center gap-1 ${sc.color}`} data-testid="text-sentiment">
               <sc.icon className="w-3 h-3" />
               <span className="text-xs font-medium">{sc.label}</span>
@@ -525,12 +563,10 @@ function LiveTranscription({
 function AISuggestionsPanel({
   suggestions,
   onOpenArticle,
-  onQuickAction,
   callTopic,
 }: {
   suggestions: AISuggestion[];
   onOpenArticle: (s: AISuggestion) => void;
-  onQuickAction: (action: string) => void;
   callTopic?: string;
 }) {
   const [votes, setVotes] = useState<Record<string, "up" | "down" | null>>({});
@@ -561,8 +597,6 @@ function AISuggestionsPanel({
     setVotes((prev) => ({ ...prev, [s.id]: newVote }));
   };
 
-  const hasFirmwareSuggestion = suggestions.some((s) => s.category === "Firmware");
-
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header">
@@ -572,50 +606,6 @@ function AISuggestionsPanel({
         </div>
         <Badge variant="secondary" className="text-xs">RAG</Badge>
       </div>
-
-      {suggestions.length > 0 && (
-        <div className="px-3 py-2 border-b border-border/20 flex flex-wrap gap-1.5">
-          <span className="text-xs text-muted-foreground self-center mr-0.5">Quick Actions:</span>
-          {hasFirmwareSuggestion && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-6 gap-1 rounded-full px-2 text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
-              onClick={() => onQuickAction("firmware")}
-              data-testid="button-qa-firmware"
-            >
-              <Upload className="w-3 h-3" /> Push Firmware
-            </Button>
-          )}
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-6 gap-1 rounded-full px-2 text-xs bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20"
-            onClick={() => onQuickAction("escalate")}
-            data-testid="button-qa-escalate"
-          >
-            <Zap className="w-3 h-3" /> Escalate L2
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-6 gap-1 rounded-full px-2 text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20"
-            onClick={() => onQuickAction("ticket")}
-            data-testid="button-qa-ticket"
-          >
-            <TicketPlus className="w-3 h-3" /> Create Ticket
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-6 gap-1 rounded-full px-2 text-xs bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted"
-            onClick={() => onQuickAction("technician")}
-            data-testid="button-qa-tech"
-          >
-            <Wrench className="w-3 h-3" /> Schedule Tech
-          </Button>
-        </div>
-      )}
 
       <ScrollArea className="flex-1">
         <div className="p-3 space-y-3">
@@ -833,6 +823,9 @@ function RightPanel({
   onSendAIChat,
   chatPrefill,
   onChatPrefillConsumed,
+  hasFirmwareSuggestion,
+  hasActiveSuggestions,
+  onQuickAction,
 }: {
   customer: Customer;
   device: DeviceInfo;
@@ -842,6 +835,9 @@ function RightPanel({
   onSendAIChat: (text: string) => void;
   chatPrefill?: string;
   onChatPrefillConsumed?: () => void;
+  hasFirmwareSuggestion?: boolean;
+  hasActiveSuggestions?: boolean;
+  onQuickAction?: (action: string) => void;
 }) {
   const statusColor =
     device.status === "active"
@@ -881,7 +877,52 @@ function RightPanel({
         </div>
 
         <div className="relative flex-1 min-h-0">
-          <TabsContent value="ai-chat" className="absolute inset-0 mt-0 flex flex-col">
+          <TabsContent value="ai-chat" className="absolute inset-0 mt-0 flex flex-col overflow-hidden">
+            {hasActiveSuggestions && onQuickAction && (
+              <div className="px-3 pt-2 pb-1 border-b border-border/20 shrink-0">
+                <p className="text-xs text-muted-foreground mb-1.5">Quick Actions</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {hasFirmwareSuggestion && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 gap-1 rounded-full px-2 text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
+                      onClick={() => onQuickAction("firmware")}
+                      data-testid="button-qa-firmware"
+                    >
+                      <Upload className="w-3 h-3" /> Push Firmware
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 gap-1 rounded-full px-2 text-xs bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20"
+                    onClick={() => onQuickAction("escalate")}
+                    data-testid="button-qa-escalate"
+                  >
+                    <Zap className="w-3 h-3" /> Escalate L2
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 gap-1 rounded-full px-2 text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20"
+                    onClick={() => onQuickAction("ticket")}
+                    data-testid="button-qa-ticket"
+                  >
+                    <TicketPlus className="w-3 h-3" /> Create Ticket
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 gap-1 rounded-full px-2 text-xs bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted"
+                    onClick={() => onQuickAction("technician")}
+                    data-testid="button-qa-tech"
+                  >
+                    <Wrench className="w-3 h-3" /> Schedule Tech
+                  </Button>
+                </div>
+              </div>
+            )}
             <AgentAIChatInline
               messages={aiChatMessages}
               onSendMessage={onSendAIChat}
@@ -1117,23 +1158,138 @@ function EmptyState() {
   );
 }
 
+interface CreatedTicket {
+  id: string;
+  customerName: string;
+  company: string;
+  topic: string;
+  summary: string;
+  notes: string;
+  priority: string;
+  createdAt: string;
+}
+
+function TicketDialog({
+  open,
+  onClose,
+  initialSummary,
+  customer,
+  call,
+  onTicketCreated,
+}: {
+  open: boolean;
+  onClose: () => void;
+  initialSummary: string;
+  customer: Customer | null;
+  call: Call | null;
+  onTicketCreated: (ticket: CreatedTicket) => void;
+}) {
+  const [summary, setSummary] = useState(initialSummary);
+  const [notes, setNotes] = useState("");
+  const [ticketId] = useState(() => `TKT-${Date.now().toString().slice(-6)}`);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (open) setSummary(initialSummary);
+  }, [open, initialSummary]);
+
+  const handleCreate = () => {
+    const ticket: CreatedTicket = {
+      id: ticketId,
+      customerName: customer?.name ?? call?.customerName ?? "Unknown",
+      company: customer?.company ?? "",
+      topic: call?.topic ?? "Support Issue",
+      summary,
+      notes,
+      priority: call?.priority ?? "medium",
+      createdAt: new Date().toISOString(),
+    };
+    onTicketCreated(ticket);
+    toast({ title: `Ticket ${ticketId} created`, description: "Call summary has been attached to the ticket." });
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-lg glass-panel border-border/30 max-h-[90vh] flex flex-col">
+        <DialogHeader className="shrink-0">
+          <DialogTitle className="flex items-center gap-2 text-sm">
+            <TicketPlus className="w-4 h-4 text-blue-400" />
+            Create Support Ticket
+          </DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground">
+            Review and edit the auto-generated summary before submitting.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+          <div className="flex items-center justify-between glass-subtle rounded-lg px-3 py-2">
+            <div>
+              <p className="text-xs font-semibold" data-testid="text-ticket-id">{ticketId}</p>
+              <p className="text-xs text-muted-foreground">{customer?.name ?? call?.customerName} • {customer?.company}</p>
+            </div>
+            <Badge variant="secondary" className="text-xs capitalize">{call?.priority ?? "medium"} priority</Badge>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <FileText className="w-3 h-3" /> Call Summary
+              <span className="text-primary font-normal normal-case tracking-normal">(editable)</span>
+            </label>
+            <Textarea
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              className="min-h-[180px] text-xs font-mono resize-y glass-subtle border-border/30 focus:border-primary/40"
+              data-testid="textarea-ticket-summary"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <MessageSquare className="w-3 h-3" /> Agent Notes
+            </label>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add any additional notes, follow-up actions, or observations..."
+              className="min-h-[80px] text-xs resize-y glass-subtle border-border/30 focus:border-primary/40"
+              data-testid="textarea-ticket-notes"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 pt-2 shrink-0 border-t border-border/20">
+          <Button variant="ghost" size="sm" onClick={onClose} className="text-xs">Cancel</Button>
+          <Button size="sm" onClick={handleCreate} className="text-xs gap-1.5" data-testid="button-create-ticket-submit">
+            <TicketPlus className="w-3.5 h-3.5" /> Create Ticket
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function CallSummary({
   call,
   customer,
   duration,
   transcript,
   suggestions,
+  createdTicket,
+  onOpenTicketDialog,
 }: {
   call: Call;
   customer: Customer | null;
   duration: number;
   transcript: TranscriptEntry[];
   suggestions: AISuggestion[];
+  createdTicket?: CreatedTicket | null;
+  onOpenTicketDialog?: () => void;
 }) {
-  const keyPoints = transcript
-    .filter((t) => t.speaker === "customer")
-    .slice(0, 3)
-    .map((t) => t.text.length > 100 ? t.text.slice(0, 100) + "…" : t.text);
+  const { toast } = useToast();
+  const generatedSummary = generateCallSummary(call, customer, transcript, suggestions, duration);
+  const [editableSummary, setEditableSummary] = useState(generatedSummary);
+  const [isEditingSummary, setIsEditingSummary] = useState(false);
+  const [agentNotes, setAgentNotes] = useState(createdTicket?.notes ?? "");
 
   const nextActions = [
     suggestions.some((s) => s.category === "Firmware") ? "Push firmware update via Device Management Portal" : null,
@@ -1142,8 +1298,14 @@ function CallSummary({
     "Flag for CSAT survey",
   ].filter(Boolean) as string[];
 
+  const handleCopy = () => {
+    const fullText = `${editableSummary}${agentNotes ? `\n\nAgent Notes:\n${agentNotes}` : ""}`;
+    navigator.clipboard.writeText(fullText).catch(() => {});
+    toast({ title: "Copied to clipboard", description: "Call summary and notes have been copied." });
+  };
+
   return (
-    <div className="flex flex-col items-center justify-start h-full py-6 px-4">
+    <div className="flex flex-col items-center justify-start h-full py-6 px-4 overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1161,23 +1323,58 @@ function CallSummary({
               <Badge variant="secondary" className="text-xs capitalize">{call.priority} priority</Badge>
             </div>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 shrink-0"
+            onClick={handleCopy}
+            data-testid="button-copy-summary"
+          >
+            <Copy className="w-3.5 h-3.5" />
+          </Button>
         </div>
 
-        {keyPoints.length > 0 && (
-          <div className="glass-panel rounded-xl p-4 space-y-2">
+        <div className="glass-panel rounded-xl p-4 space-y-2">
+          <div className="flex items-center justify-between">
             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5" /> Customer Issues
+              <FileText className="w-3.5 h-3.5" /> AI-Generated Summary
             </h4>
-            <ul className="space-y-1.5">
-              {keyPoints.map((point, i) => (
-                <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary/60 mt-1.5 shrink-0" />
-                  {point}
-                </li>
-              ))}
-            </ul>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs gap-1 text-muted-foreground hover:text-foreground"
+              onClick={() => setIsEditingSummary((v) => !v)}
+              data-testid="button-toggle-edit-summary"
+            >
+              {isEditingSummary ? <><Check className="w-3 h-3 text-primary" /> Save</> : <><Pencil className="w-3 h-3" /> Edit</>}
+            </Button>
           </div>
-        )}
+          {isEditingSummary ? (
+            <Textarea
+              value={editableSummary}
+              onChange={(e) => setEditableSummary(e.target.value)}
+              className="min-h-[180px] text-xs font-mono resize-y glass-subtle border-border/30 focus:border-primary/40"
+              data-testid="textarea-edit-summary"
+            />
+          ) : (
+            <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed" data-testid="text-summary-content">
+              {editableSummary}
+            </pre>
+          )}
+        </div>
+
+        <div className="glass-panel rounded-xl p-4 space-y-2">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <MessageSquare className="w-3.5 h-3.5" /> Agent Notes
+          </h4>
+          <Textarea
+            value={agentNotes}
+            onChange={(e) => setAgentNotes(e.target.value)}
+            placeholder="Add notes, follow-up actions, or observations for the record..."
+            className="min-h-[80px] text-xs resize-y glass-subtle border-border/30 focus:border-primary/40"
+            data-testid="textarea-agent-notes"
+          />
+        </div>
 
         {suggestions.length > 0 && (
           <div className="glass-panel rounded-xl p-4 space-y-2">
@@ -1207,6 +1404,41 @@ function CallSummary({
               </li>
             ))}
           </ul>
+        </div>
+
+        <div className="glass-panel rounded-xl p-4 space-y-2">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <TicketPlus className="w-3.5 h-3.5" /> Support Ticket
+          </h4>
+          {createdTicket ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Badge className="text-xs bg-emerald-500/15 text-emerald-400 border-emerald-500/20" data-testid="text-ticket-ref">{createdTicket.id}</Badge>
+                <span className="text-xs text-muted-foreground">Created during call</span>
+              </div>
+              <p className="text-xs text-muted-foreground">Summary and notes have been attached to the ticket.</p>
+              {createdTicket.notes && (
+                <div className="glass-subtle rounded-lg p-2">
+                  <p className="text-xs text-muted-foreground italic">{createdTicket.notes}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">No ticket was created during this call.</p>
+              {onOpenTicketDialog && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 gap-1.5 text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20"
+                  onClick={onOpenTicketDialog}
+                  data-testid="button-create-ticket-from-summary"
+                >
+                  <TicketPlus className="w-3.5 h-3.5" /> Create Ticket Now
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </motion.div>
     </div>
@@ -1269,6 +1501,10 @@ export default function CallsPage() {
     call: Call; customer: Customer | null; duration: number;
     transcript: TranscriptEntry[]; suggestions: AISuggestion[];
   } | null>(null);
+  const [ticketCreated, setTicketCreated] = useState(false);
+  const [createdTicket, setCreatedTicket] = useState<CreatedTicket | null>(null);
+  const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
+  const [ticketDialogSummary, setTicketDialogSummary] = useState("");
 
   const { toggleSidebar, open: sidebarOpen } = useSidebar();
 
@@ -1407,6 +1643,19 @@ export default function CallsPage() {
   };
 
   const handleQuickAction = (action: string) => {
+    if (action === "ticket") {
+      const summary = generateCallSummary(
+        selectedCall!,
+        currentCustomer,
+        transcript,
+        aiSuggestions,
+        callElapsed[selectedCall!.id] || 0
+      );
+      setTicketDialogSummary(summary);
+      setTicketDialogOpen(true);
+      return;
+    }
+
     const actionConfig: Record<string, { title: string; description: string }> = {
       firmware: {
         title: "Firmware push initiated",
@@ -1416,10 +1665,6 @@ export default function CallsPage() {
         title: "Escalated to Level 2",
         description: `Ticket ${currentTickets[0]?.id ?? "TKT-NEW"} assigned to L2 support queue. Avg. resolution: 4–6 hours.`,
       },
-      ticket: {
-        title: "Ticket created",
-        description: `New ticket opened for ${currentCustomer?.name ?? "customer"} — ${selectedCall?.topic ?? "active call issue"}.`,
-      },
       technician: {
         title: "Technician scheduled",
         description: `On-site visit requested for ${currentCustomer?.company ?? "customer location"}. Premium SLA: within 4 business hours.`,
@@ -1427,6 +1672,11 @@ export default function CallsPage() {
     };
     const cfg = actionConfig[action];
     if (cfg) toast({ title: cfg.title, description: cfg.description });
+  };
+
+  const handleTicketCreated = (ticket: CreatedTicket) => {
+    setCreatedTicket(ticket);
+    setTicketCreated(true);
   };
 
   const handleOpenArticle = (s: AISuggestion) => {
@@ -1558,6 +1808,7 @@ export default function CallsPage() {
                 <LiveTranscription
                   entries={transcript}
                   isLive={selectedCall!.status === "active"}
+                  showSentiment={ticketCreated}
                 />
               </div>
 
@@ -1565,7 +1816,6 @@ export default function CallsPage() {
                 <AISuggestionsPanel
                   suggestions={aiSuggestions}
                   onOpenArticle={handleOpenArticle}
-                  onQuickAction={handleQuickAction}
                   callTopic={selectedCall?.topic}
                 />
               </div>
@@ -1590,6 +1840,9 @@ export default function CallsPage() {
                         onSendAIChat={handleSendAIChat}
                         chatPrefill={chatPrefill}
                         onChatPrefillConsumed={() => setChatPrefill(undefined)}
+                        hasFirmwareSuggestion={aiSuggestions.some((s) => s.category === "Firmware")}
+                        hasActiveSuggestions={aiSuggestions.length > 0}
+                        onQuickAction={handleQuickAction}
                       />
                     </div>
                   </motion.div>
@@ -1616,6 +1869,18 @@ export default function CallsPage() {
                 duration={endedCallSummary.duration}
                 transcript={endedCallSummary.transcript}
                 suggestions={endedCallSummary.suggestions}
+                createdTicket={createdTicket}
+                onOpenTicketDialog={() => {
+                  const summary = generateCallSummary(
+                    endedCallSummary.call,
+                    endedCallSummary.customer,
+                    endedCallSummary.transcript,
+                    endedCallSummary.suggestions,
+                    endedCallSummary.duration
+                  );
+                  setTicketDialogSummary(summary);
+                  setTicketDialogOpen(true);
+                }}
               />
             ) : (
               <EmptyState />
@@ -1623,6 +1888,15 @@ export default function CallsPage() {
           </div>
         )}
       </div>
+
+      <TicketDialog
+        open={ticketDialogOpen}
+        onClose={() => setTicketDialogOpen(false)}
+        initialSummary={ticketDialogSummary}
+        customer={currentCustomer ?? endedCallSummary?.customer ?? null}
+        call={selectedCall ?? endedCallSummary?.call ?? null}
+        onTicketCreated={handleTicketCreated}
+      />
 
       <KbArticleModal
         suggestion={selectedArticle}
