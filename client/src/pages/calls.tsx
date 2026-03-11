@@ -790,18 +790,20 @@ function AgentAIChatInline({
           <div ref={bottomRef} />
         </div>
       </ScrollArea>
-      <div className="px-3 pb-1 flex flex-wrap gap-1">
-        {QUICK_PROMPTS.map((q) => (
-          <button
-            key={q}
-            onClick={() => setInput(q)}
-            className="text-xs px-2 py-0.5 rounded-full border border-border/30 bg-muted/30 hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-colors text-muted-foreground"
-            data-testid={`chip-quick-prompt-${q.replace(/\s+/g, "-").toLowerCase()}`}
-          >
-            {q}
-          </button>
-        ))}
-      </div>
+      {messages.length === 0 && (
+        <div className="px-3 pb-1 flex flex-wrap gap-1">
+          {QUICK_PROMPTS.map((q) => (
+            <button
+              key={q}
+              onClick={() => setInput(q)}
+              className="text-xs px-2 py-0.5 rounded-full border border-border/30 bg-muted/30 hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-colors text-muted-foreground"
+              data-testid={`chip-quick-prompt-${q.replace(/\s+/g, "-").toLowerCase()}`}
+            >
+              {q}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="p-3 border-t border-border/30">
         <div className="flex gap-2">
           <Input
