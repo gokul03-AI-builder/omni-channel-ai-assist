@@ -837,7 +837,6 @@ function RightPanel({
   onSendAIChat,
   chatPrefill,
   onChatPrefillConsumed,
-  hasFirmwareSuggestion,
   hasActiveSuggestions,
   onQuickAction,
   onNewChat,
@@ -850,7 +849,6 @@ function RightPanel({
   onSendAIChat: (text: string) => void;
   chatPrefill?: string;
   onChatPrefillConsumed?: () => void;
-  hasFirmwareSuggestion?: boolean;
   hasActiveSuggestions?: boolean;
   onQuickAction?: (action: string) => void;
   onNewChat?: () => void;
@@ -898,17 +896,6 @@ function RightPanel({
               <div className="px-3 pt-2 pb-1 border-b border-border/20 shrink-0">
                 <p className="text-xs text-muted-foreground mb-1.5">Quick Actions</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {hasFirmwareSuggestion && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 gap-1 rounded-full px-2 text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
-                      onClick={() => onQuickAction("firmware")}
-                      data-testid="button-qa-firmware"
-                    >
-                      <Upload className="w-3 h-3" /> Push Firmware
-                    </Button>
-                  )}
                   <Button
                     size="sm"
                     variant="ghost"
@@ -926,15 +913,6 @@ function RightPanel({
                     data-testid="button-qa-ticket"
                   >
                     <TicketPlus className="w-3 h-3" /> Create Ticket
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 gap-1 rounded-full px-2 text-xs bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted"
-                    onClick={() => onQuickAction("technician")}
-                    data-testid="button-qa-tech"
-                  >
-                    <Wrench className="w-3 h-3" /> Schedule Tech
                   </Button>
                 </div>
               </div>
@@ -1676,17 +1654,9 @@ export default function CallsPage() {
     }
 
     const actionConfig: Record<string, { title: string; description: string }> = {
-      firmware: {
-        title: "Firmware push initiated",
-        description: `Scheduling v4.2.1 remote push for ${currentCustomer?.name ?? "customer"}. ETA: ~3 minutes.`,
-      },
       escalate: {
         title: "Escalated to Level 2",
         description: `Ticket ${currentTickets[0]?.id ?? "TKT-NEW"} assigned to L2 support queue. Avg. resolution: 4–6 hours.`,
-      },
-      technician: {
-        title: "Technician scheduled",
-        description: `On-site visit requested for ${currentCustomer?.company ?? "customer location"}. Premium SLA: within 4 business hours.`,
       },
     };
     const cfg = actionConfig[action];
@@ -1864,7 +1834,6 @@ export default function CallsPage() {
                         onSendAIChat={handleSendAIChat}
                         chatPrefill={chatPrefill}
                         onChatPrefillConsumed={() => setChatPrefill(undefined)}
-                        hasFirmwareSuggestion={aiSuggestions.some((s) => s.category === "Firmware")}
                         hasActiveSuggestions={aiSuggestions.length > 0}
                         onQuickAction={handleQuickAction}
                         onNewChat={handleNewChat}
