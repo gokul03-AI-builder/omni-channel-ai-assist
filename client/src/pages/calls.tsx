@@ -28,6 +28,22 @@ import {
   PanelRightOpen,
   ListEnd,
   UserCircle,
+  ThumbsUp,
+  ThumbsDown,
+  ExternalLink,
+  Zap,
+  Upload,
+  TicketPlus,
+  Wrench,
+  TrendingDown,
+  TrendingUp,
+  Minus,
+  X,
+  Copy,
+  ClipboardCheck,
+  FileText,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,7 +54,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useToast } from "@/hooks/use-toast";
 import type {
   Call,
   TranscriptEntry,
@@ -62,6 +80,187 @@ import {
   getAiResponse,
   formatDuration,
 } from "@/lib/mock-data";
+import {
+  getKbVote,
+  addKbFeedback,
+  getChatHistory,
+  saveChatHistory,
+} from "@/lib/store";
+
+function analyzeSentiment(entries: TranscriptEntry[]): "positive" | "neutral" | "concerned" | "frustrated" {
+  const recentCustomer = entries.filter((e) => e.speaker === "customer").slice(-3);
+  const neg = ["error", "broken", "frustrated", "urgent", "fail", "problem", "issue", "can't", "wrong", "hurting", "losing", "terrible"];
+  const pos = ["thanks", "great", "good", "works", "resolved", "working", "perfect", "okay", "ok", "it's back"];
+  let negScore = 0, posScore = 0;
+  recentCustomer.forEach((e) => {
+    const lower = e.text.toLowerCase();
+    neg.forEach((k) => { if (lower.includes(k)) negScore++; });
+    pos.forEach((k) => { if (lower.includes(k)) posScore++; });
+  });
+  if (negScore >= 3) return "frustrated";
+  if (negScore >= 1) return "concerned";
+  if (posScore > negScore) return "positive";
+  return "neutral";
+}
+
+function renderArticleContent(text: string) {
+  const lines = text.split("\n");
+  return lines.map((line, i) => {
+    if (line.startsWith("## ")) {
+      return <h3 key={i} className="text-xs font-bold text-foreground mt-4 mb-1 uppercase tracking-wider text-primary/80">{line.slice(3)}</h3>;
+    }
+    if (line.startsWith("- ") || line.startsWith("* ")) {
+      const content = line.slice(2).replace(/\*\*(.*?)\*\*/g, "$1");
+      return <li key={i} className="text-xs text-muted-foreground ml-3 leading-relaxed list-disc">{content}</li>;
+    }
+    if (/^\d+\.\s/.test(line)) {
+      const content = line.replace(/\*\*(.*?)\*\*/g, "$1");
+      return <li key={i} className="text-xs text-muted-foreground ml-3 leading-relaxed list-decimal">{content}</li>;
+    }
+    if (line.startsWith("|")) {
+      return null;
+    }
+    if (line.trim() === "") {
+      return <div key={i} className="h-1" />;
+    }
+    const parts = line.split(/\*\*(.*?)\*\*/g);
+    return (
+      <p key={i} className="text-xs text-muted-foreground leading-relaxed">
+        {parts.map((part, j) => j % 2 === 1 ? <strong key={j} className="text-foreground font-medium">{part}</strong> : part)}
+      </p>
+    );
+  });
+}
+
+function KbArticleModal({
+  suggestion,
+  open,
+  onOpenChange,
+  onCopyToChat,
+  callTopic,
+}: {
+  suggestion: AISuggestion | null;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onCopyToChat: (text: string) => void;
+  callTopic?: string;
+}) {
+  const { toast } = useToast();
+  const [vote, setVote] = useState<"up" | "down" | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (suggestion) setVote(getKbVote(suggestion.id));
+  }, [suggestion?.id]);
+
+  if (!suggestion) return null;
+
+  const handleVote = (v: "up" | "down") => {
+    const newVote = vote === v ? null : v;
+    if (newVote) {
+      addKbFeedback({
+        id: `fb-kb-${Date.now()}`,
+        suggestionId: suggestion.id,
+        suggestionTitle: suggestion.title,
+        source: suggestion.source,
+        vote: newVote,
+        timestamp: new Date().toISOString(),
+        callTopic,
+      });
+      toast({ title: newVote === "up" ? "Marked as helpful" : "Feedback recorded", description: "Your feedback improves AI accuracy." });
+    }
+    setVote(newVote);
+  };
+
+  const handleCopy = () => {
+    if (suggestion.suggestedResponse) {
+      onCopyToChat(suggestion.suggestedResponse);
+      setCopied(true);
+      onOpenChange(false);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col glass-panel border-border/30 p-0 overflow-hidden">
+        <DialogHeader className="px-5 pt-5 pb-3 border-b border-border/30 shrink-0">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                <Badge variant="secondary" className="text-xs">{suggestion.source}</Badge>
+                <Badge variant="secondary" className="text-xs">{suggestion.category}</Badge>
+                <span className="text-xs text-primary font-medium">{Math.round(suggestion.confidence * 100)}% match</span>
+              </div>
+              <DialogTitle className="text-sm font-semibold leading-snug">{suggestion.title}</DialogTitle>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="px-5 py-4 space-y-1">
+            {renderArticleContent(suggestion.fullContent)}
+          </div>
+
+          {suggestion.references && suggestion.references.length > 0 && (
+            <div className="px-5 pb-4">
+              <Separator className="bg-border/30 mb-3" />
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">References</p>
+              <div className="space-y-1.5">
+                {suggestion.references.map((ref, i) => (
+                  <a
+                    key={i}
+                    href={ref.url}
+                    className="flex items-center gap-1.5 text-xs text-primary hover:underline"
+                    data-testid={`link-ref-${i}`}
+                  >
+                    <ExternalLink className="w-3 h-3 shrink-0" />
+                    {ref.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </ScrollArea>
+
+        <div className="px-5 py-3 border-t border-border/30 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground mr-1">Was this helpful?</span>
+            <Button
+              size="sm"
+              variant="ghost"
+              className={`h-7 gap-1 rounded-full px-2.5 text-xs ${vote === "up" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "text-muted-foreground"}`}
+              onClick={() => handleVote("up")}
+              data-testid="button-kb-vote-up"
+            >
+              <ThumbsUp className="w-3 h-3" /> Yes
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className={`h-7 gap-1 rounded-full px-2.5 text-xs ${vote === "down" ? "bg-red-500/20 text-red-400 border border-red-500/30" : "text-muted-foreground"}`}
+              onClick={() => handleVote("down")}
+              data-testid="button-kb-vote-down"
+            >
+              <ThumbsDown className="w-3 h-3" /> No
+            </Button>
+          </div>
+          {suggestion.suggestedResponse && (
+            <Button
+              size="sm"
+              onClick={handleCopy}
+              className="gap-1.5 h-7 rounded-full text-xs mint-glow-sm"
+              data-testid="button-copy-to-chat"
+            >
+              {copied ? <ClipboardCheck className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              Copy to AI Chat
+            </Button>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function IncomingCallAlert({
   call,
@@ -208,6 +407,15 @@ function LiveTranscription({
   isLive: boolean;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const sentiment = analyzeSentiment(entries);
+
+  const sentimentConfig = {
+    positive: { icon: TrendingUp, label: "Positive", color: "text-emerald-400" },
+    neutral: { icon: Minus, label: "Neutral", color: "text-muted-foreground" },
+    concerned: { icon: TrendingDown, label: "Concerned", color: "text-yellow-400" },
+    frustrated: { icon: TrendingDown, label: "Frustrated", color: "text-red-400" },
+  };
+  const sc = sentimentConfig[sentiment];
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -220,12 +428,20 @@ function LiveTranscription({
           <Headphones className="w-4 h-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold">Live Transcription</h3>
         </div>
-        {isLive && (
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-primary animate-breathing" />
-            <span className="text-xs text-primary font-medium">LIVE</span>
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {entries.length > 0 && (
+            <div className={`flex items-center gap-1 ${sc.color}`} data-testid="text-sentiment">
+              <sc.icon className="w-3 h-3" />
+              <span className="text-xs font-medium">{sc.label}</span>
+            </div>
+          )}
+          {isLive && (
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-primary animate-breathing" />
+              <span className="text-xs text-primary font-medium">LIVE</span>
+            </div>
+          )}
+        </div>
       </div>
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-3">
@@ -308,9 +524,45 @@ function LiveTranscription({
 
 function AISuggestionsPanel({
   suggestions,
+  onOpenArticle,
+  onQuickAction,
+  callTopic,
 }: {
   suggestions: AISuggestion[];
+  onOpenArticle: (s: AISuggestion) => void;
+  onQuickAction: (action: string) => void;
+  callTopic?: string;
 }) {
+  const [votes, setVotes] = useState<Record<string, "up" | "down" | null>>({});
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const initialVotes: Record<string, "up" | "down" | null> = {};
+    suggestions.forEach((s) => { initialVotes[s.id] = getKbVote(s.id); });
+    setVotes(initialVotes);
+  }, [suggestions.length]);
+
+  const handleVote = (s: AISuggestion, v: "up" | "down", e: React.MouseEvent) => {
+    e.stopPropagation();
+    const current = votes[s.id];
+    const newVote = current === v ? null : v;
+    if (newVote) {
+      addKbFeedback({
+        id: `fb-kb-${Date.now()}`,
+        suggestionId: s.id,
+        suggestionTitle: s.title,
+        source: s.source,
+        vote: newVote,
+        timestamp: new Date().toISOString(),
+        callTopic,
+      });
+      toast({ title: newVote === "up" ? "Marked as helpful" : "Feedback recorded", description: "Your feedback improves AI accuracy." });
+    }
+    setVotes((prev) => ({ ...prev, [s.id]: newVote }));
+  };
+
+  const hasFirmwareSuggestion = suggestions.some((s) => s.category === "Firmware");
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header">
@@ -318,10 +570,53 @@ function AISuggestionsPanel({
           <Sparkles className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-semibold">AI KB Assist</h3>
         </div>
-        <Badge variant="secondary" className="text-xs">
-          RAG
-        </Badge>
+        <Badge variant="secondary" className="text-xs">RAG</Badge>
       </div>
+
+      {suggestions.length > 0 && (
+        <div className="px-3 py-2 border-b border-border/20 flex flex-wrap gap-1.5">
+          <span className="text-xs text-muted-foreground self-center mr-0.5">Quick Actions:</span>
+          {hasFirmwareSuggestion && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 gap-1 rounded-full px-2 text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
+              onClick={() => onQuickAction("firmware")}
+              data-testid="button-qa-firmware"
+            >
+              <Upload className="w-3 h-3" /> Push Firmware
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-6 gap-1 rounded-full px-2 text-xs bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20"
+            onClick={() => onQuickAction("escalate")}
+            data-testid="button-qa-escalate"
+          >
+            <Zap className="w-3 h-3" /> Escalate L2
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-6 gap-1 rounded-full px-2 text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20"
+            onClick={() => onQuickAction("ticket")}
+            data-testid="button-qa-ticket"
+          >
+            <TicketPlus className="w-3 h-3" /> Create Ticket
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-6 gap-1 rounded-full px-2 text-xs bg-muted/50 text-muted-foreground border border-border/30 hover:bg-muted"
+            onClick={() => onQuickAction("technician")}
+            data-testid="button-qa-tech"
+          >
+            <Wrench className="w-3 h-3" /> Schedule Tech
+          </Button>
+        </div>
+      )}
+
       <ScrollArea className="flex-1">
         <div className="p-3 space-y-3">
           {suggestions.length === 0 && (
@@ -338,28 +633,43 @@ function AISuggestionsPanel({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="p-3 space-y-2" data-testid={`card-suggestion-${suggestion.id}`}>
+                <Card
+                  className="p-3 space-y-2 cursor-pointer hover-elevate transition-all"
+                  onClick={() => onOpenArticle(suggestion)}
+                  data-testid={`card-suggestion-${suggestion.id}`}
+                >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
                       <BookOpen className="w-3.5 h-3.5 text-primary shrink-0" />
-                      <span className="text-xs font-semibold text-primary">{suggestion.title}</span>
+                      <span className="text-xs font-semibold text-primary leading-snug">{suggestion.title}</span>
                     </div>
+                    <ExternalLink className="w-3 h-3 text-muted-foreground shrink-0 mt-0.5" />
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
                     {suggestion.content}
                   </p>
                   <div className="flex items-center justify-between gap-1 flex-wrap">
                     <div className="flex items-center gap-1.5">
-                      <Badge variant="secondary" className="text-xs">
-                        {suggestion.source}
-                      </Badge>
-                      <Badge variant="secondary" className="text-xs">
-                        {suggestion.category}
-                      </Badge>
+                      <Badge variant="secondary" className="text-xs">{suggestion.source}</Badge>
+                      <Badge variant="secondary" className="text-xs">{suggestion.category}</Badge>
                     </div>
-                    <span className="text-xs text-primary font-medium">
-                      {Math.round(suggestion.confidence * 100)}% match
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-primary font-medium mr-1">{Math.round(suggestion.confidence * 100)}%</span>
+                      <button
+                        className={`p-0.5 rounded hover:bg-muted transition-colors ${votes[suggestion.id] === "up" ? "text-emerald-400" : "text-muted-foreground/50 hover:text-emerald-400"}`}
+                        onClick={(e) => handleVote(suggestion, "up", e)}
+                        data-testid={`button-vote-up-${suggestion.id}`}
+                      >
+                        <ThumbsUp className="w-3 h-3" />
+                      </button>
+                      <button
+                        className={`p-0.5 rounded hover:bg-muted transition-colors ${votes[suggestion.id] === "down" ? "text-red-400" : "text-muted-foreground/50 hover:text-red-400"}`}
+                        onClick={(e) => handleVote(suggestion, "down", e)}
+                        data-testid={`button-vote-down-${suggestion.id}`}
+                      >
+                        <ThumbsDown className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                 </Card>
               </motion.div>
@@ -371,16 +681,34 @@ function AISuggestionsPanel({
   );
 }
 
+const QUICK_PROMPTS = [
+  "Firmware update steps?",
+  "Warranty coverage?",
+  "How to escalate?",
+  "RMA process?",
+];
+
 function AgentAIChatInline({
   messages,
   onSendMessage,
+  prefillText,
+  onPrefillConsumed,
 }: {
   messages: ChatMessage[];
   onSendMessage: (text: string) => void;
+  prefillText?: string;
+  onPrefillConsumed?: () => void;
 }) {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (prefillText) {
+      setInput(prefillText);
+      onPrefillConsumed?.();
+    }
+  }, [prefillText]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -403,12 +731,19 @@ function AgentAIChatInline({
 
   return (
     <div className="flex flex-col h-full">
+      <div className="px-3 pt-2 pb-0 flex items-center justify-between">
+        <span className="text-xs text-muted-foreground">Chat History</span>
+        {messages.length > 0 && (
+          <span className="text-xs text-muted-foreground">{messages.length} messages</span>
+        )}
+      </div>
       <ScrollArea className="flex-1">
         <div className="p-3 space-y-3">
           {messages.length === 0 && (
             <div className="text-center py-4">
+              <Bot className="w-8 h-8 opacity-20 text-primary mx-auto mb-2" />
               <p className="text-xs text-muted-foreground">
-                Ask the AI assistant about troubleshooting steps, firmware details, warranty info, or escalation procedures.
+                Ask about troubleshooting steps, firmware, warranty, or escalation. History is saved across sessions.
               </p>
             </div>
           )}
@@ -426,9 +761,7 @@ function AgentAIChatInline({
               </Avatar>
               <div
                 className={`rounded-lg px-3 py-2 text-xs leading-relaxed max-w-[85%] ${
-                  msg.sender === "ai"
-                    ? "glass-bubble-primary"
-                    : "glass-bubble"
+                  msg.sender === "ai" ? "glass-bubble-primary" : "glass-bubble"
                 }`}
                 data-testid={`text-chat-${msg.id}`}
               >
@@ -453,6 +786,18 @@ function AgentAIChatInline({
           <div ref={bottomRef} />
         </div>
       </ScrollArea>
+      <div className="px-3 pb-1 flex flex-wrap gap-1">
+        {QUICK_PROMPTS.map((q) => (
+          <button
+            key={q}
+            onClick={() => setInput(q)}
+            className="text-xs px-2 py-0.5 rounded-full border border-border/30 bg-muted/30 hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-colors text-muted-foreground"
+            data-testid={`chip-quick-prompt-${q.replace(/\s+/g, "-").toLowerCase()}`}
+          >
+            {q}
+          </button>
+        ))}
+      </div>
       <div className="p-3 border-t border-border/30">
         <div className="flex gap-2">
           <Input
@@ -486,6 +831,8 @@ function RightPanel({
   pastCalls,
   aiChatMessages,
   onSendAIChat,
+  chatPrefill,
+  onChatPrefillConsumed,
 }: {
   customer: Customer;
   device: DeviceInfo;
@@ -493,6 +840,8 @@ function RightPanel({
   pastCalls: PastCall[];
   aiChatMessages: ChatMessage[];
   onSendAIChat: (text: string) => void;
+  chatPrefill?: string;
+  onChatPrefillConsumed?: () => void;
 }) {
   const statusColor =
     device.status === "active"
@@ -536,6 +885,8 @@ function RightPanel({
             <AgentAIChatInline
               messages={aiChatMessages}
               onSendMessage={onSendAIChat}
+              prefillText={chatPrefill}
+              onPrefillConsumed={onChatPrefillConsumed}
             />
           </TabsContent>
 
@@ -766,6 +1117,102 @@ function EmptyState() {
   );
 }
 
+function CallSummary({
+  call,
+  customer,
+  duration,
+  transcript,
+  suggestions,
+}: {
+  call: Call;
+  customer: Customer | null;
+  duration: number;
+  transcript: TranscriptEntry[];
+  suggestions: AISuggestion[];
+}) {
+  const keyPoints = transcript
+    .filter((t) => t.speaker === "customer")
+    .slice(0, 3)
+    .map((t) => t.text.length > 100 ? t.text.slice(0, 100) + "…" : t.text);
+
+  const nextActions = [
+    suggestions.some((s) => s.category === "Firmware") ? "Push firmware update via Device Management Portal" : null,
+    "Send follow-up email with resolution steps",
+    "Update ticket with call notes and resolution",
+    "Flag for CSAT survey",
+  ].filter(Boolean) as string[];
+
+  return (
+    <div className="flex flex-col items-center justify-start h-full py-6 px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-xl space-y-4"
+      >
+        <div className="flex items-center gap-3 glass-panel rounded-xl p-4">
+          <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold" data-testid="text-call-summary-title">Call Ended — {customer?.name ?? call.customerName}</p>
+            <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+              <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{formatDuration(duration)}</span>
+              <span className="text-xs text-muted-foreground">{call.topic}</span>
+              <Badge variant="secondary" className="text-xs capitalize">{call.priority} priority</Badge>
+            </div>
+          </div>
+        </div>
+
+        {keyPoints.length > 0 && (
+          <div className="glass-panel rounded-xl p-4 space-y-2">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5" /> Customer Issues
+            </h4>
+            <ul className="space-y-1.5">
+              {keyPoints.map((point, i) => (
+                <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary/60 mt-1.5 shrink-0" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {suggestions.length > 0 && (
+          <div className="glass-panel rounded-xl p-4 space-y-2">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <BookOpen className="w-3.5 h-3.5" /> KB Articles Referenced
+            </h4>
+            <div className="space-y-1.5">
+              {suggestions.map((s) => (
+                <div key={s.id} className="flex items-center gap-2">
+                  <Badge variant="secondary" className="text-xs shrink-0">{s.source}</Badge>
+                  <span className="text-xs text-muted-foreground truncate">{s.title}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="glass-panel rounded-xl p-4 space-y-2">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5" /> Recommended Next Actions
+          </h4>
+          <ul className="space-y-1.5">
+            {nextActions.map((action, i) => (
+              <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                <ChevronRight className="w-3 h-3 text-primary shrink-0 mt-0.5" />
+                {action}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 function ToggleButton({
   active,
   onClick,
@@ -800,11 +1247,12 @@ function ToggleButton({
 }
 
 export default function CallsPage() {
+  const { toast } = useToast();
   const [calls, setCalls] = useState<Call[]>(initialCalls);
   const [selectedCallId, setSelectedCallId] = useState<string | null>("call-001");
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
-  const [aiChatMessages, setAiChatMessages] = useState<ChatMessage[]>([]);
+  const [aiChatMessages, setAiChatMessages] = useState<ChatMessage[]>(() => getChatHistory());
   const [isMuted, setIsMuted] = useState(false);
   const [isOnHold, setIsOnHold] = useState(false);
   const [transcriptIndex, setTranscriptIndex] = useState(0);
@@ -813,6 +1261,14 @@ export default function CallsPage() {
   const [showSidebar, setShowSidebar] = useState(true);
   const [showCallQueue, setShowCallQueue] = useState(true);
   const [showProfile, setShowProfile] = useState(true);
+
+  const [selectedArticle, setSelectedArticle] = useState<AISuggestion | null>(null);
+  const [articleModalOpen, setArticleModalOpen] = useState(false);
+  const [chatPrefill, setChatPrefill] = useState<string | undefined>(undefined);
+  const [endedCallSummary, setEndedCallSummary] = useState<{
+    call: Call; customer: Customer | null; duration: number;
+    transcript: TranscriptEntry[]; suggestions: AISuggestion[];
+  } | null>(null);
 
   const { toggleSidebar, open: sidebarOpen } = useSidebar();
 
@@ -890,7 +1346,14 @@ export default function CallsPage() {
   };
 
   const handleEndCall = () => {
-    if (!selectedCallId) return;
+    if (!selectedCallId || !selectedCall) return;
+    const summaryData = {
+      call: selectedCall,
+      customer: currentCustomer,
+      duration: callElapsed[selectedCallId] || 0,
+      transcript: [...transcript],
+      suggestions: [...aiSuggestions],
+    };
     setCalls((prev) =>
       prev.map((c) => (c.id === selectedCallId ? { ...c, status: "ended" as const } : c))
     );
@@ -898,6 +1361,7 @@ export default function CallsPage() {
     setTranscript([]);
     setAiSuggestions([]);
     setTranscriptIndex(0);
+    setEndedCallSummary(summaryData);
   };
 
   const handleToggleHold = () => {
@@ -920,7 +1384,11 @@ export default function CallsPage() {
       text,
       timestamp: new Date().toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" }),
     };
-    setAiChatMessages((prev) => [...prev, agentMsg]);
+    setAiChatMessages((prev) => {
+      const updated = [...prev, agentMsg];
+      saveChatHistory(updated);
+      return updated;
+    });
 
     setTimeout(() => {
       const aiResponse = getAiResponse(text);
@@ -930,8 +1398,40 @@ export default function CallsPage() {
         text: aiResponse,
         timestamp: new Date().toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit" }),
       };
-      setAiChatMessages((prev) => [...prev, aiMsg]);
+      setAiChatMessages((prev) => {
+        const updated = [...prev, aiMsg];
+        saveChatHistory(updated);
+        return updated;
+      });
     }, 1500);
+  };
+
+  const handleQuickAction = (action: string) => {
+    const actionConfig: Record<string, { title: string; description: string }> = {
+      firmware: {
+        title: "Firmware push initiated",
+        description: `Scheduling v4.2.1 remote push for ${currentCustomer?.name ?? "customer"}. ETA: ~3 minutes.`,
+      },
+      escalate: {
+        title: "Escalated to Level 2",
+        description: `Ticket ${currentTickets[0]?.id ?? "TKT-NEW"} assigned to L2 support queue. Avg. resolution: 4–6 hours.`,
+      },
+      ticket: {
+        title: "Ticket created",
+        description: `New ticket opened for ${currentCustomer?.name ?? "customer"} — ${selectedCall?.topic ?? "active call issue"}.`,
+      },
+      technician: {
+        title: "Technician scheduled",
+        description: `On-site visit requested for ${currentCustomer?.company ?? "customer location"}. Premium SLA: within 4 business hours.`,
+      },
+    };
+    const cfg = actionConfig[action];
+    if (cfg) toast({ title: cfg.title, description: cfg.description });
+  };
+
+  const handleOpenArticle = (s: AISuggestion) => {
+    setSelectedArticle(s);
+    setArticleModalOpen(true);
   };
 
   const hasActiveCall = selectedCall && selectedCall.status !== "ended";
@@ -1062,7 +1562,12 @@ export default function CallsPage() {
               </div>
 
               <div className="flex-1 flex flex-col min-w-0 glass-panel rounded-xl overflow-hidden">
-                <AISuggestionsPanel suggestions={aiSuggestions} />
+                <AISuggestionsPanel
+                  suggestions={aiSuggestions}
+                  onOpenArticle={handleOpenArticle}
+                  onQuickAction={handleQuickAction}
+                  callTopic={selectedCall?.topic}
+                />
               </div>
 
               <AnimatePresence initial={false}>
@@ -1083,6 +1588,8 @@ export default function CallsPage() {
                         pastCalls={currentPastCalls}
                         aiChatMessages={aiChatMessages}
                         onSendAIChat={handleSendAIChat}
+                        chatPrefill={chatPrefill}
+                        onChatPrefillConsumed={() => setChatPrefill(undefined)}
                       />
                     </div>
                   </motion.div>
@@ -1101,11 +1608,32 @@ export default function CallsPage() {
             </div>
           </div>
         ) : (
-          <div className="flex-1">
-            <EmptyState />
+          <div className="flex-1 glass-panel rounded-xl overflow-hidden">
+            {endedCallSummary ? (
+              <CallSummary
+                call={endedCallSummary.call}
+                customer={endedCallSummary.customer}
+                duration={endedCallSummary.duration}
+                transcript={endedCallSummary.transcript}
+                suggestions={endedCallSummary.suggestions}
+              />
+            ) : (
+              <EmptyState />
+            )}
           </div>
         )}
       </div>
+
+      <KbArticleModal
+        suggestion={selectedArticle}
+        open={articleModalOpen}
+        onOpenChange={setArticleModalOpen}
+        onCopyToChat={(text) => {
+          setChatPrefill(text);
+          setArticleModalOpen(false);
+        }}
+        callTopic={endedCallSummary?.call.topic ?? selectedCall?.topic}
+      />
     </div>
   );
 }

@@ -29,7 +29,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="p-4">
         <div className="space-y-1">
-          <div className="rounded-lg overflow-hidden">
+          <div className="rounded-lg overflow-hidden bg-slate-900">
             <img
               src={verifoneLogo}
               alt="Verifone"

@@ -62,9 +62,22 @@ export interface AISuggestion {
   id: string;
   title: string;
   content: string;
+  fullContent: string;
   source: string;
   confidence: number;
   category: string;
+  references?: { label: string; url: string }[];
+  suggestedResponse?: string;
+}
+
+export interface KbFeedback {
+  id: string;
+  suggestionId: string;
+  suggestionTitle: string;
+  source: string;
+  vote: "up" | "down";
+  timestamp: string;
+  callTopic?: string;
 }
 
 export interface ChatMessage {
