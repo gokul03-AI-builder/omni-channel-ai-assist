@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "GCTxQm0VYO_MNCulMFtfM"
+uri = "file://PRODUCT_DOC.md"
+type = "text"
+title = "Verifone Assist — Product Feature Reference"
