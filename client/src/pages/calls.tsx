@@ -727,7 +727,7 @@ function AgentAIChatInline({
     <div className="flex flex-col h-full">
       <div className="px-3 pt-2 pb-0 flex items-center justify-between shrink-0">
         <span className="text-xs text-muted-foreground">
-          {messages.length > 0 ? `${messages.length} messages` : "AI Chat"}
+          Chat History{messages.length > 0 ? ` · ${messages.length} messages` : ""}
         </span>
         {onNewChat && (
           <Button
