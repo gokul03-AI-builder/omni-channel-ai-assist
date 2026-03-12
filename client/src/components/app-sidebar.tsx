@@ -46,7 +46,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="space-y-1">
-          <div className="rounded-lg overflow-hidden bg-slate-900">
+          <div className="rounded-lg overflow-hidden bg-slate-900 group-data-[collapsible=icon]:hidden">
             <img
               src={verifoneLogo}
               alt="Verifone"
@@ -54,7 +54,10 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
               data-testid="img-logo"
             />
           </div>
-          <p className="text-xs text-muted-foreground pl-0.5">Agent Console</p>
+          <div className="hidden w-full group-data-[collapsible=icon]:flex items-center justify-center">
+            <span className="text-sm font-bold text-primary" data-testid="img-logo-collapsed">V</span>
+          </div>
+          <p className="text-xs text-muted-foreground pl-0.5 group-data-[collapsible=icon]:hidden">Agent Console</p>
         </div>
       </SidebarHeader>
       <SidebarContent>
