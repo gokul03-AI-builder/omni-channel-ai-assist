@@ -1452,14 +1452,6 @@ function IncomingCallScreen({
                 <p className="text-sm text-muted-foreground">{customer.company}</p>
                 <p className="text-xs text-muted-foreground">{customer.phone}</p>
               </div>
-              <div className="flex flex-col items-end gap-1.5">
-                <Badge variant="default" className="text-xs">{customer.accountType}</Badge>
-                <Badge variant="secondary" className="text-xs capitalize">{call.priority}</Badge>
-              </div>
-            </div>
-            <div className="px-3 py-2 rounded-lg bg-muted/30 border border-border/20">
-              <p className="text-xs text-muted-foreground">Topic</p>
-              <p className="text-sm font-medium" data-testid="text-incoming-topic">{call.topic}</p>
             </div>
           </div>
         </motion.div>
