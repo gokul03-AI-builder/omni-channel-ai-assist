@@ -12,6 +12,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import verifoneLogo from "@assets/Screenshot_2026-03-05_at_5.50.17_PM_1772713220675.png";
 
 const navItems = [
@@ -75,7 +76,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-3 border-t border-border/20">
+      <SidebarFooter className="p-3 border-t border-border/20 glass-subtle">
         <div className="flex items-center gap-2.5 mb-2">
           <Avatar className="h-8 w-8 shrink-0 border border-primary/20">
             <AvatarFallback className="bg-primary/10 text-primary font-semibold text-[10px]" data-testid="text-sidebar-initials">
@@ -84,7 +85,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
           </Avatar>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-medium truncate" data-testid="text-sidebar-email">{storedEmail}</p>
-            <p className="text-[10px] text-muted-foreground" data-testid="text-sidebar-role">{displayRole}</p>
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal border-border/30" data-testid="text-sidebar-role">{displayRole}</Badge>
           </div>
         </div>
         <button
