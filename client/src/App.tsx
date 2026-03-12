@@ -5,7 +5,16 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { ThemeProvider } from "@/lib/theme-provider";
+import { ThemeProvider, useTheme } from "@/lib/theme-provider";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { LogOut, Sun, Moon } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import CallsPage from "@/pages/calls";
 import ChatsPage from "@/pages/chats";
@@ -27,6 +36,42 @@ const sidebarStyle = {
   "--sidebar-width-icon": "3rem",
 };
 
+function ProfileAvatar() {
+  const { theme, toggleTheme } = useTheme();
+
+  return (
+    <div className="absolute top-4 right-4 z-20">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="shrink-0 focus:outline-none" data-testid="button-profile-dropdown">
+            <Avatar className="h-9 w-9 cursor-pointer border border-primary/20 hover:border-primary/40 transition-colors">
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+                AM
+              </AvatarFallback>
+            </Avatar>
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56 glass-panel border-border/30" data-testid="dropdown-profile-menu">
+          <div className="px-3 py-2">
+            <p className="text-sm font-semibold" data-testid="text-agent-name">Alex Morgan</p>
+            <p className="text-xs text-muted-foreground">Support Agent</p>
+          </div>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer gap-2" data-testid="button-theme-toggle">
+            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="cursor-pointer gap-2 text-red-400 focus:text-red-400" data-testid="button-logout">
+            <LogOut className="w-4 h-4" />
+            <span>Logout</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
+
 function App() {
   return (
     <ThemeProvider>
@@ -41,6 +86,7 @@ function App() {
               </div>
               <AppSidebar />
               <main className="flex-1 h-full relative z-10">
+                <ProfileAvatar />
                 <Router />
               </main>
             </div>
