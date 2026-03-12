@@ -1515,16 +1515,30 @@ function FloatingCallWidget({
       ? "bg-yellow-500"
       : "bg-emerald-500";
 
+  const [isDragging, setIsDragging] = useState(false);
+  const constraintsRef = useRef<HTMLDivElement>(null);
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
-      className="fixed top-4 right-4 z-50"
-      data-testid="floating-call-widget"
-    >
-      <div className="glass-panel rounded-2xl p-3 flex items-center gap-3 shadow-xl">
+    <>
+      <div
+        ref={constraintsRef}
+        style={{ position: "fixed", inset: 0, pointerEvents: "none" }}
+      />
+      <motion.div
+        drag
+        dragMomentum={false}
+        dragConstraints={constraintsRef}
+        onDragStart={() => setIsDragging(true)}
+        onDragEnd={() => setIsDragging(false)}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        className="fixed top-4 right-4 z-50"
+        style={{ cursor: isDragging ? "grabbing" : "grab" }}
+        data-testid="floating-call-widget"
+      >
+        <div className="glass-panel rounded-2xl p-3 flex items-center gap-3 shadow-xl">
         <div className="flex flex-col items-start gap-0.5 min-w-0">
           <div className="flex items-center gap-2">
             <span className={`w-2 h-2 rounded-full ${statusColor} animate-breathing shrink-0`} />
@@ -1537,7 +1551,7 @@ function FloatingCallWidget({
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5" onPointerDownCapture={(e) => e.stopPropagation()}>
           <Button
             size="icon"
             variant="ghost"
@@ -1576,6 +1590,7 @@ function FloatingCallWidget({
         </div>
       </div>
     </motion.div>
+    </>
   );
 }
 
