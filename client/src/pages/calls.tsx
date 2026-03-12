@@ -26,7 +26,6 @@ import {
   PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
-  ListEnd,
   UserCircle,
   ThumbsUp,
   ThumbsDown,
@@ -1475,6 +1474,95 @@ function ToggleButton({
   );
 }
 
+function FloatingCallWidget({
+  call,
+  customer,
+  elapsed,
+  isMuted,
+  isOnHold,
+  onToggleMute,
+  onToggleHold,
+  onEndCall,
+}: {
+  call: Call;
+  customer: Customer | null;
+  elapsed: number;
+  isMuted: boolean;
+  isOnHold: boolean;
+  onToggleMute: () => void;
+  onToggleHold: () => void;
+  onEndCall: () => void;
+}) {
+  const statusColor =
+    call.status === "on-hold"
+      ? "bg-yellow-500"
+      : "bg-emerald-500";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.3 }}
+      className="fixed bottom-4 z-50"
+      style={{ left: "calc(var(--sidebar-width) + 1rem)" }}
+      data-testid="floating-call-widget"
+    >
+      <div className="glass-panel rounded-2xl p-3 flex items-center gap-3 shadow-xl">
+        <div className="flex flex-col items-start gap-0.5 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${statusColor} animate-breathing shrink-0`} />
+            <span className="text-sm font-medium truncate max-w-[120px]" data-testid="text-widget-caller">
+              {customer?.name ?? call.customerName}
+            </span>
+          </div>
+          <span className="text-xs text-muted-foreground font-mono pl-4" data-testid="text-widget-timer">
+            {formatDuration(elapsed)}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onToggleMute}
+            className={`h-8 w-8 rounded-full backdrop-blur-sm border transition-all ${
+              isMuted
+                ? "bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30"
+                : "bg-white/10 text-foreground border-white/15 hover:bg-white/20"
+            }`}
+            data-testid="button-widget-mute"
+          >
+            {isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onToggleHold}
+            className={`h-8 w-8 rounded-full backdrop-blur-sm border transition-all ${
+              isOnHold
+                ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30"
+                : "bg-white/10 text-foreground border-white/15 hover:bg-white/20"
+            }`}
+            data-testid="button-widget-hold"
+          >
+            {isOnHold ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onEndCall}
+            className="h-8 w-8 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 backdrop-blur-sm hover:bg-red-500/30 transition-all"
+            data-testid="button-widget-end"
+          >
+            <PhoneOff className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function CallsPage() {
   const { toast } = useToast();
   const [calls, setCalls] = useState<Call[]>(initialCalls);
@@ -1488,7 +1576,6 @@ export default function CallsPage() {
   const [callElapsed, setCallElapsed] = useState<Record<string, number>>({ "call-001": 187 });
 
   const [showSidebar, setShowSidebar] = useState(true);
-  const [showCallQueue, setShowCallQueue] = useState(true);
   const [showProfile, setShowProfile] = useState(true);
 
   const [selectedArticle, setSelectedArticle] = useState<AISuggestion | null>(null);
@@ -1693,13 +1780,6 @@ export default function CallsPage() {
             label="Agent Console"
             testId="button-toggle-sidebar"
           />
-          <ToggleButton
-            active={showCallQueue}
-            onClick={() => setShowCallQueue(!showCallQueue)}
-            icon={ListEnd}
-            label="Call Queue"
-            testId="button-toggle-queue"
-          />
         </div>
 
         <div className="flex items-center gap-1">
@@ -1714,72 +1794,6 @@ export default function CallsPage() {
       </div>
 
       <div className="flex flex-1 overflow-hidden gap-2 p-2">
-        <AnimatePresence initial={false}>
-          {showCallQueue && (
-            <motion.div
-              key="call-queue"
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 300, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="shrink-0 overflow-hidden"
-            >
-              <div className="flex flex-col h-full w-[300px] glass-panel rounded-xl overflow-hidden">
-                <div className="px-4 py-3 glass-header">
-                  <div className="flex items-center justify-between gap-2">
-                    <h2 className="text-sm font-semibold">Call Queue</h2>
-                    <Badge variant="secondary" className="text-xs">
-                      {activeCalls.length}
-                    </Badge>
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {incomingCall && customers[incomingCall.customerId] && (
-                    <div className="shrink-0 border-b border-border/30">
-                      <IncomingCallAlert
-                        call={incomingCall}
-                        customer={customers[incomingCall.customerId]}
-                        onAccept={() => handleAcceptCall(incomingCall.id)}
-                        onDecline={() => handleDeclineCall(incomingCall.id)}
-                      />
-                    </div>
-                  )}
-                </AnimatePresence>
-
-                <ScrollArea className="flex-1">
-                  <div className="py-1 space-y-1">
-                    {activeCalls.map((call) => (
-                      <CallQueueItem
-                        key={call.id}
-                        call={call}
-                        isSelected={call.id === selectedCallId}
-                        onClick={() => {
-                          if (call.id !== selectedCallId) {
-                            setSelectedCallId(call.id);
-                            setTranscript([]);
-                            setAiSuggestions([]);
-                            setAiChatMessages([]);
-                            setTranscriptIndex(0);
-                          }
-                        }}
-                        elapsed={callElapsed[call.id] || 0}
-                      />
-                    ))}
-                  </div>
-
-                  {activeCalls.length === 0 && !incomingCall && (
-                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                      <Phone className="w-6 h-6 mb-2 opacity-20" />
-                      <p className="text-xs">No calls in queue</p>
-                    </div>
-                  )}
-                </ScrollArea>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {hasActiveCall ? (
           <div className="flex flex-col flex-1 min-w-0 gap-2">
             <div className="flex items-center justify-between gap-2 px-4 py-2 glass-panel rounded-xl">
@@ -1904,6 +1918,44 @@ export default function CallsPage() {
         }}
         callTopic={endedCallSummary?.call.topic ?? selectedCall?.topic}
       />
+
+      <AnimatePresence>
+        {hasActiveCall && selectedCall && (
+          <FloatingCallWidget
+            call={selectedCall}
+            customer={currentCustomer}
+            elapsed={callElapsed[selectedCall.id] || 0}
+            isMuted={isMuted}
+            isOnHold={isOnHold}
+            onToggleMute={() => setIsMuted(!isMuted)}
+            onToggleHold={handleToggleHold}
+            onEndCall={handleEndCall}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {incomingCall && customers[incomingCall.customerId] && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-20 z-50"
+            style={{ left: "calc(var(--sidebar-width) + 1rem)" }}
+            data-testid="floating-incoming-call"
+          >
+            <div className="glass-panel rounded-2xl shadow-xl overflow-hidden w-[300px]">
+              <IncomingCallAlert
+                call={incomingCall}
+                customer={customers[incomingCall.customerId]}
+                onAccept={() => handleAcceptCall(incomingCall.id)}
+                onDecline={() => handleDeclineCall(incomingCall.id)}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
