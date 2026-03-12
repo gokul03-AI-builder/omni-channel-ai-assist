@@ -6,70 +6,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { ThemeProvider, useTheme } from "@/lib/theme-provider";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { LogOut, Sun, Moon } from "lucide-react";
+import { ThemeProvider } from "@/lib/theme-provider";
 import NotFound from "@/pages/not-found";
 import CallsPage from "@/pages/calls";
 import ChatsPage from "@/pages/chats";
 import FeedbackPage from "@/pages/feedback";
 import LoginPage from "@/pages/login";
-
-function ProfileDropdown({ onLogout }: { onLogout: () => void }) {
-  const { theme, toggleTheme } = useTheme();
-  const authRole = localStorage.getItem("wingman_auth");
-  const storedEmail = localStorage.getItem("wingman_email") || "";
-  const isAdmin = authRole === "admin";
-  const displayName = storedEmail || (isAdmin ? "Admin" : "Agent");
-  const displayRole = isAdmin ? "Admin" : "Support Agent";
-  const emailPrefix = storedEmail.split("@")[0] || "";
-  const initials = emailPrefix.length >= 2
-    ? (emailPrefix[0] + emailPrefix[1]).toUpperCase()
-    : emailPrefix.toUpperCase() || (isAdmin ? "AD" : "AG");
-
-  return (
-    <div className="fixed bottom-4 left-4 z-50" data-testid="profile-dropdown-container">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="focus:outline-none" data-testid="button-profile-dropdown">
-            <Avatar className="h-9 w-9 cursor-pointer border border-primary/20 hover:border-primary/40 transition-colors shadow-lg">
-              <AvatarFallback className="bg-primary/10 text-primary font-semibold text-[10px]">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent side="top" align="start" className="w-56 glass-panel border-border/30" data-testid="dropdown-profile-menu">
-          <div className="px-3 py-2">
-            <p className="text-sm font-semibold" data-testid="text-agent-name">{displayName}</p>
-            <p className="text-xs text-muted-foreground">{displayRole}</p>
-          </div>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer gap-2" data-testid="button-theme-toggle">
-            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={onLogout}
-            className="cursor-pointer gap-2 text-red-400 focus:text-red-400"
-            data-testid="button-logout"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Logout</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
-}
 
 function AuthenticatedRouter() {
   return (
@@ -134,7 +76,6 @@ function App() {
                 <main className="flex-1 h-full relative z-10">
                   <AuthenticatedRouter />
                 </main>
-                <ProfileDropdown onLogout={handleLogout} />
               </div>
             </SidebarProvider>
             <Toaster />
