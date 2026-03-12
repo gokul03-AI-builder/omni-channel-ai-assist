@@ -1526,7 +1526,7 @@ function FloatingCallWidget({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="fixed top-4 right-4 z-50"
+        className="fixed top-4 left-0 right-0 mx-auto w-fit z-50"
         style={{ cursor: isDragging ? "grabbing" : "grab" }}
         data-testid="floating-call-widget"
       >
