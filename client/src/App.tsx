@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -19,6 +20,7 @@ import NotFound from "@/pages/not-found";
 import CallsPage from "@/pages/calls";
 import ChatsPage from "@/pages/chats";
 import FeedbackPage from "@/pages/feedback";
+import LoginPage from "@/pages/login";
 
 function Router() {
   return (
@@ -36,8 +38,13 @@ const sidebarStyle = {
   "--sidebar-width-icon": "3rem",
 };
 
-function ProfileAvatar() {
+function ProfileAvatar({ onLogout }: { onLogout: () => void }) {
   const { theme, toggleTheme } = useTheme();
+  const authRole = localStorage.getItem("wingman_auth");
+  const isAdmin = authRole === "admin";
+  const displayName = isAdmin ? "Gokul Nair" : "Alex Morgan";
+  const displayRole = isAdmin ? "Admin" : "Support Agent";
+  const initials = isAdmin ? "GN" : "AM";
 
   return (
     <div className="absolute top-4 right-4 z-20">
@@ -46,15 +53,15 @@ function ProfileAvatar() {
           <button className="shrink-0 focus:outline-none" data-testid="button-profile-dropdown">
             <Avatar className="h-9 w-9 cursor-pointer border border-primary/20 hover:border-primary/40 transition-colors">
               <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
-                AM
+                {initials}
               </AvatarFallback>
             </Avatar>
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 glass-panel border-border/30" data-testid="dropdown-profile-menu">
           <div className="px-3 py-2">
-            <p className="text-sm font-semibold" data-testid="text-agent-name">Alex Morgan</p>
-            <p className="text-xs text-muted-foreground">Support Agent</p>
+            <p className="text-sm font-semibold" data-testid="text-agent-name">{displayName}</p>
+            <p className="text-xs text-muted-foreground">{displayRole}</p>
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer gap-2" data-testid="button-theme-toggle">
@@ -62,7 +69,11 @@ function ProfileAvatar() {
             <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="cursor-pointer gap-2 text-red-400 focus:text-red-400" data-testid="button-logout">
+          <DropdownMenuItem
+            onClick={onLogout}
+            className="cursor-pointer gap-2 text-red-400 focus:text-red-400"
+            data-testid="button-logout"
+          >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>
           </DropdownMenuItem>
@@ -73,6 +84,26 @@ function ProfileAvatar() {
 }
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    () => !!localStorage.getItem("wingman_auth")
+  );
+
+  const handleLogin = () => setIsAuthenticated(true);
+
+  const handleLogout = () => {
+    localStorage.removeItem("wingman_auth");
+    setIsAuthenticated(false);
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <ThemeProvider>
+        <LoginPage onLogin={handleLogin} />
+        <Toaster />
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
@@ -86,7 +117,7 @@ function App() {
               </div>
               <AppSidebar />
               <main className="flex-1 h-full relative z-10">
-                <ProfileAvatar />
+                <ProfileAvatar onLogout={handleLogout} />
                 <Router />
               </main>
             </div>
