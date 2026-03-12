@@ -1,5 +1,5 @@
 import { useLocation, Link } from "wouter";
-import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose } from "lucide-react";
+import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -24,7 +24,7 @@ const navItems = [
 
 export function AppSidebar({ onLogout }: { onLogout: () => void }) {
   const [location] = useLocation();
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, open } = useSidebar();
   const storedEmail = localStorage.getItem("wingman_email") || "";
   const authRole = localStorage.getItem("wingman_auth");
   const isAdmin = authRole === "admin";
@@ -35,7 +35,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
     : emailPrefix.toUpperCase() || (isAdmin ? "AD" : "AG");
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="space-y-1">
           <div className="rounded-lg overflow-hidden bg-slate-900">
@@ -85,26 +85,30 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
             className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
             data-testid="button-toggle-sidebar"
           >
-            <PanelLeftClose className="w-4 h-4" />
+            {open ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
           </button>
           <Avatar className="h-8 w-8 shrink-0 border border-primary/20">
             <AvatarFallback className="bg-primary/10 text-primary font-semibold text-[10px]" data-testid="text-sidebar-initials">
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium truncate" data-testid="text-sidebar-email">{storedEmail}</p>
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal border-border/30" data-testid="text-sidebar-role">{displayRole}</Badge>
-          </div>
+          {open && (
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium truncate" data-testid="text-sidebar-email">{storedEmail}</p>
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal border-border/30" data-testid="text-sidebar-role">{displayRole}</Badge>
+            </div>
+          )}
         </div>
-        <button
-          onClick={onLogout}
-          className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
-          data-testid="button-sidebar-logout"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          Log Out
-        </button>
+        {open && (
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
+            data-testid="button-sidebar-logout"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Log Out
+          </button>
+        )}
       </SidebarFooter>
     </Sidebar>
   );
