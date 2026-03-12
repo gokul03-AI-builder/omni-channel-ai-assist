@@ -72,7 +72,7 @@ function App() {
                   <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-mint-100/40 dark:bg-primary/[0.05] blur-3xl" />
                   <div className="absolute top-1/2 left-1/3 w-64 h-64 rounded-full bg-mint-100/30 dark:bg-primary/[0.04] blur-3xl" />
                 </div>
-                <AppSidebar />
+                <AppSidebar onLogout={handleLogout} />
                 <main className="flex-1 h-full relative z-10">
                   <AuthenticatedRouter onLogout={handleLogout} />
                 </main>

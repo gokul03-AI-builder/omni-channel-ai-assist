@@ -1,8 +1,9 @@
 import { useLocation, Link } from "wouter";
-import { Phone, MessageSquare, ThumbsUp } from "lucide-react";
+import { Phone, MessageSquare, ThumbsUp, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -10,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import verifoneLogo from "@assets/Screenshot_2026-03-05_at_5.50.17_PM_1772713220675.png";
 
 const navItems = [
@@ -18,8 +20,16 @@ const navItems = [
   { title: "Feedback", url: "/feedback", icon: ThumbsUp },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ onLogout }: { onLogout: () => void }) {
   const [location] = useLocation();
+  const storedEmail = localStorage.getItem("wingman_email") || "";
+  const authRole = localStorage.getItem("wingman_auth");
+  const isAdmin = authRole === "admin";
+  const displayRole = isAdmin ? "Admin" : "Support Agent";
+  const emailPrefix = storedEmail.split("@")[0] || "";
+  const initials = emailPrefix.length >= 2
+    ? (emailPrefix[0] + emailPrefix[1]).toUpperCase()
+    : emailPrefix.toUpperCase() || (isAdmin ? "AD" : "AG");
 
   return (
     <Sidebar>
@@ -65,6 +75,27 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="p-3 border-t border-border/20">
+        <div className="flex items-center gap-2.5 mb-2">
+          <Avatar className="h-8 w-8 shrink-0 border border-primary/20">
+            <AvatarFallback className="bg-primary/10 text-primary font-semibold text-[10px]" data-testid="text-sidebar-initials">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium truncate" data-testid="text-sidebar-email">{storedEmail}</p>
+            <p className="text-[10px] text-muted-foreground" data-testid="text-sidebar-role">{displayRole}</p>
+          </div>
+        </div>
+        <button
+          onClick={onLogout}
+          className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
+          data-testid="button-sidebar-logout"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          Log Out
+        </button>
+      </SidebarFooter>
     </Sidebar>
   );
 }
