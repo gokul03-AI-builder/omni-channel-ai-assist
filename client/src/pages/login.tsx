@@ -1,8 +1,8 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { Headphones, Shield, Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import verifoneLogo from "@assets/verifone_logo_1772712551074.png";
 
 const roles = [
@@ -37,11 +37,13 @@ const wingPath2 = "M 0,0 C 30,-15 70,-20 120,-10 C 150,-5 170,5 180,15";
 
 export default function LoginPage({ onLogin }: { onLogin: () => void }) {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
 
   const handleSignIn = () => {
     if (!selectedRole) return;
     localStorage.setItem("wingman_auth", selectedRole);
     onLogin();
+    setLocation("/");
   };
 
   const containerVariants = {
@@ -66,7 +68,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
       </div>
 
       <motion.div
-        className="w-full max-w-2xl relative z-10"
+        className="w-full max-w-lg relative z-10 glass-panel rounded-2xl p-8"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
