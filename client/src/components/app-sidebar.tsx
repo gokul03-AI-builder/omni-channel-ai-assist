@@ -1,5 +1,5 @@
 import { useLocation, Link } from "wouter";
-import { Phone, MessageSquare, ThumbsUp, LogOut } from "lucide-react";
+import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -10,6 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ const navItems = [
 
 export function AppSidebar({ onLogout }: { onLogout: () => void }) {
   const [location] = useLocation();
+  const { toggleSidebar } = useSidebar();
   const storedEmail = localStorage.getItem("wingman_email") || "";
   const authRole = localStorage.getItem("wingman_auth");
   const isAdmin = authRole === "admin";
@@ -78,6 +80,13 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
       </SidebarContent>
       <SidebarFooter className="p-3 border-t border-border/20 glass-subtle">
         <div className="flex items-center gap-2.5 mb-2">
+          <button
+            onClick={toggleSidebar}
+            className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
+            data-testid="button-toggle-sidebar"
+          >
+            <PanelLeftClose className="w-4 h-4" />
+          </button>
           <Avatar className="h-8 w-8 shrink-0 border border-primary/20">
             <AvatarFallback className="bg-primary/10 text-primary font-semibold text-[10px]" data-testid="text-sidebar-initials">
               {initials}

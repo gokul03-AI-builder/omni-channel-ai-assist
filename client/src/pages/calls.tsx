@@ -23,8 +23,6 @@ import {
   BookOpen,
   Headphones,
   Volume2,
-  PanelLeftClose,
-  PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
   UserCircle,
@@ -74,7 +72,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSidebar } from "@/components/ui/sidebar";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/lib/theme-provider";
 import type {
@@ -1418,39 +1415,6 @@ function CallSummary({
   );
 }
 
-function ToggleButton({
-  active,
-  onClick,
-  icon: Icon,
-  label,
-  testId,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: typeof Phone;
-  label: string;
-  testId: string;
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          size="sm"
-          variant={active ? "secondary" : "ghost"}
-          onClick={onClick}
-          className={`h-7 w-7 p-0 ${active ? "text-primary" : "text-muted-foreground"}`}
-          data-testid={testId}
-        >
-          <Icon className="w-3.5 h-3.5" />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent side="bottom" className="text-xs z-50">
-        {active ? `Hide ${label}` : `Show ${label}`}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
 function IncomingCallScreen({
   call,
   customer,
@@ -1666,7 +1630,6 @@ export default function CallsPage({ onLogout }: { onLogout: () => void }) {
   const [transcriptIndex, setTranscriptIndex] = useState(0);
   const [callElapsed, setCallElapsed] = useState<Record<string, number>>({});
 
-  const [showSidebar, setShowSidebar] = useState(true);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
 
   const [selectedArticle, setSelectedArticle] = useState<AISuggestion | null>(null);
@@ -1680,13 +1643,6 @@ export default function CallsPage({ onLogout }: { onLogout: () => void }) {
   const [createdTicket, setCreatedTicket] = useState<CreatedTicket | null>(null);
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
   const [ticketDialogSummary, setTicketDialogSummary] = useState("");
-
-  const { toggleSidebar, open: sidebarOpen } = useSidebar();
-
-  const handleToggleSidebar = useCallback(() => {
-    toggleSidebar();
-    setShowSidebar((prev) => !prev);
-  }, [toggleSidebar]);
 
   const selectedCall = calls.find((c) => c.id === selectedCallId);
 
@@ -1880,18 +1836,6 @@ export default function CallsPage({ onLogout }: { onLogout: () => void }) {
 
   return (
     <div className="h-full flex flex-col" data-testid="page-calls">
-      <div className="flex items-center justify-between px-3 py-1.5 mx-2 mt-2 glass-panel rounded-xl overflow-visible relative z-20">
-        <div className="flex items-center gap-1">
-          <ToggleButton
-            active={sidebarOpen}
-            onClick={handleToggleSidebar}
-            icon={sidebarOpen ? PanelLeftClose : PanelLeftOpen}
-            label="Agent Console"
-            testId="button-toggle-sidebar"
-          />
-        </div>
-      </div>
-
       <div className="flex flex-1 overflow-hidden gap-2 p-2">
         {hasIncomingCall && currentCustomer ? (
           <IncomingCallScreen
