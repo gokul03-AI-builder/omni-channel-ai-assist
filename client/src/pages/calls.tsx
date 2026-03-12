@@ -1686,6 +1686,12 @@ export default function CallsPage() {
     setSelectedCallId(null);
     setTicketCreated(false);
     setCreatedTicket(null);
+    setCallElapsed({});
+    setIsMuted(false);
+    setIsOnHold(false);
+    setTranscript([]);
+    setAiSuggestions([]);
+    setTranscriptIndex(0);
     clearChatHistory();
     setAiChatMessages([]);
     setCalls(initialCalls.map((c) => ({ ...c, status: c.status === "active" ? "incoming" as const : c.status })));
