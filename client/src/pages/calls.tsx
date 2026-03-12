@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Phone,
   PhoneOff,
-  PhoneIncoming,
+
   Mic,
   MicOff,
   Pause,
@@ -299,53 +299,6 @@ function KbArticleModal({
   );
 }
 
-function IncomingCallAlert({
-  customer,
-  onAccept,
-}: {
-  call: Call;
-  customer: Customer;
-  onAccept: () => void;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      className="px-3 py-3 space-y-2.5"
-    >
-      <div className="flex items-center gap-1.5 text-primary">
-        <PhoneIncoming className="w-4 h-4 animate-pulse" />
-        <span className="text-xs font-semibold uppercase tracking-wider">Incoming Call</span>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <div className="relative">
-          <Avatar className="h-10 w-10 border border-primary/20">
-            <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-              {customer.avatarInitials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full animate-pulse-ring" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm truncate" data-testid="text-incoming-caller">{customer.name}</p>
-          <p className="text-xs text-muted-foreground truncate">{customer.phone}</p>
-        </div>
-      </div>
-
-      <Button
-        size="sm"
-        onClick={onAccept}
-        className="w-full gap-1.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-sm hover:bg-emerald-500/30 transition-all"
-        data-testid="button-accept-call"
-      >
-        <Phone className="w-3.5 h-3.5" />
-        Accept
-      </Button>
-    </motion.div>
-  );
-}
 
 function CallQueueItem({
   call,
@@ -1092,62 +1045,6 @@ function InfoRow({ label, value, mono }: { label: string; value: string; mono?: 
   );
 }
 
-function CallControls({
-  isMuted,
-  isOnHold,
-  onToggleMute,
-  onToggleHold,
-  onEndCall,
-}: {
-  isMuted: boolean;
-  isOnHold: boolean;
-  onToggleMute: () => void;
-  onToggleHold: () => void;
-  onEndCall: () => void;
-}) {
-  return (
-    <div className="flex items-center justify-center gap-3 px-4 py-2.5 glass-controls">
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={onToggleMute}
-        className={`gap-1.5 rounded-full backdrop-blur-sm border transition-all ${
-          isMuted
-            ? "bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30"
-            : "bg-white/10 text-foreground border-white/15 hover:bg-white/20"
-        }`}
-        data-testid="button-mute"
-      >
-        {isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-        <span className="text-xs">{isMuted ? "Unmute" : "Mute"}</span>
-      </Button>
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={onToggleHold}
-        className={`gap-1.5 rounded-full backdrop-blur-sm border transition-all ${
-          isOnHold
-            ? "bg-primary/20 text-primary border-primary/30 hover:bg-primary/30"
-            : "bg-white/10 text-foreground border-white/15 hover:bg-white/20"
-        }`}
-        data-testid="button-hold"
-      >
-        {isOnHold ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
-        <span className="text-xs">{isOnHold ? "Resume" : "Hold"}</span>
-      </Button>
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={onEndCall}
-        className="gap-1.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 backdrop-blur-sm hover:bg-red-500/30 transition-all"
-        data-testid="button-end-call"
-      >
-        <PhoneOff className="w-3.5 h-3.5" />
-        <span className="text-xs">End Call</span>
-      </Button>
-    </div>
-  );
-}
 
 function EmptyState() {
   return (
@@ -1507,12 +1404,11 @@ function FloatingCallWidget({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
+      exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className="fixed bottom-4 z-50"
-      style={{ left: "calc(var(--sidebar-width) + 1rem)" }}
+      className="fixed top-4 right-4 z-50"
       data-testid="floating-call-widget"
     >
       <div className="glass-panel rounded-2xl p-3 flex items-center gap-3 shadow-xl">
@@ -1605,7 +1501,7 @@ export default function CallsPage() {
   }, [toggleSidebar]);
 
   const selectedCall = calls.find((c) => c.id === selectedCallId);
-  const incomingCall = calls.find((c) => c.status === "incoming");
+
   const activeCalls = calls.filter((c) => c.status === "active" || c.status === "on-hold");
 
   const currentCustomer = selectedCall ? customers[selectedCall.customerId] : null;
@@ -1657,20 +1553,6 @@ export default function CallsPage() {
     return () => clearInterval(interval);
   }, [calls]);
 
-  const handleAcceptCall = (callId: string) => {
-    setCalls((prev) =>
-      prev.map((c) => (c.id === callId ? { ...c, status: "active" as const } : c))
-    );
-    setSelectedCallId(callId);
-    setTranscript([]);
-    setAiSuggestions([]);
-    setTranscriptIndex(0);
-    setCallElapsed((prev) => ({ ...prev, [callId]: 0 }));
-  };
-
-  const handleDeclineCall = (callId: string) => {
-    setCalls((prev) => prev.filter((c) => c.id !== callId));
-  };
 
   const handleEndCall = () => {
     if (!selectedCallId || !selectedCall) return;
@@ -1867,15 +1749,6 @@ export default function CallsPage() {
               </AnimatePresence>
             </div>
 
-            <div className="glass-panel rounded-xl overflow-hidden">
-              <CallControls
-                isMuted={isMuted}
-                isOnHold={isOnHold}
-                onToggleMute={() => setIsMuted(!isMuted)}
-                onToggleHold={handleToggleHold}
-                onEndCall={handleEndCall}
-              />
-            </div>
           </div>
         ) : (
           <div className="flex-1 glass-panel rounded-xl overflow-hidden">
@@ -1941,27 +1814,6 @@ export default function CallsPage() {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {incomingCall && customers[incomingCall.customerId] && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="fixed bottom-20 z-50"
-            style={{ left: "calc(var(--sidebar-width) + 1rem)" }}
-            data-testid="floating-incoming-call"
-          >
-            <div className="glass-panel rounded-2xl shadow-xl overflow-hidden w-[300px]">
-              <IncomingCallAlert
-                call={incomingCall}
-                customer={customers[incomingCall.customerId]}
-                onAccept={() => handleAcceptCall(incomingCall.id)}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
