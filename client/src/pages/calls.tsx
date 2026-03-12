@@ -52,6 +52,9 @@ import {
   BarChart3,
   Target,
   Star,
+  LogOut,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -64,8 +67,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/lib/theme-provider";
 import type {
   Call,
   TranscriptEntry,
@@ -808,6 +819,7 @@ function RightPanel({
   hasActiveSuggestions,
   onQuickAction,
   onNewChat,
+  onLogout,
 }: {
   customer: Customer;
   device: DeviceInfo;
@@ -820,6 +832,7 @@ function RightPanel({
   hasActiveSuggestions?: boolean;
   onQuickAction?: (action: string) => void;
   onNewChat?: () => void;
+  onLogout: () => void;
 }) {
   const statusColor =
     device.status === "active"
@@ -838,6 +851,13 @@ function RightPanel({
     }
   };
 
+  const { theme, toggleTheme } = useTheme();
+  const authRole = localStorage.getItem("wingman_auth");
+  const isAdmin = authRole === "admin";
+  const displayName = isAdmin ? "Gokul Nair" : "Alex Morgan";
+  const displayRole = isAdmin ? "Admin" : "Support Agent";
+  const initials = isAdmin ? "GN" : "AM";
+
   const [profileOpen, setProfileOpen] = useState(true);
   const [deviceOpen, setDeviceOpen] = useState(true);
   const [historyOpen, setHistoryOpen] = useState(true);
@@ -846,14 +866,47 @@ function RightPanel({
     <div className="flex flex-col h-full overflow-hidden">
       <Tabs defaultValue="ai-chat" className="flex flex-col h-full overflow-hidden">
         <div className="px-3 pt-3 pb-2 shrink-0">
-          <TabsList className="w-full glass-subtle">
-            <TabsTrigger value="ai-chat" className="flex-1 text-xs" data-testid="tab-ai-chat">
-              AI Chat
-            </TabsTrigger>
-            <TabsTrigger value="info" className="flex-1 text-xs" data-testid="tab-info">
-              Info
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex items-center gap-2">
+            <TabsList className="flex-1 glass-subtle">
+              <TabsTrigger value="ai-chat" className="flex-1 text-xs" data-testid="tab-ai-chat">
+                AI Chat
+              </TabsTrigger>
+              <TabsTrigger value="info" className="flex-1 text-xs" data-testid="tab-info">
+                Info
+              </TabsTrigger>
+            </TabsList>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="shrink-0 focus:outline-none" data-testid="button-profile-dropdown">
+                  <Avatar className="h-8 w-8 cursor-pointer border border-primary/20 hover:border-primary/40 transition-colors">
+                    <AvatarFallback className="bg-primary/10 text-primary font-semibold text-[10px]">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 glass-panel border-border/30" data-testid="dropdown-profile-menu">
+                <div className="px-3 py-2">
+                  <p className="text-sm font-semibold" data-testid="text-agent-name">{displayName}</p>
+                  <p className="text-xs text-muted-foreground">{displayRole}</p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer gap-2" data-testid="button-theme-toggle">
+                  {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={onLogout}
+                  className="cursor-pointer gap-2 text-red-400 focus:text-red-400"
+                  data-testid="button-logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         <div className="relative flex-1 min-h-0">
@@ -1586,7 +1639,7 @@ function FloatingCallWidget({
   );
 }
 
-export default function CallsPage() {
+export default function CallsPage({ onLogout }: { onLogout: () => void }) {
   const { toast } = useToast();
   const [calls, setCalls] = useState<Call[]>(initialCalls);
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
@@ -1599,7 +1652,7 @@ export default function CallsPage() {
   const [callElapsed, setCallElapsed] = useState<Record<string, number>>({});
 
   const [showSidebar, setShowSidebar] = useState(true);
-  const [showProfile, setShowProfile] = useState(true);
+  const [rightPanelOpen, setRightPanelOpen] = useState(true);
 
   const [selectedArticle, setSelectedArticle] = useState<AISuggestion | null>(null);
   const [articleModalOpen, setArticleModalOpen] = useState(false);
@@ -1822,16 +1875,6 @@ export default function CallsPage() {
             testId="button-toggle-sidebar"
           />
         </div>
-
-        <div className="flex items-center gap-1">
-          <ToggleButton
-            active={showProfile}
-            onClick={() => setShowProfile(!showProfile)}
-            icon={UserCircle}
-            label="Profile & Device"
-            testId="button-toggle-profile"
-          />
-        </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden gap-2 p-2">
@@ -1861,34 +1904,65 @@ export default function CallsPage() {
                 />
               </div>
 
-              <AnimatePresence initial={false}>
-                {showProfile && currentCustomer && currentDevice && (
-                  <motion.div
-                    key="right-panel"
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 300, opacity: 1 }}
-                    exit={{ width: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="shrink-0 overflow-hidden"
-                  >
-                    <div className="h-full w-[300px] glass-panel rounded-xl overflow-hidden">
-                      <RightPanel
-                        customer={currentCustomer}
-                        device={currentDevice}
-                        tickets={currentTickets}
-                        pastCalls={currentPastCalls}
-                        aiChatMessages={aiChatMessages}
-                        onSendAIChat={handleSendAIChat}
-                        chatPrefill={chatPrefill}
-                        onChatPrefillConsumed={() => setChatPrefill(undefined)}
-                        hasActiveSuggestions={aiSuggestions.length > 0}
-                        onQuickAction={handleQuickAction}
-                        onNewChat={handleNewChat}
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {currentCustomer && currentDevice && (
+                <div className="shrink-0 flex">
+                  <AnimatePresence initial={false}>
+                    {rightPanelOpen ? (
+                      <motion.div
+                        key="right-panel-expanded"
+                        initial={{ width: 0, opacity: 0 }}
+                        animate={{ width: 300, opacity: 1 }}
+                        exit={{ width: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="h-full w-[300px] glass-panel rounded-xl overflow-hidden relative">
+                          <button
+                            onClick={() => setRightPanelOpen(false)}
+                            className="absolute top-3.5 left-2 z-10 p-0.5 rounded-md hover:bg-muted/40 transition-colors"
+                            data-testid="button-collapse-right-panel"
+                          >
+                            <PanelRightClose className="w-3.5 h-3.5 text-muted-foreground" />
+                          </button>
+                          <RightPanel
+                            customer={currentCustomer}
+                            device={currentDevice}
+                            tickets={currentTickets}
+                            pastCalls={currentPastCalls}
+                            aiChatMessages={aiChatMessages}
+                            onSendAIChat={handleSendAIChat}
+                            chatPrefill={chatPrefill}
+                            onChatPrefillConsumed={() => setChatPrefill(undefined)}
+                            hasActiveSuggestions={aiSuggestions.length > 0}
+                            onQuickAction={handleQuickAction}
+                            onNewChat={handleNewChat}
+                            onLogout={onLogout}
+                          />
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="right-panel-collapsed"
+                        initial={{ width: 0, opacity: 0 }}
+                        animate={{ width: 36, opacity: 1 }}
+                        exit={{ width: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="h-full w-[36px] glass-panel rounded-xl flex flex-col items-center pt-3 gap-2">
+                          <button
+                            onClick={() => setRightPanelOpen(true)}
+                            className="p-1 rounded-md hover:bg-muted/40 transition-colors"
+                            data-testid="button-expand-right-panel"
+                          >
+                            <PanelRightOpen className="w-4 h-4 text-muted-foreground" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
             </div>
 
           </div>
