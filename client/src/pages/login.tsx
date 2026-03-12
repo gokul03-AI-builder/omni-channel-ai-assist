@@ -64,7 +64,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
       return;
     }
     const domain = trimmed.split("@")[1]?.toLowerCase() || "";
-    const allowedDomains = ["verifone.com", "company.com"];
+    const allowedDomains = ["verifone.com", "company.com", "verifone.in"];
     if (!allowedDomains.includes(domain)) {
       setError("Email not found for this region. Please check your credentials.");
       return;
