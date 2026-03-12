@@ -1,5 +1,5 @@
 import { useLocation, Link } from "wouter";
-import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,7 +13,14 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useTheme } from "@/lib/theme-provider";
 import verifoneLogo from "@assets/Screenshot_2026-03-05_at_5.50.17_PM_1772713220675.png";
 
 const navItems = [
@@ -25,6 +32,7 @@ const navItems = [
 export function AppSidebar({ onLogout }: { onLogout: () => void }) {
   const [location] = useLocation();
   const { toggleSidebar, open } = useSidebar();
+  const { theme, toggleTheme } = useTheme();
   const storedEmail = localStorage.getItem("wingman_email") || "";
   const authRole = localStorage.getItem("wingman_auth");
   const isAdmin = authRole === "admin";
@@ -79,7 +87,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-3 border-t border-border/20 glass-subtle">
-        <div className="flex items-center gap-2.5 mb-2">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={toggleSidebar}
             className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
@@ -87,28 +95,38 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
           >
             {open ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
           </button>
-          <Avatar className="h-8 w-8 shrink-0 border border-primary/20">
-            <AvatarFallback className="bg-primary/10 text-primary font-semibold text-[10px]" data-testid="text-sidebar-initials">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          {open && (
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium truncate" data-testid="text-sidebar-email">{storedEmail}</p>
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal border-border/30" data-testid="text-sidebar-role">{displayRole}</Badge>
-            </div>
-          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="focus:outline-none" data-testid="button-profile-dropdown">
+                <Avatar className="h-8 w-8 shrink-0 border border-primary/20 cursor-pointer hover:border-primary/40 transition-colors">
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold text-[10px]" data-testid="text-sidebar-initials">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="w-56 glass-panel border-border/30" data-testid="dropdown-profile-menu">
+              <div className="px-3 py-2">
+                <p className="text-sm font-semibold truncate" data-testid="text-sidebar-email">{storedEmail}</p>
+                <p className="text-xs text-muted-foreground" data-testid="text-sidebar-role">{displayRole}</p>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer gap-2" data-testid="button-theme-toggle">
+                {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={onLogout}
+                className="cursor-pointer gap-2 text-red-400 focus:text-red-400"
+                data-testid="button-logout"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Log Out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        {open && (
-          <button
-            onClick={onLogout}
-            className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
-            data-testid="button-sidebar-logout"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            Log Out
-          </button>
-        )}
       </SidebarFooter>
     </Sidebar>
   );
