@@ -820,6 +820,7 @@ function RightPanel({
   onQuickAction,
   onNewChat,
   onLogout,
+  onCollapse,
 }: {
   customer: Customer;
   device: DeviceInfo;
@@ -833,6 +834,7 @@ function RightPanel({
   onQuickAction?: (action: string) => void;
   onNewChat?: () => void;
   onLogout: () => void;
+  onCollapse?: () => void;
 }) {
   const statusColor =
     device.status === "active"
@@ -867,6 +869,15 @@ function RightPanel({
       <Tabs defaultValue="ai-chat" className="flex flex-col h-full overflow-hidden">
         <div className="px-3 pt-3 pb-2 shrink-0">
           <div className="flex items-center gap-2">
+            {onCollapse && (
+              <button
+                onClick={onCollapse}
+                className="shrink-0 p-1 rounded-md hover:bg-muted/40 transition-colors"
+                data-testid="button-collapse-right-panel"
+              >
+                <PanelRightClose className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
+            )}
             <TabsList className="flex-1 glass-subtle">
               <TabsTrigger value="ai-chat" className="flex-1 text-xs" data-testid="tab-ai-chat">
                 AI Chat
@@ -1916,14 +1927,7 @@ export default function CallsPage({ onLogout }: { onLogout: () => void }) {
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <div className="h-full w-[300px] glass-panel rounded-xl overflow-hidden relative">
-                          <button
-                            onClick={() => setRightPanelOpen(false)}
-                            className="absolute top-3.5 left-2 z-10 p-0.5 rounded-md hover:bg-muted/40 transition-colors"
-                            data-testid="button-collapse-right-panel"
-                          >
-                            <PanelRightClose className="w-3.5 h-3.5 text-muted-foreground" />
-                          </button>
+                        <div className="h-full w-[300px] glass-panel rounded-xl overflow-hidden">
                           <RightPanel
                             customer={currentCustomer}
                             device={currentDevice}
@@ -1937,6 +1941,7 @@ export default function CallsPage({ onLogout }: { onLogout: () => void }) {
                             onQuickAction={handleQuickAction}
                             onNewChat={handleNewChat}
                             onLogout={onLogout}
+                            onCollapse={() => setRightPanelOpen(false)}
                           />
                         </div>
                       </motion.div>
