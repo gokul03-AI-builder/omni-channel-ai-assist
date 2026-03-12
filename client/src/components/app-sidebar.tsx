@@ -82,8 +82,8 @@ export function AppSidebar() {
         </Button>
         <Button
           size="sm"
-          variant="destructive"
-          className="w-full justify-start gap-2"
+          variant="ghost"
+          className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
           data-testid="button-logout"
         >
           <LogOut className="w-4 h-4" />
