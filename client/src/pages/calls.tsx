@@ -300,15 +300,12 @@ function KbArticleModal({
 }
 
 function IncomingCallAlert({
-  call,
   customer,
   onAccept,
-  onDecline,
 }: {
   call: Call;
   customer: Customer;
   onAccept: () => void;
-  onDecline: () => void;
 }) {
   return (
     <motion.div
@@ -333,41 +330,19 @@ function IncomingCallAlert({
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-sm truncate" data-testid="text-incoming-caller">{customer.name}</p>
-          <p className="text-xs text-muted-foreground truncate">{customer.company}</p>
-          <p className="text-xs text-muted-foreground mt-0.5 truncate">{call.topic}</p>
+          <p className="text-xs text-muted-foreground truncate">{customer.phone}</p>
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5">
-        <Badge variant="secondary" className="text-xs">
-          {call.priority.charAt(0).toUpperCase() + call.priority.slice(1)}
-        </Badge>
-        <Badge variant="secondary" className="text-xs">
-          {customer.accountType}
-        </Badge>
-      </div>
-
-      <div className="flex gap-2">
-        <Button
-          size="sm"
-          onClick={onAccept}
-          className="flex-1 gap-1.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-sm hover:bg-emerald-500/30 transition-all"
-          data-testid="button-accept-call"
-        >
-          <Phone className="w-3.5 h-3.5" />
-          Accept
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onDecline}
-          className="flex-1 gap-1.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 backdrop-blur-sm hover:bg-red-500/30 transition-all"
-          data-testid="button-decline-call"
-        >
-          <PhoneOff className="w-3.5 h-3.5" />
-          Decline
-        </Button>
-      </div>
+      <Button
+        size="sm"
+        onClick={onAccept}
+        className="w-full gap-1.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-sm hover:bg-emerald-500/30 transition-all"
+        data-testid="button-accept-call"
+      >
+        <Phone className="w-3.5 h-3.5" />
+        Accept
+      </Button>
     </motion.div>
   );
 }
@@ -1950,7 +1925,6 @@ export default function CallsPage() {
                 call={incomingCall}
                 customer={customers[incomingCall.customerId]}
                 onAccept={() => handleAcceptCall(incomingCall.id)}
-                onDecline={() => handleDeclineCall(incomingCall.id)}
               />
             </div>
           </motion.div>
