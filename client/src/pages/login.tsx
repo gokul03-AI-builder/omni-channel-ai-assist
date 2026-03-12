@@ -60,7 +60,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
     if (!canContinue) return;
     const trimmed = email.trim();
     if (!validateEmail(trimmed)) {
-      setError("Please enter a valid email address.");
+      setError("Email not found for this region. Please check your credentials.");
       return;
     }
     const domain = trimmed.split("@")[1]?.toLowerCase() || "";
