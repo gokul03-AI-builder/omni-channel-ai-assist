@@ -58,8 +58,15 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
 
   const handleContinue = () => {
     if (!canContinue) return;
-    if (!validateEmail(email.trim())) {
+    const trimmed = email.trim();
+    if (!validateEmail(trimmed)) {
       setError("Please enter a valid email address.");
+      return;
+    }
+    const domain = trimmed.split("@")[1]?.toLowerCase() || "";
+    const allowedDomains = ["verifone.com", "company.com"];
+    if (!allowedDomains.includes(domain)) {
+      setError("Email not found for this region. Please check your credentials.");
       return;
     }
     setError("");
