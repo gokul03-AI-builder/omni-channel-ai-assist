@@ -168,10 +168,10 @@
     @apply font-sans antialiased text-foreground;
     background-color: hsl(var(--background));
     background-image:
-      radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px),
-      radial-gradient(ellipse 80% 50% at 5% 5%, var(--mint-glow-subtle), transparent 60%),
-      radial-gradient(ellipse 60% 40% at 95% 95%, var(--mint-glow-subtle), transparent 60%),
-      radial-gradient(ellipse 40% 30% at 50% 50%, rgba(110,255,210,0.02), transparent 70%);
+      radial-gradient(circle, rgba(120, 180, 160, 0.10) 1px, transparent 1px),
+      radial-gradient(ellipse 80% 50% at 5% 5%, rgba(110, 255, 210, 0.12), transparent 55%),
+      radial-gradient(ellipse 60% 40% at 95% 95%, rgba(110, 255, 210, 0.10), transparent 55%),
+      radial-gradient(ellipse 40% 30% at 50% 50%, rgba(110, 255, 210, 0.05), transparent 65%);
     background-size: 24px 24px, 100% 100%, 100% 100%, 100% 100%;
     background-position: 0 0, 0 0, 0 0, 0 0;
     min-height: 100vh;
