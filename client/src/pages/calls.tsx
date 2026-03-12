@@ -855,10 +855,14 @@ function RightPanel({
 
   const { theme, toggleTheme } = useTheme();
   const authRole = localStorage.getItem("wingman_auth");
+  const storedEmail = localStorage.getItem("wingman_email") || "";
   const isAdmin = authRole === "admin";
-  const displayName = isAdmin ? "Gokul Nair" : "Alex Morgan";
+  const displayName = storedEmail || (isAdmin ? "Admin" : "Agent");
   const displayRole = isAdmin ? "Admin" : "Support Agent";
-  const initials = isAdmin ? "GN" : "AM";
+  const emailPrefix = storedEmail.split("@")[0] || "";
+  const initials = emailPrefix.length >= 2
+    ? (emailPrefix[0] + emailPrefix[1]).toUpperCase()
+    : emailPrefix.toUpperCase() || (isAdmin ? "AD" : "AG");
 
   const [profileOpen, setProfileOpen] = useState(true);
   const [deviceOpen, setDeviceOpen] = useState(true);

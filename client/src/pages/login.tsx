@@ -1,16 +1,24 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { motion } from "framer-motion";
-import { Headphones, Shield, Check, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Headphones, Shield, Check, ArrowRight, ArrowLeft, Mail, Globe, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import verifoneLogo from "@assets/verifone_logo_1772712551074.png";
+
+const regions = [
+  { value: "north-america", label: "North America" },
+  { value: "europe", label: "Europe" },
+  { value: "asia-pacific", label: "Asia Pacific" },
+  { value: "latin-america", label: "Latin America" },
+  { value: "mea", label: "Middle East & Africa" },
+];
 
 const roles = [
   {
     id: "agent",
     title: "Support Agent",
-    name: "Alex Morgan",
-    initials: "AM",
     description: "Handle customer calls with real-time AI assist, live transcription, and KB search",
     icon: Headphones,
     color: "text-primary",
@@ -21,8 +29,6 @@ const roles = [
   {
     id: "admin",
     title: "Admin",
-    name: "Gokul Nair",
-    initials: "GN",
     description: "Full platform access with analytics, reports, and system configuration",
     icon: Shield,
     color: "text-violet-400",
@@ -35,13 +41,41 @@ const roles = [
 const wingPath1 = "M 0,0 C -30,-15 -70,-20 -120,-10 C -150,-5 -170,5 -180,15";
 const wingPath2 = "M 0,0 C 30,-15 70,-20 120,-10 C 150,-5 170,5 180,15";
 
+function validateEmail(email: string): boolean {
+  const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return pattern.test(email);
+}
+
 export default function LoginPage({ onLogin }: { onLogin: () => void }) {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [email, setEmail] = useState("");
+  const [region, setRegion] = useState("");
+  const [error, setError] = useState("");
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [, setLocation] = useLocation();
+
+  const canContinue = email.trim().length > 0 && region.length > 0;
+
+  const handleContinue = () => {
+    if (!canContinue) return;
+    if (!validateEmail(email.trim())) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    setError("");
+    setStep(2);
+  };
+
+  const handleBack = () => {
+    setSelectedRole(null);
+    setStep(1);
+  };
 
   const handleSignIn = () => {
     if (!selectedRole) return;
     localStorage.setItem("wingman_auth", selectedRole);
+    localStorage.setItem("wingman_email", email.trim());
+    localStorage.setItem("wingman_region", region);
     onLogin();
     setLocation("/");
   };
@@ -58,6 +92,15 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
     hidden: { opacity: 0, y: 24 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
   };
+
+  const stepTransition = {
+    initial: { opacity: 0, x: 40 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -40 },
+    transition: { duration: 0.35, ease: "easeInOut" },
+  };
+
+  const regionLabel = regions.find(r => r.value === region)?.label || "";
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" data-testid="page-login">
@@ -186,64 +229,165 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
           </motion.p>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4 mb-6">
-          {roles.map((role) => {
-            const isSelected = selectedRole === role.id;
-            const Icon = role.icon;
-            return (
+        <AnimatePresence mode="wait">
+          {step === 1 ? (
+            <motion.div
+              key="step1"
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.35, ease: "easeInOut" }}
+              className="space-y-4"
+            >
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2 text-foreground/80">
+                  <Mail className="w-4 h-4 text-primary/60" />
+                  Work Email
+                </label>
+                <Input
+                  type="email"
+                  placeholder="you@verifone.com"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleContinue(); }}
+                  className="h-11 rounded-xl glass-subtle border-border/30 focus:border-primary/40 text-sm"
+                  data-testid="input-email"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2 text-foreground/80">
+                  <Globe className="w-4 h-4 text-primary/60" />
+                  Country / Region
+                </label>
+                <Select value={region} onValueChange={(v) => { setRegion(v); setError(""); }}>
+                  <SelectTrigger className="h-11 rounded-xl glass-subtle border-border/30 focus:border-primary/40 text-sm" data-testid="select-region">
+                    <SelectValue placeholder="Select your region" />
+                  </SelectTrigger>
+                  <SelectContent className="glass-panel border-border/30" data-testid="select-region-options">
+                    {regions.map((r) => (
+                      <SelectItem key={r.value} value={r.value} data-testid={`option-region-${r.value}`}>
+                        {r.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 text-red-400 text-sm px-1"
+                  data-testid="text-login-error"
+                >
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {error}
+                </motion.div>
+              )}
+
+              <div className="pt-2 space-y-3">
+                <Button
+                  onClick={handleContinue}
+                  disabled={!canContinue}
+                  className={`w-full h-12 rounded-2xl gap-2 text-base font-semibold transition-all duration-300 ${
+                    canContinue
+                      ? "bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30"
+                      : "bg-muted/30 text-muted-foreground border border-border/20"
+                  }`}
+                  data-testid="button-continue"
+                >
+                  Continue
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+                <p className="text-xs text-muted-foreground text-center" data-testid="text-step1-hint">
+                  Enter your credentials to verify region access
+                </p>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="step2"
+              {...stepTransition}
+              className="space-y-4"
+            >
               <button
-                key={role.id}
-                onClick={() => setSelectedRole(role.id)}
-                className={`relative text-left p-5 rounded-2xl glass-panel border-2 transition-all duration-300 cursor-pointer group ${
-                  isSelected
-                    ? `${role.borderColor} ${role.glowColor}`
-                    : "border-transparent hover:border-border/40"
-                }`}
-                data-testid={`card-role-${role.id}`}
+                onClick={handleBack}
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-2"
+                data-testid="button-back-to-step1"
               >
-                {isSelected && (
-                  <motion.div
-                    className="absolute top-3 right-3"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                  >
-                    <div className={`w-6 h-6 rounded-full ${role.bgColor} flex items-center justify-center`}>
-                      <Check className={`w-3.5 h-3.5 ${role.color}`} />
-                    </div>
-                  </motion.div>
-                )}
-
-                <div className={`w-10 h-10 rounded-xl ${role.bgColor} flex items-center justify-center mb-3`}>
-                  <Icon className={`w-5 h-5 ${role.color}`} />
-                </div>
-
-                <h3 className="text-base font-semibold mb-0.5">{role.title}</h3>
-                <p className={`text-sm font-medium ${role.color} mb-2`}>{role.name}</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">{role.description}</p>
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Back
               </button>
-            );
-          })}
-        </motion.div>
 
-        <motion.div variants={itemVariants} className="space-y-3">
-          <Button
-            onClick={handleSignIn}
-            disabled={!selectedRole}
-            className={`w-full h-12 rounded-2xl gap-2 text-base font-semibold transition-all duration-300 ${
-              selectedRole
-                ? "bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30"
-                : "bg-muted/30 text-muted-foreground border border-border/20"
-            }`}
-            data-testid="button-sign-in"
-          >
-            Sign In
-            <ArrowRight className="w-4 h-4" />
-          </Button>
-          <p className="text-xs text-muted-foreground text-center" data-testid="text-demo-hint">
-            Demo login — select a role to continue
-          </p>
-        </motion.div>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl glass-subtle border border-border/20 mb-4">
+                <Mail className="w-3.5 h-3.5 text-primary/60" />
+                <span className="text-xs text-muted-foreground truncate" data-testid="text-step2-email">{email}</span>
+                <span className="text-xs text-border/60 mx-1">·</span>
+                <Globe className="w-3.5 h-3.5 text-primary/60" />
+                <span className="text-xs text-muted-foreground" data-testid="text-step2-region">{regionLabel}</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-2">
+                {roles.map((role) => {
+                  const isSelected = selectedRole === role.id;
+                  const Icon = role.icon;
+                  return (
+                    <button
+                      key={role.id}
+                      onClick={() => setSelectedRole(role.id)}
+                      className={`relative text-left p-5 rounded-2xl glass-panel border-2 transition-all duration-300 cursor-pointer group ${
+                        isSelected
+                          ? `${role.borderColor} ${role.glowColor}`
+                          : "border-transparent hover:border-border/40"
+                      }`}
+                      data-testid={`card-role-${role.id}`}
+                    >
+                      {isSelected && (
+                        <motion.div
+                          className="absolute top-3 right-3"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                        >
+                          <div className={`w-6 h-6 rounded-full ${role.bgColor} flex items-center justify-center`}>
+                            <Check className={`w-3.5 h-3.5 ${role.color}`} />
+                          </div>
+                        </motion.div>
+                      )}
+
+                      <div className={`w-10 h-10 rounded-xl ${role.bgColor} flex items-center justify-center mb-3`}>
+                        <Icon className={`w-5 h-5 ${role.color}`} />
+                      </div>
+
+                      <h3 className="text-base font-semibold mb-1">{role.title}</h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{role.description}</p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="space-y-3">
+                <Button
+                  onClick={handleSignIn}
+                  disabled={!selectedRole}
+                  className={`w-full h-12 rounded-2xl gap-2 text-base font-semibold transition-all duration-300 ${
+                    selectedRole
+                      ? "bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30"
+                      : "bg-muted/30 text-muted-foreground border border-border/20"
+                  }`}
+                  data-testid="button-sign-in"
+                >
+                  Sign In
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+                <p className="text-xs text-muted-foreground text-center" data-testid="text-demo-hint">
+                  Select a role to continue
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </div>
   );

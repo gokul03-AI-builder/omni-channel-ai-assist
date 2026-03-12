@@ -43,6 +43,8 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem("wingman_auth");
+    localStorage.removeItem("wingman_email");
+    localStorage.removeItem("wingman_region");
     setIsAuthenticated(false);
   };
 
