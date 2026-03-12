@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Phone,
   PhoneOff,
-
+  PhoneIncoming,
+  PhoneCall,
   Mic,
   MicOff,
   Pause,
@@ -47,6 +48,10 @@ import {
   Check,
   MessageSquare,
   Plus,
+  ArrowLeft,
+  BarChart3,
+  Target,
+  Star,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -1378,6 +1383,114 @@ function ToggleButton({
   );
 }
 
+function IncomingCallScreen({
+  call,
+  customer,
+  onAccept,
+}: {
+  call: Call;
+  customer: Customer;
+  onAccept: () => void;
+}) {
+  const agentStats = [
+    { label: "Today's Calls", value: "4", icon: PhoneCall, color: "text-primary" },
+    { label: "Avg Handle Time", value: "6m 32s", icon: Clock, color: "text-blue-400" },
+    { label: "CSAT Score", value: "4.8/5", icon: Star, color: "text-yellow-400" },
+    { label: "FCR Rate", value: "87%", icon: Target, color: "text-emerald-400" },
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.12, delayChildren: 0.2 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+  };
+
+  return (
+    <motion.div
+      className="flex-1 flex items-center justify-center"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      data-testid="incoming-call-screen"
+    >
+      <div className="w-full max-w-lg space-y-6 px-4">
+        <motion.div variants={itemVariants} className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="absolute inset-0 w-24 h-24 rounded-full border-2 border-primary/20 animate-ping" style={{ animationDuration: "2s" }} />
+            <div className="absolute -inset-3 w-30 h-30 rounded-full border border-primary/10 animate-ping" style={{ animationDuration: "2.5s", animationDelay: "0.3s" }} />
+            <div className="absolute -inset-6 w-36 h-36 rounded-full border border-primary/5 animate-ping" style={{ animationDuration: "3s", animationDelay: "0.6s" }} />
+            <div className="relative w-24 h-24 rounded-full glass-bubble-primary flex items-center justify-center">
+              <PhoneIncoming className="w-10 h-10 text-primary animate-pulse" />
+            </div>
+          </div>
+          <div className="text-center mt-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1" data-testid="text-incoming-label">Incoming Call</p>
+            <p className="text-sm text-muted-foreground">Connecting to customer...</p>
+          </div>
+        </motion.div>
+
+        <motion.div variants={itemVariants}>
+          <div className="glass-panel rounded-2xl p-5 space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Avatar className="h-14 w-14 border-2 border-primary/20">
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
+                    {customer.avatarInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-primary rounded-full animate-pulse border-2 border-background" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold" data-testid="text-incoming-customer-name">{customer.name}</h3>
+                <p className="text-sm text-muted-foreground">{customer.company}</p>
+                <p className="text-xs text-muted-foreground">{customer.phone}</p>
+              </div>
+              <div className="flex flex-col items-end gap-1.5">
+                <Badge variant="default" className="text-xs">{customer.accountType}</Badge>
+                <Badge variant="secondary" className="text-xs capitalize">{call.priority}</Badge>
+              </div>
+            </div>
+            <div className="px-3 py-2 rounded-lg bg-muted/30 border border-border/20">
+              <p className="text-xs text-muted-foreground">Topic</p>
+              <p className="text-sm font-medium" data-testid="text-incoming-topic">{call.topic}</p>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div variants={itemVariants}>
+          <div className="grid grid-cols-4 gap-2">
+            {agentStats.map((stat) => (
+              <div key={stat.label} className="glass-panel rounded-xl p-3 text-center" data-testid={`stat-${stat.label.toLowerCase().replace(/[' ]/g, "-")}`}>
+                <stat.icon className={`w-4 h-4 ${stat.color} mx-auto mb-1.5`} />
+                <p className="text-sm font-semibold">{stat.value}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.div variants={itemVariants}>
+          <Button
+            onClick={onAccept}
+            className="w-full h-12 rounded-2xl gap-2 text-base font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all"
+            data-testid="button-accept-incoming"
+          >
+            <PhoneCall className="w-5 h-5" />
+            Accept Call
+          </Button>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
 function FloatingCallWidget({
   call,
   customer,
@@ -1469,14 +1582,14 @@ function FloatingCallWidget({
 export default function CallsPage() {
   const { toast } = useToast();
   const [calls, setCalls] = useState<Call[]>(initialCalls);
-  const [selectedCallId, setSelectedCallId] = useState<string | null>("call-001");
+  const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
   const [aiChatMessages, setAiChatMessages] = useState<ChatMessage[]>(() => getChatHistory());
   const [isMuted, setIsMuted] = useState(false);
   const [isOnHold, setIsOnHold] = useState(false);
   const [transcriptIndex, setTranscriptIndex] = useState(0);
-  const [callElapsed, setCallElapsed] = useState<Record<string, number>>({ "call-001": 187 });
+  const [callElapsed, setCallElapsed] = useState<Record<string, number>>({});
 
   const [showSidebar, setShowSidebar] = useState(true);
   const [showProfile, setShowProfile] = useState(true);
@@ -1553,6 +1666,31 @@ export default function CallsPage() {
     return () => clearInterval(interval);
   }, [calls]);
 
+  useEffect(() => {
+    const t = setTimeout(() => setSelectedCallId("call-001"), 2500);
+    return () => clearTimeout(t);
+  }, []);
+
+  const handleAcceptCall = (callId: string) => {
+    setCalls((prev) =>
+      prev.map((c) => (c.id === callId ? { ...c, status: "active" as const } : c))
+    );
+    setCallElapsed((prev) => ({ ...prev, [callId]: 0 }));
+    setTranscript([]);
+    setAiSuggestions([]);
+    setTranscriptIndex(0);
+  };
+
+  const handleBackFromSummary = () => {
+    setEndedCallSummary(null);
+    setSelectedCallId(null);
+    setTicketCreated(false);
+    setCreatedTicket(null);
+    clearChatHistory();
+    setAiChatMessages([]);
+    setCalls(initialCalls.map((c) => ({ ...c, status: c.status === "active" ? "incoming" as const : c.status })));
+    setTimeout(() => setSelectedCallId("call-001"), 3000);
+  };
 
   const handleEndCall = () => {
     if (!selectedCallId || !selectedCall) return;
@@ -1656,7 +1794,8 @@ export default function CallsPage() {
     setArticleModalOpen(true);
   };
 
-  const hasActiveCall = selectedCall && selectedCall.status !== "ended";
+  const hasActiveCall = selectedCall && (selectedCall.status === "active" || selectedCall.status === "on-hold");
+  const hasIncomingCall = selectedCall && selectedCall.status === "incoming";
 
   return (
     <div className="h-full flex flex-col" data-testid="page-calls">
@@ -1683,7 +1822,13 @@ export default function CallsPage() {
       </div>
 
       <div className="flex flex-1 overflow-hidden gap-2 p-2">
-        {hasActiveCall ? (
+        {hasIncomingCall && currentCustomer ? (
+          <IncomingCallScreen
+            call={selectedCall!}
+            customer={currentCustomer}
+            onAccept={() => handleAcceptCall(selectedCall!.id)}
+          />
+        ) : hasActiveCall ? (
           <div className="flex flex-col flex-1 min-w-0 gap-2">
             <div className="flex items-center justify-between gap-2 px-4 py-2 glass-panel rounded-xl">
               <div className="flex items-center gap-2">
@@ -1751,29 +1896,45 @@ export default function CallsPage() {
 
           </div>
         ) : (
-          <div className="flex-1 glass-panel rounded-xl overflow-hidden">
+          <div className="flex-1 flex flex-col gap-2">
             {endedCallSummary ? (
-              <CallSummary
-                call={endedCallSummary.call}
-                customer={endedCallSummary.customer}
-                duration={endedCallSummary.duration}
-                transcript={endedCallSummary.transcript}
-                suggestions={endedCallSummary.suggestions}
-                createdTicket={createdTicket}
-                onOpenTicketDialog={() => {
-                  const summary = generateCallSummary(
-                    endedCallSummary.call,
-                    endedCallSummary.customer,
-                    endedCallSummary.transcript,
-                    endedCallSummary.suggestions,
-                    endedCallSummary.duration
-                  );
-                  setTicketDialogSummary(summary);
-                  setTicketDialogOpen(true);
-                }}
-              />
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBackFromSummary}
+                  className="self-start gap-1.5 text-muted-foreground hover:text-foreground"
+                  data-testid="button-back-from-summary"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Queue
+                </Button>
+                <div className="flex-1 glass-panel rounded-xl overflow-hidden">
+                  <CallSummary
+                    call={endedCallSummary.call}
+                    customer={endedCallSummary.customer}
+                    duration={endedCallSummary.duration}
+                    transcript={endedCallSummary.transcript}
+                    suggestions={endedCallSummary.suggestions}
+                    createdTicket={createdTicket}
+                    onOpenTicketDialog={() => {
+                      const summary = generateCallSummary(
+                        endedCallSummary.call,
+                        endedCallSummary.customer,
+                        endedCallSummary.transcript,
+                        endedCallSummary.suggestions,
+                        endedCallSummary.duration
+                      );
+                      setTicketDialogSummary(summary);
+                      setTicketDialogOpen(true);
+                    }}
+                  />
+                </div>
+              </>
             ) : (
-              <EmptyState />
+              <div className="flex-1 glass-panel rounded-xl overflow-hidden">
+                <EmptyState />
+              </div>
             )}
           </div>
         )}
