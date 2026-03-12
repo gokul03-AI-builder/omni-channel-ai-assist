@@ -804,6 +804,40 @@ function AgentAIChatInline({
   );
 }
 
+function CollapsibleSection({
+  title,
+  icon,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="glass-panel rounded-xl overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-3 py-2.5 text-left hover:bg-muted/10 transition-colors"
+        data-testid={`section-toggle-${title.toLowerCase()}`}
+      >
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {icon} {title}
+        </div>
+        <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="px-3 pb-3">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function RightPanel({
   customer,
   device,
@@ -846,6 +880,10 @@ function RightPanel({
     }
   };
 
+  const [profileOpen, setProfileOpen] = useState(true);
+  const [deviceOpen, setDeviceOpen] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(true);
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <Tabs defaultValue="ai-chat" className="flex flex-col h-full overflow-hidden">
@@ -854,14 +892,8 @@ function RightPanel({
             <TabsTrigger value="ai-chat" className="flex-1 text-xs" data-testid="tab-ai-chat">
               AI Chat
             </TabsTrigger>
-            <TabsTrigger value="profile" className="flex-1 text-xs" data-testid="tab-profile">
-              Profile
-            </TabsTrigger>
-            <TabsTrigger value="device" className="flex-1 text-xs" data-testid="tab-device">
-              Device
-            </TabsTrigger>
-            <TabsTrigger value="history" className="flex-1 text-xs" data-testid="tab-history">
-              History
+            <TabsTrigger value="info" className="flex-1 text-xs" data-testid="tab-info">
+              Info
             </TabsTrigger>
           </TabsList>
         </div>
@@ -902,146 +934,146 @@ function RightPanel({
             />
           </TabsContent>
 
-          <TabsContent value="profile" className="absolute inset-0 mt-0 overflow-hidden">
+          <TabsContent value="info" className="absolute inset-0 mt-0 overflow-hidden">
             <ScrollArea className="h-full">
-              <div className="p-4 space-y-4">
-                <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="relative">
-                    <Avatar className="h-16 w-16 border border-primary/20">
-                      <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
-                        {customer.avatarInitials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-status-online border-2 border-background" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold" data-testid="text-customer-name">{customer.name}</h3>
-                    <p className="text-sm text-muted-foreground">{customer.company}</p>
-                  </div>
-                  <Badge variant="default" className="text-xs">
-                    {customer.accountType}
-                  </Badge>
-                </div>
+              <div className="p-3 space-y-2">
+                <CollapsibleSection title="Profile" icon={<UserCircle className="w-3.5 h-3.5" />} open={profileOpen} onToggle={() => setProfileOpen(!profileOpen)}>
+                  <div className="space-y-4">
+                    <div className="flex flex-col items-center text-center space-y-3">
+                      <div className="relative">
+                        <Avatar className="h-16 w-16 border border-primary/20">
+                          <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
+                            {customer.avatarInitials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-status-online border-2 border-background" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold" data-testid="text-customer-name">{customer.name}</h3>
+                        <p className="text-sm text-muted-foreground">{customer.company}</p>
+                      </div>
+                      <Badge variant="default" className="text-xs">
+                        {customer.accountType}
+                      </Badge>
+                    </div>
 
-                <Separator className="bg-border/50" />
+                    <Separator className="bg-border/50" />
 
-                <div className="space-y-3">
-                  <InfoRow label="Email" value={customer.email} />
-                  <InfoRow label="Phone" value={customer.phone} />
-                  <InfoRow label="Location" value={customer.location} />
-                  <InfoRow label="Member Since" value={new Date(customer.joinedDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })} />
-                </div>
-              </div>
-            </ScrollArea>
-          </TabsContent>
-
-          <TabsContent value="device" className="absolute inset-0 mt-0 overflow-hidden">
-            <ScrollArea className="h-full">
-              <div className="p-4 space-y-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center">
-                    <Cpu className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-sm" data-testid="text-device-model">{device.model}</h4>
-                    <div className="flex items-center gap-1.5">
-                      <span className={`w-2 h-2 rounded-full ${device.status === "active" ? "bg-status-online" : device.status === "maintenance" ? "bg-status-away" : "bg-status-offline"}`} />
-                      <span className={`text-xs capitalize ${statusColor}`}>{device.status}</span>
+                    <div className="space-y-3">
+                      <InfoRow label="Email" value={customer.email} />
+                      <InfoRow label="Phone" value={customer.phone} />
+                      <InfoRow label="Location" value={customer.location} />
+                      <InfoRow label="Member Since" value={new Date(customer.joinedDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })} />
                     </div>
                   </div>
-                </div>
+                </CollapsibleSection>
 
-                <Separator className="bg-border/50" />
-
-                <div className="space-y-3">
-                  <InfoRow label="Serial Number" value={device.serialNumber} mono />
-                  <InfoRow label="Firmware" value={device.firmwareVersion} mono />
-                  <InfoRow label="OS" value={device.osVersion} />
-                  <InfoRow label="Connection" value={device.connectionType} />
-                  <InfoRow label="Last Updated" value={device.lastUpdated} />
-                </div>
-
-                {device.firmwareVersion !== "v4.2.1" && device.model.includes("P400") && (
-                  <Card className="p-3">
-                    <div className="flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <CollapsibleSection title="Device" icon={<Cpu className="w-3.5 h-3.5" />} open={deviceOpen} onToggle={() => setDeviceOpen(!deviceOpen)}>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center">
+                        <Cpu className="w-5 h-5 text-primary" />
+                      </div>
                       <div>
-                        <p className="text-xs font-medium text-primary">Firmware Update Available</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          v4.2.1 available with NFC fixes. Can be pushed remotely.
-                        </p>
+                        <h4 className="font-semibold text-sm" data-testid="text-device-model">{device.model}</h4>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`w-2 h-2 rounded-full ${device.status === "active" ? "bg-status-online" : device.status === "maintenance" ? "bg-status-away" : "bg-status-offline"}`} />
+                          <span className={`text-xs capitalize ${statusColor}`}>{device.status}</span>
+                        </div>
                       </div>
                     </div>
-                  </Card>
-                )}
-              </div>
-            </ScrollArea>
-          </TabsContent>
 
-          <TabsContent value="history" className="absolute inset-0 mt-0 overflow-hidden">
-            <ScrollArea className="h-full">
-              <div className="p-4 space-y-4">
-                <div>
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                    Support Tickets ({tickets.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {tickets.map((ticket) => (
-                      <Card key={ticket.id} className="p-3" data-testid={`card-ticket-${ticket.id}`}>
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium truncate">{ticket.subject}</p>
-                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                              <span className="text-xs text-muted-foreground font-mono">{ticket.id}</span>
-                              <span className={`text-xs px-1.5 py-0.5 rounded-sm capitalize ${ticketStatusColor(ticket.status)}`}>
-                                {ticket.status}
-                              </span>
-                            </div>
+                    <Separator className="bg-border/50" />
+
+                    <div className="space-y-3">
+                      <InfoRow label="Serial Number" value={device.serialNumber} mono />
+                      <InfoRow label="Firmware" value={device.firmwareVersion} mono />
+                      <InfoRow label="OS" value={device.osVersion} />
+                      <InfoRow label="Connection" value={device.connectionType} />
+                      <InfoRow label="Last Updated" value={device.lastUpdated} />
+                    </div>
+
+                    {device.firmwareVersion !== "v4.2.1" && device.model.includes("P400") && (
+                      <Card className="p-3">
+                        <div className="flex items-start gap-2">
+                          <AlertCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-xs font-medium text-primary">Firmware Update Available</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              v4.2.1 available with NFC fixes. Can be pushed remotely.
+                            </p>
                           </div>
                         </div>
-                        {ticket.resolution && (
-                          <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
-                            <CheckCircle2 className="w-3 h-3 text-status-online shrink-0 mt-0.5" />
-                            {ticket.resolution}
-                          </p>
-                        )}
                       </Card>
-                    ))}
+                    )}
                   </div>
-                </div>
+                </CollapsibleSection>
 
-                <Separator className="bg-border/50" />
-
-                <div>
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                    Past Calls ({pastCalls.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {pastCalls.map((pc) => (
-                      <Card key={pc.id} className="p-3" data-testid={`card-past-call-${pc.id}`}>
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium">{pc.topic}</p>
-                            <div className="flex items-center gap-2 mt-1 flex-wrap">
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {pc.date}
-                              </span>
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {formatDuration(pc.duration)}
-                              </span>
+                <CollapsibleSection title="History" icon={<Clock className="w-3.5 h-3.5" />} open={historyOpen} onToggle={() => setHistoryOpen(!historyOpen)}>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                        Support Tickets ({tickets.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {tickets.map((ticket) => (
+                          <Card key={ticket.id} className="p-3" data-testid={`card-ticket-${ticket.id}`}>
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium truncate">{ticket.subject}</p>
+                                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                                  <span className="text-xs text-muted-foreground font-mono">{ticket.id}</span>
+                                  <span className={`text-xs px-1.5 py-0.5 rounded-sm capitalize ${ticketStatusColor(ticket.status)}`}>
+                                    {ticket.status}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
-                          <ChevronRight className="w-3 h-3 shrink-0 mt-0.5 text-primary" />
-                          {pc.resolution}
-                        </p>
-                      </Card>
-                    ))}
+                            {ticket.resolution && (
+                              <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
+                                <CheckCircle2 className="w-3 h-3 text-status-online shrink-0 mt-0.5" />
+                                {ticket.resolution}
+                              </p>
+                            )}
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Separator className="bg-border/50" />
+
+                    <div>
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                        Past Calls ({pastCalls.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {pastCalls.map((pc) => (
+                          <Card key={pc.id} className="p-3" data-testid={`card-past-call-${pc.id}`}>
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium">{pc.topic}</p>
+                                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    {pc.date}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {formatDuration(pc.duration)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
+                              <ChevronRight className="w-3 h-3 shrink-0 mt-0.5 text-primary" />
+                              {pc.resolution}
+                            </p>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </CollapsibleSection>
               </div>
             </ScrollArea>
           </TabsContent>
