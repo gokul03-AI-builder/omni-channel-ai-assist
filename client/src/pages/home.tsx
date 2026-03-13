@@ -6,7 +6,6 @@ import {
   MessageSquare,
   Clock,
   Bot,
-  DollarSign,
   TrendingUp,
   Phone,
   Mail,
@@ -16,7 +15,6 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   AreaChart,
   Area,
@@ -60,13 +58,6 @@ const kpiCards = [
     change: "↑15.2%",
     icon: Bot,
     color: "bg-violet-50 text-violet-500",
-  },
-  {
-    title: "Cost Saved",
-    value: "$42.8K",
-    change: "↑23.1%",
-    icon: DollarSign,
-    color: "bg-emerald-50 text-emerald-500",
   },
 ];
 
@@ -153,9 +144,8 @@ export default function HomePage() {
   const firstName = useMemo(() => getFirstName(), []);
 
   return (
-    <div className="flex flex-col h-full" data-testid="page-home">
-      <ScrollArea className="flex-1">
-        <div className="px-6 py-6 space-y-6 max-w-[1200px] mx-auto">
+    <div className="flex flex-col h-full overflow-auto" data-testid="page-home">
+        <div className="px-6 py-6 space-y-6 flex-1 flex flex-col">
 
           <div className="flex flex-col items-center text-center pt-2 pb-1" data-testid="section-welcome">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
@@ -197,7 +187,7 @@ export default function HomePage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="section-kpi">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="section-kpi">
             {kpiCards.map((kpi) => (
               <Card
                 key={kpi.title}
@@ -224,13 +214,13 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="p-5" data-testid="card-conversation-volume">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0">
+            <Card className="p-5 flex flex-col" data-testid="card-conversation-volume">
               <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-primary" />
                 Conversation Volume
               </h3>
-              <ResponsiveContainer width="100%" height={240}>
+              <ResponsiveContainer width="100%" height={280} className="flex-1 min-h-0">
                 <AreaChart data={conversationVolumeData}>
                   <defs>
                     <linearGradient id="colorChat" x1="0" y1="0" x2="0" y2="1">
@@ -258,7 +248,7 @@ export default function HomePage() {
               </ResponsiveContainer>
             </Card>
 
-            <Card className="p-5" data-testid="card-channel-mix">
+            <Card className="p-5 flex flex-col" data-testid="card-channel-mix">
               <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
                 <MessageSquare className="w-4 h-4 text-primary" />
                 Channel Mix
@@ -298,13 +288,13 @@ export default function HomePage() {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="p-5" data-testid="card-resolution-trend">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0">
+            <Card className="p-5 flex flex-col" data-testid="card-resolution-trend">
               <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-primary" />
                 Resolution Trend
               </h3>
-              <ResponsiveContainer width="100%" height={240}>
+              <ResponsiveContainer width="100%" height={280} className="flex-1 min-h-0">
                 <LineChart data={resolutionTrendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="day" tick={{ fontSize: 11 }} stroke="#9ca3af" />
@@ -317,7 +307,7 @@ export default function HomePage() {
               </ResponsiveContainer>
             </Card>
 
-            <Card className="p-5" data-testid="card-live-activity">
+            <Card className="p-5 flex flex-col" data-testid="card-live-activity">
               <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-primary" />
                 Live Activity
@@ -344,7 +334,6 @@ export default function HomePage() {
           </div>
 
         </div>
-      </ScrollArea>
     </div>
   );
 }
