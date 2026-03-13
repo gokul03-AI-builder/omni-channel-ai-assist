@@ -40,6 +40,9 @@ import {
   History,
   Hash,
   Paperclip,
+  Ticket as TicketIcon,
+  ArrowUpDown,
+  Timer,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { Card } from "@/components/ui/card";
@@ -607,12 +610,14 @@ function ChatThread({
 function KbAssistPanel({
   suggestions,
   onOpenArticle,
+  onCopyToChat,
   chatTopic,
   searchQuery,
   setSearchQuery,
 }: {
   suggestions: AISuggestion[];
   onOpenArticle: (s: AISuggestion) => void;
+  onCopyToChat: (text: string) => void;
   chatTopic?: string;
   searchQuery: string;
   setSearchQuery: (v: string) => void;
@@ -719,6 +724,16 @@ function KbAssistPanel({
                       </button>
                     </div>
                   </div>
+                  {suggestion.suggestedResponse && (
+                    <Button
+                      size="sm" variant="ghost"
+                      className="w-full h-6 text-xs gap-1 text-primary hover:bg-primary/10 mt-1"
+                      onClick={(e) => { e.stopPropagation(); onCopyToChat(suggestion.suggestedResponse!); }}
+                      data-testid={`button-kb-copy-${suggestion.id}`}
+                    >
+                      <Copy className="w-3 h-3" /> Copy to Chat
+                    </Button>
+                  )}
                 </Card>
               </motion.div>
             ))}
@@ -739,6 +754,9 @@ function ChatInfoPanel({
   onSendAI,
   onCollapse,
   onNewAIChat,
+  onCreateTicket,
+  createdTicketId,
+  chatMessages,
 }: {
   session: ChatSession;
   customer: Customer;
@@ -749,6 +767,9 @@ function ChatInfoPanel({
   onSendAI: (text: string) => void;
   onCollapse?: () => void;
   onNewAIChat?: () => void;
+  onCreateTicket: (ticket: { subject: string; body: string; priority: string; cc: string }) => void;
+  createdTicketId?: string;
+  chatMessages: ChatConversationMessage[];
 }) {
   const devStatus = device.status.toLowerCase();
   const statusColor = devStatus === "active" ? "text-status-online" : devStatus === "maintenance" ? "text-status-away" : "text-status-offline";
@@ -801,6 +822,7 @@ function ChatInfoPanel({
             <TabsList className="flex-1 glass-subtle">
               <TabsTrigger value="info" className="flex-1 text-xs" data-testid="tab-chat-info">Info</TabsTrigger>
               <TabsTrigger value="ai" className="flex-1 text-xs" data-testid="tab-chat-ai">AI Assist</TabsTrigger>
+              <TabsTrigger value="ticket" className="flex-1 text-xs" data-testid="tab-chat-ticket">Ticket</TabsTrigger>
             </TabsList>
           </div>
         </div>
@@ -956,9 +978,115 @@ function ChatInfoPanel({
               </div>
             </div>
           </TabsContent>
+
+          <TabsContent value="ticket" className="absolute inset-0 mt-0 flex flex-col overflow-hidden">
+            <TicketTabForm
+              session={session}
+              customer={customer}
+              chatMessages={chatMessages}
+              onCreateTicket={onCreateTicket}
+              createdTicketId={createdTicketId}
+            />
+          </TabsContent>
         </div>
       </Tabs>
     </div>
+  );
+}
+
+function TicketTabForm({
+  session,
+  customer,
+  chatMessages,
+  onCreateTicket,
+  createdTicketId,
+}: {
+  session: ChatSession;
+  customer: Customer;
+  chatMessages: ChatConversationMessage[];
+  onCreateTicket: (ticket: { subject: string; body: string; priority: string; cc: string }) => void;
+  createdTicketId?: string;
+}) {
+  const [subject, setSubject] = useState(`Chat: ${session.topic}`);
+  const [body, setBody] = useState(() => {
+    const lastMsgs = chatMessages.slice(-5).map(m => `[${m.sender}] ${m.text}`).join("\n");
+    return `Customer: ${customer.name}\nChannel: ${session.channel}\n\nRecent messages:\n${lastMsgs}`;
+  });
+  const [priority, setPriority] = useState("medium");
+  const [cc, setCc] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (createdTicketId) setSubmitted(true);
+  }, [createdTicketId]);
+
+  if (submitted && createdTicketId) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-3 px-6 text-center">
+        <div className="w-12 h-12 rounded-full bg-emerald-500/15 flex items-center justify-center">
+          <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+        </div>
+        <h4 className="text-sm font-semibold">Ticket Created</h4>
+        <p className="text-xs text-muted-foreground">{createdTicketId}</p>
+        <Button variant="ghost" size="sm" className="text-xs" onClick={() => setSubmitted(false)} data-testid="button-ticket-new">
+          Create Another
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <ScrollArea className="flex-1">
+      <div className="p-4 space-y-4">
+        <div className="flex items-center gap-2 mb-1">
+          <TicketIcon className="w-4 h-4 text-primary" />
+          <h4 className="text-sm font-semibold">Create Support Ticket</h4>
+        </div>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Subject</label>
+            <Input value={subject} onChange={(e) => setSubject(e.target.value)} className="glass-input text-xs h-8" data-testid="input-ticket-subject" />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Description</label>
+            <Textarea value={body} onChange={(e) => setBody(e.target.value)} className="glass-input text-xs min-h-[120px] resize-none" rows={6} data-testid="input-ticket-body" />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Priority</label>
+            <div className="flex gap-1.5">
+              {["low", "medium", "high", "urgent"].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPriority(p)}
+                  className={`flex-1 text-xs py-1.5 rounded-md capitalize transition-colors ${priority === p
+                    ? p === "urgent" ? "bg-red-500/15 text-red-400 border border-red-500/30"
+                      : p === "high" ? "bg-orange-500/15 text-orange-400 border border-orange-500/30"
+                        : p === "medium" ? "bg-yellow-500/15 text-yellow-400 border border-yellow-500/30"
+                          : "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                    : "text-muted-foreground hover:bg-muted/30 border border-transparent"
+                  }`}
+                  data-testid={`button-ticket-priority-${p}`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">CC (optional)</label>
+            <Input value={cc} onChange={(e) => setCc(e.target.value)} placeholder="email@verifone.com" className="glass-input text-xs h-8" data-testid="input-ticket-cc" />
+          </div>
+          <Button
+            className="w-full mint-glow-sm text-sm gap-2 mt-2"
+            onClick={() => onCreateTicket({ subject, body, priority, cc })}
+            disabled={!subject.trim() || !body.trim()}
+            data-testid="button-ticket-submit"
+          >
+            <TicketIcon className="w-4 h-4" /> Create Ticket
+          </Button>
+        </div>
+      </div>
+    </ScrollArea>
   );
 }
 
@@ -1213,6 +1341,10 @@ export default function ChatsPage() {
   const [closedHistory, setClosedHistory] = useState(getClosedChatSessions);
   const [elapsedTimes, setElapsedTimes] = useState<Record<string, number>>({});
   const [slaTimers, setSlaTimers] = useState<Record<string, number>>({});
+  const [activeSlaTimes, setActiveSlaTimes] = useState<Record<string, number>>({});
+  const [sortBy, setSortBy] = useState<"wait" | "priority">("wait");
+  const [historySearch, setHistorySearch] = useState("");
+  const [queueCollapsed, setQueueCollapsed] = useState(false);
 
   const activeSessions = sessions.filter(s => s.status === "active" || s.status === "on-hold");
   const simEligibleSessions = sessions.filter(s => s.status === "active");
@@ -1222,16 +1354,29 @@ export default function ChatsPage() {
   const selectedIdRef = useRef(selectedId);
   selectedIdRef.current = selectedId;
 
-  const filteredWaiting = waitingSessions.filter(s => {
-    if (channelFilter !== "all" && s.channel !== channelFilter) return false;
-    if (searchFilter && !s.customerName.toLowerCase().includes(searchFilter.toLowerCase()) && !s.topic.toLowerCase().includes(searchFilter.toLowerCase())) return false;
-    return true;
-  });
+  const priorityOrder: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
+
+  const filteredWaiting = waitingSessions
+    .filter(s => {
+      if (channelFilter !== "all" && s.channel !== channelFilter) return false;
+      if (searchFilter && !s.customerName.toLowerCase().includes(searchFilter.toLowerCase()) && !s.topic.toLowerCase().includes(searchFilter.toLowerCase())) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === "priority") return (priorityOrder[a.priority] ?? 2) - (priorityOrder[b.priority] ?? 2);
+      return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+    });
 
   const filteredActive = activeSessions.filter(s => {
     if (channelFilter !== "all" && s.channel !== channelFilter) return false;
     if (searchFilter && !s.customerName.toLowerCase().includes(searchFilter.toLowerCase()) && !s.topic.toLowerCase().includes(searchFilter.toLowerCase())) return false;
     return true;
+  });
+
+  const filteredHistory = closedHistory.filter(h => {
+    if (!historySearch.trim()) return true;
+    const q = historySearch.toLowerCase();
+    return h.customerName.toLowerCase().includes(q) || h.topic.toLowerCase().includes(q);
   });
 
   useEffect(() => {
@@ -1260,6 +1405,39 @@ export default function ChatsPage() {
     }, 1000);
     return () => clearInterval(interval);
   }, [sessions]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveSlaTimes(prev => {
+        const next = { ...prev };
+        activeSessions.forEach(s => {
+          if (!(s.id in next)) next[s.id] = 300;
+          if (s.status === "active") {
+            next[s.id] = next[s.id] - 1;
+          }
+        });
+        Object.keys(next).forEach(k => {
+          if (!activeSessions.find(s => s.id === k)) delete next[k];
+        });
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [activeSessions.map(s => `${s.id}-${s.status}`).join(",")]);
+
+  const getSlaBadgeClass = (remaining: number) => {
+    if (remaining <= 0) return "bg-red-500/20 text-red-400 border-red-500/40 animate-pulse";
+    if (remaining < 60) return "bg-red-500/15 text-red-400 border-red-500/30";
+    if (remaining < 120) return "bg-amber-500/15 text-amber-400 border-amber-500/30";
+    return "bg-muted/30 text-muted-foreground";
+  };
+
+  const formatSla = (secs: number) => {
+    const abs = Math.abs(secs);
+    const m = Math.floor(abs / 60);
+    const s = abs % 60;
+    return `${secs < 0 ? "-" : ""}${m}:${s.toString().padStart(2, "0")}`;
+  };
 
   useEffect(() => {
     const outerTimers: ReturnType<typeof setTimeout>[] = [];
@@ -1443,23 +1621,22 @@ export default function ChatsPage() {
     toast({ title: "Chat transferred", description: `Transferred to ${agentName}` });
   }, [selectedId]);
 
-  const handleCreateTicket = useCallback((ticket: { subject: string; body: string; priority: string; cc: string }) => {
-    if (!selectedId) return;
+  const handleCreateTicket = useCallback((sid: string, ticket: { subject: string; body: string; priority: string; cc: string }) => {
     const ticketId = `TKT-${Math.floor(Math.random() * 9000 + 1000)}`;
-    setCreatedTickets(prev => ({ ...prev, [selectedId]: ticketId }));
+    setCreatedTickets(prev => ({ ...prev, [sid]: ticketId }));
     const sysMsgId = `sys-${Date.now()}`;
     setMessages(prev => ({
       ...prev,
-      [selectedId]: [...(prev[selectedId] || []), {
+      [sid]: [...(prev[sid] || []), {
         id: sysMsgId,
-        sessionId: selectedId,
+        sessionId: sid,
         sender: "system" as const,
         text: `Ticket ${ticketId} created: ${ticket.subject}`,
         timestamp: new Date().toISOString(),
       }],
     }));
     toast({ title: "Ticket created", description: ticketId });
-  }, [selectedId]);
+  }, []);
 
   const handleSendAI = useCallback((sessionId: string, text: string) => {
     const agentMsg: ChatMessage = {
@@ -1552,17 +1729,28 @@ export default function ChatsPage() {
               data-testid="input-chat-search"
             />
           </div>
-          <div className="flex gap-1">
-            {["all", "web", "email", "whatsapp", "sms"].map((ch) => (
-              <button
-                key={ch}
-                onClick={() => setChannelFilter(ch)}
-                className={`text-[10px] px-2 py-1 rounded-full transition-colors ${channelFilter === ch ? "bg-primary/15 text-primary border border-primary/30" : "text-muted-foreground hover:bg-muted/30"}`}
-                data-testid={`filter-${ch}`}
-              >
-                {ch === "all" ? "All" : channelIcon(ch, "w-3 h-3 inline")}
-              </button>
-            ))}
+          <div className="flex items-center justify-between gap-1">
+            <div className="flex gap-1 flex-1">
+              {["all", "web", "email", "whatsapp", "sms"].map((ch) => (
+                <button
+                  key={ch}
+                  onClick={() => setChannelFilter(ch)}
+                  className={`text-[10px] px-2 py-1 rounded-full transition-colors ${channelFilter === ch ? "bg-primary/15 text-primary border border-primary/30" : "text-muted-foreground hover:bg-muted/30"}`}
+                  data-testid={`filter-${ch}`}
+                >
+                  {ch === "all" ? "All" : channelIcon(ch, "w-3 h-3 inline")}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setSortBy(prev => prev === "wait" ? "priority" : "wait")}
+              className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-full bg-muted/30 hover:bg-primary/10 hover:text-primary transition-colors text-muted-foreground"
+              title={`Sort by ${sortBy === "wait" ? "Wait Time" : "Priority"}`}
+              data-testid="button-sort-toggle"
+            >
+              <ArrowUpDown className="w-3 h-3" />
+              {sortBy === "wait" ? "Time" : "Priority"}
+            </button>
           </div>
           <div className="flex gap-1">
             <button
@@ -1632,13 +1820,23 @@ export default function ChatsPage() {
             </div>
           ) : (
             <div className="space-y-1 pb-3 px-2">
-              {closedHistory.length === 0 ? (
+              <div className="relative mb-2">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input
+                  value={historySearch}
+                  onChange={(e) => setHistorySearch(e.target.value)}
+                  placeholder="Search history..."
+                  className="glass-input pl-8 h-7 text-xs"
+                  data-testid="input-history-search"
+                />
+              </div>
+              {filteredHistory.length === 0 ? (
                 <div className="flex flex-col items-center py-8 text-muted-foreground">
                   <History className="w-6 h-6 mb-2 opacity-30" />
-                  <p className="text-xs">No chat history yet</p>
+                  <p className="text-xs">{historySearch ? "No matching history" : "No chat history yet"}</p>
                 </div>
               ) : (
-                closedHistory.map((h) => (
+                filteredHistory.map((h) => (
                   <Card key={h.id} className="p-3 space-y-1" data-testid={`card-history-${h.id}`}>
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-medium truncate">{h.customerName}</p>
@@ -1693,6 +1891,12 @@ export default function ChatsPage() {
                 <div className="flex items-center gap-1 shrink-0">
                   {selectedSession.status === "on-hold" && (
                     <Badge className="text-[10px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 mr-1">ON HOLD</Badge>
+                  )}
+                  {(selectedSession.status === "active" || selectedSession.status === "on-hold") && activeSlaTimes[selectedId!] !== undefined && (
+                    <Badge className={`text-[10px] font-mono border mr-1 ${getSlaBadgeClass(activeSlaTimes[selectedId!])}`} data-testid="badge-active-sla">
+                      <Timer className="w-3 h-3 mr-1" />
+                      SLA {formatSla(activeSlaTimes[selectedId!])}
+                    </Badge>
                   )}
                   <span className="text-xs text-muted-foreground font-mono mr-2">{formatDuration(elapsedTimes[selectedId!] || 0)}</span>
                   <Button
@@ -1775,6 +1979,7 @@ export default function ChatsPage() {
               <KbAssistPanel
                 suggestions={currentKbSuggestions}
                 onOpenArticle={(s) => { setSelectedArticle(s); setArticleModalOpen(true); }}
+                onCopyToChat={(text) => { setInputValues(prev => ({ ...prev, [selectedId!]: text })); }}
                 chatTopic={selectedSession.topic}
                 searchQuery={kbSearchQuery}
                 setSearchQuery={setKbSearchQuery}
@@ -1793,6 +1998,9 @@ export default function ChatsPage() {
                   onSendAI={(text) => handleSendAI(selectedId!, text)}
                   onCollapse={() => setRightPanelOpen(false)}
                   onNewAIChat={handleNewAIChat}
+                  onCreateTicket={(t) => handleCreateTicket(selectedId!, t)}
+                  createdTicketId={createdTickets[selectedId!]}
+                  chatMessages={currentMessages}
                 />
               </div>
             )}
@@ -1821,7 +2029,7 @@ export default function ChatsPage() {
             onOpenChange={setTicketOpen}
             session={selectedSession}
             messages={currentMessages}
-            onCreateTicket={handleCreateTicket}
+            onCreateTicket={(t) => handleCreateTicket(selectedId!, t)}
             createdTicketId={createdTickets[selectedId!]}
           />
         </>
