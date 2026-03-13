@@ -1814,6 +1814,30 @@ export default function ChatsPage() {
         ) : (
           <div className="flex h-full gap-2">
             <div className="flex-1 flex flex-col h-full min-w-0 glass-panel rounded-xl overflow-hidden">
+              {activeSessions.length > 1 && (
+                <div className="flex gap-1 px-3 py-1.5 border-b border-border/30 bg-muted/5">
+                  {activeSessions.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => handleSelectSession(s.id)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-all ${selectedId === s.id ? "bg-primary/15 text-primary font-medium border border-primary/30" : "text-muted-foreground hover:bg-muted/30"}`}
+                      data-testid={`tab-session-${s.id}`}
+                    >
+                      {channelIcon(s.channel, "w-3 h-3")}
+                      <span className="truncate max-w-[80px]">{s.customerName.split(" ")[0]}</span>
+                      {s.unreadCount > 0 && selectedId !== s.id && (
+                        <span className="min-w-[14px] h-[14px] rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center px-0.5">
+                          {s.unreadCount}
+                        </span>
+                      )}
+                      {s.status === "on-hold" && (
+                        <Pause className="w-2.5 h-2.5 text-yellow-400" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <div className="flex items-center justify-between gap-2 px-4 py-2 glass-header">
                 <div className="flex items-center gap-2 min-w-0">
                   <Avatar className="h-7 w-7 shrink-0">
@@ -1866,30 +1890,6 @@ export default function ChatsPage() {
                   </Button>
                 </div>
               </div>
-
-              {activeSessions.length > 1 && (
-                <div className="flex gap-1 px-3 py-1.5 border-b border-border/30 bg-muted/5">
-                  {activeSessions.map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => handleSelectSession(s.id)}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-all ${selectedId === s.id ? "bg-primary/15 text-primary font-medium border border-primary/30" : "text-muted-foreground hover:bg-muted/30"}`}
-                      data-testid={`tab-session-${s.id}`}
-                    >
-                      {channelIcon(s.channel, "w-3 h-3")}
-                      <span className="truncate max-w-[80px]">{s.customerName.split(" ")[0]}</span>
-                      {s.unreadCount > 0 && selectedId !== s.id && (
-                        <span className="min-w-[14px] h-[14px] rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center px-0.5">
-                          {s.unreadCount}
-                        </span>
-                      )}
-                      {s.status === "on-hold" && (
-                        <Pause className="w-2.5 h-2.5 text-yellow-400" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
 
               <ChatThread
                 messages={currentMessages}
