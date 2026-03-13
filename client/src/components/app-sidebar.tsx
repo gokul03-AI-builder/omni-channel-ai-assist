@@ -98,6 +98,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
           >
             {open ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
           </button>
+          <div className="group-data-[collapsible=icon]:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="focus:outline-none" data-testid="button-profile-dropdown">
@@ -129,6 +130,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>
