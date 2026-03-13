@@ -92,6 +92,7 @@ import {
   saveChatHistory,
   clearChatHistory,
 } from "@/lib/store";
+import { useSidebar } from "@/components/ui/sidebar";
 
 function generateCallSummary(
   call: Call,
@@ -1564,6 +1565,7 @@ function FloatingCallWidget({
 
 export default function CallsPage() {
   const { toast } = useToast();
+  const { setOpen: setSidebarOpen } = useSidebar();
   const [calls, setCalls] = useState<Call[]>(initialCalls);
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
@@ -1654,6 +1656,7 @@ export default function CallsPage() {
     setTranscript([]);
     setAiSuggestions([]);
     setTranscriptIndex(0);
+    setSidebarOpen(false);
   };
 
   const handleBackFromSummary = () => {

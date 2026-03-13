@@ -87,6 +87,7 @@ import {
   addClosedChatSession,
   getClosedChatSessions,
 } from "@/lib/store";
+import { useSidebar } from "@/components/ui/sidebar";
 
 const MAX_ACTIVE = 3;
 const SLA_SECONDS = 300;
@@ -1322,6 +1323,7 @@ function ChatSummaryOverlay({
 
 export default function ChatsPage() {
   const { toast } = useToast();
+  const { setOpen: setSidebarOpen } = useSidebar();
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const [sessions, setSessions] = useState<ChatSession[]>(initialChatSessions);
@@ -1532,8 +1534,9 @@ export default function ChatsPage() {
       }],
     }));
     setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, unreadCount: 0 } : s));
+    setSidebarOpen(false);
     toast({ title: "Chat accepted", description: `You're now chatting with ${sessions.find(s => s.id === sessionId)?.customerName}` });
-  }, [activeCount, sessions]);
+  }, [activeCount, sessions, setSidebarOpen]);
 
   const handleDecline = useCallback((sessionId: string) => {
     setSessions(prev => prev.filter(s => s.id !== sessionId));
