@@ -23,7 +23,6 @@ import {
   BookOpen,
   Headphones,
   Volume2,
-  PanelRightClose,
   PanelRightOpen,
   UserCircle,
   ThumbsUp,
@@ -848,15 +847,6 @@ function RightPanel({
       <Tabs defaultValue="ai-chat" className="flex flex-col h-full overflow-hidden">
         <div className="px-3 pt-3 pb-2 shrink-0">
           <div className="flex items-center gap-2">
-            {onCollapse && (
-              <button
-                onClick={onCollapse}
-                className="shrink-0 p-1 rounded-md hover:bg-muted/40 transition-colors"
-                data-testid="button-collapse-right-panel"
-              >
-                <PanelRightClose className="w-3.5 h-3.5 text-muted-foreground" />
-              </button>
-            )}
             <TabsList className="flex-1 glass-subtle">
               <TabsTrigger value="ai-chat" className="flex-1 text-xs" data-testid="tab-ai-chat">
                 Chat Assist
