@@ -168,7 +168,7 @@
     @apply font-sans antialiased text-foreground;
     background-color: hsl(var(--background));
     background-image:
-      radial-gradient(circle, rgba(0, 0, 0, 0.08) 1px, transparent 1px),
+      radial-gradient(circle, rgba(0, 0, 0, 0.07) 1px, transparent 1px),
       radial-gradient(ellipse 80% 50% at 5% 5%, rgba(110, 255, 210, 0.18), transparent 55%),
       radial-gradient(ellipse 60% 40% at 95% 95%, rgba(110, 255, 210, 0.14), transparent 55%),
       radial-gradient(ellipse 40% 30% at 50% 50%, rgba(110, 255, 210, 0.06), transparent 65%);
@@ -220,7 +220,7 @@
 
   /* Glass Sidebar */
   [data-sidebar="sidebar"] {
-    background: rgba(248,250,252,0.80) !important;
+    background: rgba(248,250,252,0.75) !important;
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
     border-right: 1px solid rgba(0,0,0,0.08) !important;
