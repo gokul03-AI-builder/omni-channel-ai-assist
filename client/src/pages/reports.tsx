@@ -1,102 +1,103 @@
 import { useState } from "react";
 import {
-  Phone,
-  MessageSquare,
+  BarChart3,
+  TrendingUp,
+  UserCheck,
   Star,
+  Clock,
   Download,
-  ArrowUpDown,
+  Plus,
+  FileText,
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
-interface CallReport {
+interface ReportTemplate {
   id: string;
-  date: string;
-  agent: string;
-  customer: string;
-  topic: string;
-  duration: string;
-  status: string;
-  priority: string;
+  name: string;
+  description: string;
+  icon: typeof BarChart3;
+  iconColor: string;
+  iconBg: string;
+  frequency: string;
+  format: string;
+  lastGenerated: string;
 }
 
-interface ChatReport {
+interface RecentReport {
   id: string;
-  date: string;
-  agent: string;
-  customer: string;
-  topic: string;
-  messages: number;
-  status: string;
-  aiAssisted: boolean;
+  name: string;
+  type: string;
+  status: "Completed" | "Processing";
+  generated: string;
+  format: string;
 }
 
-interface CSATReport {
-  id: string;
-  date: string;
-  agent: string;
-  customer: string;
-  rating: number;
-  comment: string;
-  channel: string;
-}
-
-const callReports: CallReport[] = [
-  { id: "CR-001", date: "2026-03-13", agent: "Alex Morgan", customer: "Sarah Chen", topic: "P400 Contactless Failure", duration: "8m 42s", status: "Resolved", priority: "High" },
-  { id: "CR-002", date: "2026-03-13", agent: "Jordan Lee", customer: "Michael Rodriguez", topic: "V240m Wi-Fi Setup", duration: "12m 15s", status: "Resolved", priority: "Medium" },
-  { id: "CR-003", date: "2026-03-12", agent: "Taylor Brooks", customer: "Emma Thompson", topic: "e285 Batch Processing", duration: "18m 33s", status: "Escalated", priority: "High" },
-  { id: "CR-004", date: "2026-03-12", agent: "Casey Patel", customer: "David Kim", topic: "VX520 Display Issue", duration: "6m 20s", status: "Resolved", priority: "Low" },
-  { id: "CR-005", date: "2026-03-11", agent: "Riley Nguyen", customer: "Lisa Park", topic: "P400 Firmware Update", duration: "5m 48s", status: "Resolved", priority: "Medium" },
-  { id: "CR-006", date: "2026-03-11", agent: "Alex Morgan", customer: "Robert Chen", topic: "Terminal Network Config", duration: "14m 02s", status: "Pending", priority: "Medium" },
-  { id: "CR-007", date: "2026-03-10", agent: "Jordan Lee", customer: "Maria Santos", topic: "Card Reader Malfunction", duration: "22m 10s", status: "Resolved", priority: "Urgent" },
-  { id: "CR-008", date: "2026-03-10", agent: "Taylor Brooks", customer: "James Wilson", topic: "Receipt Printer Error", duration: "9m 55s", status: "Resolved", priority: "Low" },
+const templates: ReportTemplate[] = [
+  {
+    id: "t-1",
+    name: "Daily Support Summary",
+    description: "Overview of all support interactions, resolution rates, and agent performance",
+    icon: BarChart3,
+    iconColor: "text-primary",
+    iconBg: "bg-primary/10",
+    frequency: "daily",
+    format: "PDF",
+    lastGenerated: "Today, 6:00 AM",
+  },
+  {
+    id: "t-2",
+    name: "Weekly Channel Performance",
+    description: "Cross-channel metrics comparison with trend analysis",
+    icon: TrendingUp,
+    iconColor: "text-emerald-500",
+    iconBg: "bg-emerald-500/10",
+    frequency: "weekly",
+    format: "CSV",
+    lastGenerated: "Mar 10, 2026",
+  },
+  {
+    id: "t-3",
+    name: "Agent Performance Report",
+    description: "Individual agent metrics, CSAT scores, and resolution efficiency",
+    icon: UserCheck,
+    iconColor: "text-orange-500",
+    iconBg: "bg-orange-500/10",
+    frequency: "monthly",
+    format: "PDF",
+    lastGenerated: "Mar 1, 2026",
+  },
+  {
+    id: "t-4",
+    name: "Customer Satisfaction Report",
+    description: "CSAT trends, NPS scores, and customer feedback analysis",
+    icon: Star,
+    iconColor: "text-blue-500",
+    iconBg: "bg-blue-500/10",
+    frequency: "monthly",
+    format: "PDF",
+    lastGenerated: "Mar 1, 2026",
+  },
 ];
 
-const chatReports: ChatReport[] = [
-  { id: "CH-001", date: "2026-03-13", agent: "Alex Morgan", customer: "Sarah Chen", topic: "Account Settings Help", messages: 12, status: "Resolved", aiAssisted: true },
-  { id: "CH-002", date: "2026-03-13", agent: "Casey Patel", customer: "Michael Rodriguez", topic: "Transaction History Query", messages: 8, status: "Resolved", aiAssisted: true },
-  { id: "CH-003", date: "2026-03-12", agent: "Riley Nguyen", customer: "Emma Thompson", topic: "Device Setup Guide", messages: 15, status: "Resolved", aiAssisted: false },
-  { id: "CH-004", date: "2026-03-12", agent: "Jordan Lee", customer: "David Kim", topic: "Billing Inquiry", messages: 6, status: "Resolved", aiAssisted: true },
-  { id: "CH-005", date: "2026-03-11", agent: "Taylor Brooks", customer: "Lisa Park", topic: "Software Update Help", messages: 10, status: "Pending", aiAssisted: true },
-  { id: "CH-006", date: "2026-03-11", agent: "Alex Morgan", customer: "Robert Chen", topic: "Integration Support", messages: 18, status: "Escalated", aiAssisted: false },
+const recentReports: RecentReport[] = [
+  { id: "r-1", name: "Daily Support Summary", type: "daily", status: "Completed", generated: "Mar 13, 2026 06:00", format: "PDF" },
+  { id: "r-2", name: "Daily Support Summary", type: "daily", status: "Completed", generated: "Mar 12, 2026 06:00", format: "PDF" },
+  { id: "r-3", name: "Weekly Channel Performance", type: "weekly", status: "Completed", generated: "Mar 10, 2026 00:00", format: "CSV" },
+  { id: "r-4", name: "Agent Performance Report", type: "monthly", status: "Processing", generated: "Mar 13, 2026 09:15", format: "PDF" },
+  { id: "r-5", name: "Daily Support Summary", type: "daily", status: "Completed", generated: "Mar 11, 2026 06:00", format: "PDF" },
+  { id: "r-6", name: "Customer Satisfaction Report", type: "monthly", status: "Completed", generated: "Mar 1, 2026 00:00", format: "PDF" },
+  { id: "r-7", name: "Weekly Channel Performance", type: "weekly", status: "Completed", generated: "Mar 3, 2026 00:00", format: "CSV" },
 ];
-
-const csatReports: CSATReport[] = [
-  { id: "CS-001", date: "2026-03-13", agent: "Alex Morgan", customer: "Sarah Chen", rating: 5, comment: "Excellent service, very knowledgeable about P400 terminals.", channel: "Call" },
-  { id: "CS-002", date: "2026-03-13", agent: "Jordan Lee", customer: "Michael Rodriguez", rating: 4, comment: "Good support, resolved my Wi-Fi issue.", channel: "Call" },
-  { id: "CS-003", date: "2026-03-12", agent: "Casey Patel", customer: "David Kim", rating: 5, comment: "Quick and professional chat support.", channel: "Chat" },
-  { id: "CS-004", date: "2026-03-12", agent: "Taylor Brooks", customer: "Emma Thompson", rating: 3, comment: "Issue took longer than expected to resolve.", channel: "Call" },
-  { id: "CS-005", date: "2026-03-11", agent: "Riley Nguyen", customer: "Lisa Park", rating: 4, comment: "Helpful firmware update assistance.", channel: "Call" },
-  { id: "CS-006", date: "2026-03-11", agent: "Alex Morgan", customer: "Robert Chen", rating: 5, comment: "AI suggestions were spot-on.", channel: "Chat" },
-  { id: "CS-007", date: "2026-03-10", agent: "Jordan Lee", customer: "Maria Santos", rating: 3, comment: "Had to call back twice before issue was resolved.", channel: "Call" },
-];
-
-function StatusBadge({ status }: { status: string }) {
-  const colorMap: Record<string, string> = {
-    Resolved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    Escalated: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-    Pending: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  };
-  return (
-    <Badge variant="secondary" className={`text-xs ${colorMap[status] || ""}`}>
-      {status}
-    </Badge>
-  );
-}
-
-function PriorityBadge({ priority }: { priority: string }) {
-  const colorMap: Record<string, string> = {
-    Urgent: "text-red-400",
-    High: "text-orange-400",
-    Medium: "text-yellow-400",
-    Low: "text-muted-foreground",
-  };
-  return <span className={`text-xs font-medium ${colorMap[priority] || ""}`}>{priority}</span>;
-}
 
 function exportCsv(headers: string[], rows: string[][], filename: string) {
   const csv = [headers.join(","), ...rows.map((r) => r.map((c) => `"${c}"`).join(","))].join("\n");
@@ -110,250 +111,168 @@ function exportCsv(headers: string[], rows: string[][], filename: string) {
 }
 
 export default function ReportsPage() {
-  const [callFilter, setCallFilter] = useState("");
-  const [chatFilter, setChatFilter] = useState("");
-  const [csatFilter, setCsatFilter] = useState("");
-  const [callSort, setCallSort] = useState<{ key: keyof CallReport; asc: boolean }>({ key: "date", asc: false });
-  const [chatSort, setChatSort] = useState<{ key: keyof ChatReport; asc: boolean }>({ key: "date", asc: false });
-  const [csatSort, setCsatSort] = useState<{ key: keyof CSATReport; asc: boolean }>({ key: "date", asc: false });
+  const { toast } = useToast();
+  const [typeFilter, setTypeFilter] = useState("all");
 
-  function sortData<T>(data: T[], key: keyof T, asc: boolean): T[] {
-    return [...data].sort((a, b) => {
-      const va = String(a[key]);
-      const vb = String(b[key]);
-      return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+  const filteredReports = typeFilter === "all"
+    ? recentReports
+    : recentReports.filter((r) => r.type === typeFilter);
+
+  const handleTemplateClick = (template: ReportTemplate) => {
+    toast({
+      title: `Generating ${template.name}...`,
+      description: `${template.format} report will be ready shortly.`,
     });
-  }
+  };
 
-  function toggleSort<T>(current: { key: keyof T; asc: boolean }, key: keyof T): { key: keyof T; asc: boolean } {
-    return current.key === key ? { key, asc: !current.asc } : { key, asc: true };
-  }
-
-  const filteredCalls = sortData(
-    callReports.filter((r) => Object.values(r).some((v) => String(v).toLowerCase().includes(callFilter.toLowerCase()))),
-    callSort.key,
-    callSort.asc
-  );
-  const filteredChats = sortData(
-    chatReports.filter((r) => Object.values(r).some((v) => String(v).toLowerCase().includes(chatFilter.toLowerCase()))),
-    chatSort.key,
-    chatSort.asc
-  );
-  const filteredCsat = sortData(
-    csatReports.filter((r) => Object.values(r).some((v) => String(v).toLowerCase().includes(csatFilter.toLowerCase()))),
-    csatSort.key,
-    csatSort.asc
-  );
-
-  const SortButton = ({ label, onClick, testId }: { label: string; onClick: () => void; testId: string }) => (
-    <button onClick={onClick} className="flex items-center gap-1 hover:text-foreground transition-colors" data-testid={testId}>
-      {label}
-      <ArrowUpDown className="w-3 h-3" />
-    </button>
-  );
+  const handleDownload = (report: RecentReport) => {
+    exportCsv(
+      ["Report", "Type", "Status", "Generated", "Format"],
+      [[report.name, report.type, report.status, report.generated, report.format]],
+      `${report.name.toLowerCase().replace(/\s+/g, "-")}.csv`
+    );
+  };
 
   return (
     <div className="flex flex-col h-full" data-testid="page-reports">
       <div className="px-6 py-4 glass-header">
-        <h2 className="text-lg font-semibold">Reports</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Call, chat, and CSAT report data</p>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight" data-testid="text-page-title">Reports</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Generate, schedule, and download support reports</p>
+          </div>
+          <Button className="gap-2" data-testid="button-create-report">
+            <Plus className="w-4 h-4" /> Custom Report
+          </Button>
+        </div>
       </div>
 
-      <div className="flex-1 min-h-0 px-6 py-4">
-        <Tabs defaultValue="calls" className="flex flex-col h-full">
-          <TabsList className="glass-subtle mb-3 shrink-0 w-fit">
-            <TabsTrigger value="calls" className="text-xs gap-1.5" data-testid="tab-call-reports">
-              <Phone className="w-3.5 h-3.5" /> Call Reports
-            </TabsTrigger>
-            <TabsTrigger value="chats" className="text-xs gap-1.5" data-testid="tab-chat-reports">
-              <MessageSquare className="w-3.5 h-3.5" /> Chat Reports
-            </TabsTrigger>
-            <TabsTrigger value="csat" className="text-xs gap-1.5" data-testid="tab-csat-reports">
-              <Star className="w-3.5 h-3.5" /> CSAT Reports
-            </TabsTrigger>
-          </TabsList>
+      <ScrollArea className="flex-1">
+        <div className="px-6 py-6 space-y-6 max-w-[1200px] mx-auto">
 
-          <TabsContent value="calls" className="flex-1 min-h-0 mt-0">
-            <Card className="flex flex-col h-full p-4">
-              <div className="flex items-center justify-between gap-3 mb-3">
-                <Input
-                  placeholder="Filter call reports..."
-                  value={callFilter}
-                  onChange={(e) => setCallFilter(e.target.value)}
-                  className="max-w-xs h-8 text-xs"
-                  data-testid="input-filter-calls"
-                />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-1.5 h-8 text-xs"
-                  onClick={() => exportCsv(
-                    ["ID", "Date", "Agent", "Customer", "Topic", "Duration", "Status", "Priority"],
-                    filteredCalls.map((r) => [r.id, r.date, r.agent, r.customer, r.topic, r.duration, r.status, r.priority]),
-                    "call-reports.csv"
-                  )}
-                  data-testid="button-export-calls"
-                >
-                  <Download className="w-3.5 h-3.5" /> Export CSV
-                </Button>
-              </div>
-              <ScrollArea className="flex-1">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-xs text-muted-foreground border-b border-border/30">
-                      <th className="text-left pb-2 font-medium"><SortButton label="Date" onClick={() => setCallSort(toggleSort(callSort, "date"))} testId="button-sort-calls-date" /></th>
-                      <th className="text-left pb-2 font-medium"><SortButton label="Agent" onClick={() => setCallSort(toggleSort(callSort, "agent"))} testId="button-sort-calls-agent" /></th>
-                      <th className="text-left pb-2 font-medium"><SortButton label="Customer" onClick={() => setCallSort(toggleSort(callSort, "customer"))} testId="button-sort-calls-customer" /></th>
-                      <th className="text-left pb-2 font-medium">Topic</th>
-                      <th className="text-left pb-2 font-medium">Duration</th>
-                      <th className="text-left pb-2 font-medium"><SortButton label="Status" onClick={() => setCallSort(toggleSort(callSort, "status"))} testId="button-sort-calls-status" /></th>
-                      <th className="text-left pb-2 font-medium">Priority</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredCalls.map((r) => (
-                      <tr key={r.id} className="border-b border-border/10 last:border-0" data-testid={`row-call-${r.id}`}>
-                        <td className="py-2 text-xs">{r.date}</td>
-                        <td className="py-2 text-xs">{r.agent}</td>
-                        <td className="py-2 text-xs">{r.customer}</td>
-                        <td className="py-2 text-xs text-muted-foreground">{r.topic}</td>
-                        <td className="py-2 text-xs font-mono">{r.duration}</td>
-                        <td className="py-2"><StatusBadge status={r.status} /></td>
-                        <td className="py-2"><PriorityBadge priority={r.priority} /></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </ScrollArea>
-            </Card>
-          </TabsContent>
+          <div>
+            <h2 className="text-sm font-semibold mb-3" data-testid="text-section-templates">Report Templates</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {templates.map((template) => {
+                const Icon = template.icon;
+                return (
+                  <div
+                    key={template.id}
+                    className="glass-panel rounded-xl p-4 cursor-pointer hover-elevate transition-all"
+                    onClick={() => handleTemplateClick(template)}
+                    data-testid={`card-template-${template.id}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${template.iconBg}`}>
+                        <Icon className={`w-[18px] h-[18px] ${template.iconColor}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-medium" data-testid={`text-template-name-${template.id}`}>{template.name}</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{template.description}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge variant="secondary" className="text-[9px]">{template.frequency}</Badge>
+                          <Badge variant="outline" className="text-[9px]">{template.format}</Badge>
+                        </div>
+                        <div className="flex items-center gap-1 mt-2">
+                          <Clock className="w-3 h-3 text-muted-foreground" />
+                          <span className="text-[10px] text-muted-foreground" data-testid={`text-template-last-generated-${template.id}`}>{template.lastGenerated}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-          <TabsContent value="chats" className="flex-1 min-h-0 mt-0">
-            <Card className="flex flex-col h-full p-4">
-              <div className="flex items-center justify-between gap-3 mb-3">
-                <Input
-                  placeholder="Filter chat reports..."
-                  value={chatFilter}
-                  onChange={(e) => setChatFilter(e.target.value)}
-                  className="max-w-xs h-8 text-xs"
-                  data-testid="input-filter-chats"
-                />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-1.5 h-8 text-xs"
-                  onClick={() => exportCsv(
-                    ["ID", "Date", "Agent", "Customer", "Topic", "Messages", "Status", "AI Assisted"],
-                    filteredChats.map((r) => [r.id, r.date, r.agent, r.customer, r.topic, String(r.messages), r.status, r.aiAssisted ? "Yes" : "No"]),
-                    "chat-reports.csv"
-                  )}
-                  data-testid="button-export-chats"
-                >
-                  <Download className="w-3.5 h-3.5" /> Export CSV
-                </Button>
-              </div>
-              <ScrollArea className="flex-1">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-xs text-muted-foreground border-b border-border/30">
-                      <th className="text-left pb-2 font-medium"><SortButton label="Date" onClick={() => setChatSort(toggleSort(chatSort, "date"))} testId="button-sort-chats-date" /></th>
-                      <th className="text-left pb-2 font-medium"><SortButton label="Agent" onClick={() => setChatSort(toggleSort(chatSort, "agent"))} testId="button-sort-chats-agent" /></th>
-                      <th className="text-left pb-2 font-medium"><SortButton label="Customer" onClick={() => setChatSort(toggleSort(chatSort, "customer"))} testId="button-sort-chats-customer" /></th>
-                      <th className="text-left pb-2 font-medium">Topic</th>
-                      <th className="text-left pb-2 font-medium">Messages</th>
-                      <th className="text-left pb-2 font-medium"><SortButton label="Status" onClick={() => setChatSort(toggleSort(chatSort, "status"))} testId="button-sort-chats-status" /></th>
-                      <th className="text-left pb-2 font-medium">AI</th>
+          <div className="glass-panel rounded-xl overflow-hidden" data-testid="card-recent-reports">
+            <div className="flex items-center justify-between gap-2 px-6 py-4">
+              <h3 className="text-sm font-medium">Recent Reports</h3>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-[120px] h-8 text-xs" data-testid="select-report-filter">
+                  <SelectValue placeholder="Filter" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="px-6 pb-4">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-xs text-muted-foreground border-b border-border/30">
+                    <th className="text-left pb-2 font-medium">Report Name</th>
+                    <th className="text-left pb-2 font-medium">Type</th>
+                    <th className="text-left pb-2 font-medium">Status</th>
+                    <th className="text-left pb-2 font-medium">Generated</th>
+                    <th className="text-left pb-2 font-medium">Format</th>
+                    <th className="text-right pb-2 font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredReports.map((report) => (
+                    <tr
+                      key={report.id}
+                      className="border-b border-border/10 last:border-0 hover:bg-primary/5 transition-colors"
+                      data-testid={`row-report-${report.id}`}
+                    >
+                      <td className="py-2.5">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+                          <span className="text-xs font-medium">{report.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-2.5">
+                        <Badge variant="secondary" className="text-[10px] capitalize">{report.type}</Badge>
+                      </td>
+                      <td className="py-2.5">
+                        <Badge
+                          variant="secondary"
+                          className={`text-[10px] ${
+                            report.status === "Completed"
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                              : "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                          }`}
+                          data-testid={`badge-status-${report.id}`}
+                        >
+                          {report.status}
+                        </Badge>
+                      </td>
+                      <td className="py-2.5 text-xs text-muted-foreground">{report.generated}</td>
+                      <td className="py-2.5">
+                        <Badge variant="outline" className="text-[10px]">{report.format}</Badge>
+                      </td>
+                      <td className="py-2.5 text-right">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 w-7 p-0 text-muted-foreground hover:text-primary"
+                          onClick={() => handleDownload(report)}
+                          disabled={report.status === "Processing"}
+                          data-testid={`button-download-${report.id}`}
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                        </Button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {filteredChats.map((r) => (
-                      <tr key={r.id} className="border-b border-border/10 last:border-0" data-testid={`row-chat-${r.id}`}>
-                        <td className="py-2 text-xs">{r.date}</td>
-                        <td className="py-2 text-xs">{r.agent}</td>
-                        <td className="py-2 text-xs">{r.customer}</td>
-                        <td className="py-2 text-xs text-muted-foreground">{r.topic}</td>
-                        <td className="py-2 text-xs font-mono">{r.messages}</td>
-                        <td className="py-2"><StatusBadge status={r.status} /></td>
-                        <td className="py-2">
-                          {r.aiAssisted ? (
-                            <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">AI</Badge>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </ScrollArea>
-            </Card>
-          </TabsContent>
+                  ))}
+                  {filteredReports.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-sm text-muted-foreground">
+                        No reports match the selected filter.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-          <TabsContent value="csat" className="flex-1 min-h-0 mt-0">
-            <Card className="flex flex-col h-full p-4">
-              <div className="flex items-center justify-between gap-3 mb-3">
-                <Input
-                  placeholder="Filter CSAT reports..."
-                  value={csatFilter}
-                  onChange={(e) => setCsatFilter(e.target.value)}
-                  className="max-w-xs h-8 text-xs"
-                  data-testid="input-filter-csat"
-                />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-1.5 h-8 text-xs"
-                  onClick={() => exportCsv(
-                    ["ID", "Date", "Agent", "Customer", "Rating", "Comment", "Channel"],
-                    filteredCsat.map((r) => [r.id, r.date, r.agent, r.customer, String(r.rating), r.comment, r.channel]),
-                    "csat-reports.csv"
-                  )}
-                  data-testid="button-export-csat"
-                >
-                  <Download className="w-3.5 h-3.5" /> Export CSV
-                </Button>
-              </div>
-              <ScrollArea className="flex-1">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-xs text-muted-foreground border-b border-border/30">
-                      <th className="text-left pb-2 font-medium"><SortButton label="Date" onClick={() => setCsatSort(toggleSort(csatSort, "date"))} testId="button-sort-csat-date" /></th>
-                      <th className="text-left pb-2 font-medium"><SortButton label="Agent" onClick={() => setCsatSort(toggleSort(csatSort, "agent"))} testId="button-sort-csat-agent" /></th>
-                      <th className="text-left pb-2 font-medium"><SortButton label="Customer" onClick={() => setCsatSort(toggleSort(csatSort, "customer"))} testId="button-sort-csat-customer" /></th>
-                      <th className="text-left pb-2 font-medium"><SortButton label="Rating" onClick={() => setCsatSort(toggleSort(csatSort, "rating"))} testId="button-sort-csat-rating" /></th>
-                      <th className="text-left pb-2 font-medium">Comment</th>
-                      <th className="text-left pb-2 font-medium">Channel</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredCsat.map((r) => (
-                      <tr key={r.id} className="border-b border-border/10 last:border-0" data-testid={`row-csat-${r.id}`}>
-                        <td className="py-2 text-xs">{r.date}</td>
-                        <td className="py-2 text-xs">{r.agent}</td>
-                        <td className="py-2 text-xs">{r.customer}</td>
-                        <td className="py-2">
-                          <div className="flex items-center gap-0.5">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-3 h-3 ${i < r.rating ? "text-yellow-500 fill-yellow-500" : "text-muted/60"}`}
-                              />
-                            ))}
-                          </div>
-                        </td>
-                        <td className="py-2 text-xs text-muted-foreground max-w-[200px] truncate">{r.comment}</td>
-                        <td className="py-2">
-                          <Badge variant="secondary" className="text-xs">{r.channel}</Badge>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </ScrollArea>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+        </div>
+      </ScrollArea>
     </div>
   );
 }

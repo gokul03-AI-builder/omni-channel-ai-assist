@@ -2,10 +2,7 @@ import { useState } from "react";
 import {
   Shield,
   Users,
-  Check,
-  X,
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -49,6 +46,12 @@ const permissionsMatrix = [
   { capability: "Escalate Tickets", admin: true, supervisor: true, agent: true },
 ];
 
+const roleColors: Record<string, { text: string; bg: string; border: string }> = {
+  Admin: { text: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
+  Supervisor: { text: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+  Agent: { text: "text-muted-foreground", bg: "bg-muted/50", border: "border-border/30" },
+};
+
 export default function PermissionsPage() {
   const [agents, setAgents] = useState(initialAgents);
 
@@ -56,124 +59,129 @@ export default function PermissionsPage() {
     setAgents((prev) => prev.map((a) => (a.id === id ? { ...a, role: newRole } : a)));
   };
 
+  const adminCount = agents.filter((a) => a.role === "Admin").length;
+  const supervisorCount = agents.filter((a) => a.role === "Supervisor").length;
+  const agentCount = agents.filter((a) => a.role === "Agent").length;
+
   return (
     <div className="flex flex-col h-full" data-testid="page-permissions">
       <div className="px-6 py-4 glass-header">
-        <h2 className="text-lg font-semibold">Permissions</h2>
+        <h1 className="text-2xl font-bold tracking-tight">Permissions</h1>
         <p className="text-sm text-muted-foreground mt-0.5">User roles & access management</p>
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="px-6 py-4 space-y-6">
-          <Card className="p-4" data-testid="card-agent-table">
-            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+        <div className="px-6 py-6 space-y-6 max-w-[1200px] mx-auto">
+
+          <div>
+            <h2 className="text-sm font-semibold mb-3 flex items-center gap-2 border-b border-primary/20 pb-2" data-testid="text-section-agents">
               <Users className="w-4 h-4 text-primary" />
               Agent Management
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-xs text-muted-foreground border-b border-border/30">
-                    <th className="text-left pb-2 font-medium">Agent</th>
-                    <th className="text-left pb-2 font-medium">Email</th>
-                    <th className="text-left pb-2 font-medium">Role</th>
-                    <th className="text-left pb-2 font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {agents.map((agent) => (
-                    <tr key={agent.id} className="border-b border-border/10 last:border-0" data-testid={`row-agent-${agent.id}`}>
-                      <td className="py-2.5">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-7 w-7">
-                            <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
-                              {agent.initials}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium text-sm">{agent.name}</span>
-                        </div>
-                      </td>
-                      <td className="py-2.5 text-xs text-muted-foreground">{agent.email}</td>
-                      <td className="py-2.5">
-                        <Select
-                          value={agent.role}
-                          onValueChange={(v) => handleRoleChange(agent.id, v as Agent["role"])}
-                        >
-                          <SelectTrigger
-                            className="h-7 w-[130px] text-xs"
-                            data-testid={`select-role-${agent.id}`}
-                          >
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Admin">Admin</SelectItem>
-                            <SelectItem value="Supervisor">Supervisor</SelectItem>
-                            <SelectItem value="Agent">Agent</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </td>
-                      <td className="py-2.5">
-                        <Badge
-                          variant="secondary"
-                          className={`text-xs ${agent.status === "Active" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}
-                          data-testid={`badge-status-${agent.id}`}
-                        >
-                          {agent.status}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="card-agent-table">
+              {agents.map((agent) => {
+                const rc = roleColors[agent.role];
+                return (
+                  <div
+                    key={agent.id}
+                    className="glass-panel rounded-xl p-4 flex flex-col gap-3"
+                    data-testid={`row-agent-${agent.id}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-10 w-10 shrink-0">
+                        <AvatarFallback className={`text-sm font-semibold ${rc.bg} ${rc.text}`}>
+                          {agent.initials}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate">{agent.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{agent.email}</p>
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className={`text-[10px] shrink-0 ${
+                          agent.status === "Active"
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : "bg-red-500/10 text-red-400 border-red-500/20"
+                        }`}
+                        data-testid={`badge-status-${agent.id}`}
+                      >
+                        {agent.status}
+                      </Badge>
+                    </div>
+                    <Select
+                      value={agent.role}
+                      onValueChange={(v) => handleRoleChange(agent.id, v as Agent["role"])}
+                    >
+                      <SelectTrigger
+                        className={`h-8 text-xs ${rc.bg} ${rc.text} border ${rc.border}`}
+                        data-testid={`select-role-${agent.id}`}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Admin">Admin</SelectItem>
+                        <SelectItem value="Supervisor">Supervisor</SelectItem>
+                        <SelectItem value="Agent">Agent</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                );
+              })}
             </div>
-          </Card>
+          </div>
 
-          <Card className="p-4" data-testid="card-permissions-matrix">
-            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+          <div>
+            <h2 className="text-sm font-semibold mb-3 flex items-center gap-2 border-b border-primary/20 pb-2">
               <Shield className="w-4 h-4 text-primary" />
               Role Permissions Matrix
-            </h3>
-            <div className="overflow-x-auto">
+            </h2>
+            <div className="glass-panel rounded-xl overflow-hidden" data-testid="card-permissions-matrix">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-xs text-muted-foreground border-b border-border/30">
-                    <th className="text-left pb-2 font-medium">Capability</th>
-                    <th className="text-center pb-2 font-medium">Admin</th>
-                    <th className="text-center pb-2 font-medium">Supervisor</th>
-                    <th className="text-center pb-2 font-medium">Agent</th>
+                  <tr className="glass-subtle">
+                    <th className="text-left px-4 py-3 font-medium text-xs uppercase tracking-wider text-muted-foreground">Capability</th>
+                    <th className="text-center px-4 py-3">
+                      <Badge className={`text-[10px] ${roleColors.Admin.bg} ${roleColors.Admin.text} border ${roleColors.Admin.border}`}>
+                        Admin ({adminCount})
+                      </Badge>
+                    </th>
+                    <th className="text-center px-4 py-3">
+                      <Badge className={`text-[10px] ${roleColors.Supervisor.bg} ${roleColors.Supervisor.text} border ${roleColors.Supervisor.border}`}>
+                        Supervisor ({supervisorCount})
+                      </Badge>
+                    </th>
+                    <th className="text-center px-4 py-3">
+                      <Badge className={`text-[10px] ${roleColors.Agent.bg} ${roleColors.Agent.text} border ${roleColors.Agent.border}`}>
+                        Agent ({agentCount})
+                      </Badge>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {permissionsMatrix.map((row) => (
-                    <tr key={row.capability} className="border-b border-border/10 last:border-0" data-testid={`row-perm-${row.capability.toLowerCase().replace(/[\s&()]/g, "-")}`}>
-                      <td className="py-2 text-xs">{row.capability}</td>
-                      <td className="py-2 text-center">
-                        {row.admin ? (
-                          <Check className="w-4 h-4 text-emerald-400 mx-auto" />
-                        ) : (
-                          <X className="w-4 h-4 text-red-400/40 mx-auto" />
-                        )}
+                  {permissionsMatrix.map((row, i) => (
+                    <tr
+                      key={row.capability}
+                      className={`border-b border-border/10 last:border-0 hover:bg-primary/5 transition-colors ${i % 2 === 0 ? "" : "glass-subtle"}`}
+                      data-testid={`row-perm-${row.capability.toLowerCase().replace(/[\s&()]/g, "-")}`}
+                    >
+                      <td className="px-4 py-2.5 text-xs">{row.capability}</td>
+                      <td className="px-4 py-2.5 text-center">
+                        <span className={`inline-block w-3 h-3 rounded-full ${row.admin ? "bg-primary shadow-[0_0_6px_rgba(110,255,210,0.3)]" : "border-2 border-muted-foreground/20"}`} />
                       </td>
-                      <td className="py-2 text-center">
-                        {row.supervisor ? (
-                          <Check className="w-4 h-4 text-emerald-400 mx-auto" />
-                        ) : (
-                          <X className="w-4 h-4 text-red-400/40 mx-auto" />
-                        )}
+                      <td className="px-4 py-2.5 text-center">
+                        <span className={`inline-block w-3 h-3 rounded-full ${row.supervisor ? "bg-blue-400 shadow-[0_0_6px_rgba(96,165,250,0.3)]" : "border-2 border-muted-foreground/20"}`} />
                       </td>
-                      <td className="py-2 text-center">
-                        {row.agent ? (
-                          <Check className="w-4 h-4 text-emerald-400 mx-auto" />
-                        ) : (
-                          <X className="w-4 h-4 text-red-400/40 mx-auto" />
-                        )}
+                      <td className="px-4 py-2.5 text-center">
+                        <span className={`inline-block w-3 h-3 rounded-full ${row.agent ? "bg-muted-foreground/60" : "border-2 border-muted-foreground/20"}`} />
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </Card>
+          </div>
+
         </div>
       </ScrollArea>
     </div>
