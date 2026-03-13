@@ -6,6 +6,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -23,19 +24,37 @@ import {
 import { useTheme } from "@/lib/theme-provider";
 import verifoneLogo from "@assets/verifone_1773393343272.png";
 
-const navItems = [
-  { title: "Home", url: "/", icon: Home },
-  { title: "Calls", url: "/calls", icon: Phone },
-  { title: "Chats", url: "/chats", icon: MessageSquare },
-  { title: "Feedback", url: "/feedback", icon: ThumbsUp },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
-  { title: "Reports", url: "/reports", icon: FileText },
+const navGroups = [
+  {
+    label: "OVERVIEW",
+    items: [
+      { title: "Home", url: "/", icon: Home },
+      { title: "Feedback", url: "/feedback", icon: ThumbsUp },
+    ],
+  },
+  {
+    label: "CHANNELS",
+    items: [
+      { title: "Calls", url: "/calls", icon: Phone },
+      { title: "Chats", url: "/chats", icon: MessageSquare },
+    ],
+  },
+  {
+    label: "INTELLIGENCE",
+    items: [
+      { title: "Analytics", url: "/analytics", icon: BarChart3 },
+      { title: "Reports", url: "/reports", icon: FileText },
+    ],
+  },
 ];
 
-const adminNavItems = [
-  { title: "Permissions", url: "/permissions", icon: Shield },
-  { title: "AI Status", url: "/ai-status", icon: Bot },
-];
+const adminGroup = {
+  label: "SYSTEM",
+  items: [
+    { title: "AI Status", url: "/ai-status", icon: Bot },
+    { title: "Permissions", url: "/permissions", icon: Shield },
+  ],
+};
 
 export function AppSidebar({ onLogout }: { onLogout: () => void }) {
   const [location] = useLocation();
@@ -72,33 +91,38 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {[...navItems, ...(isAdmin ? adminNavItems : [])].map((item) => {
-                const isActive = location === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      data-active={isActive}
-                      className={
-                        isActive
-                          ? "!bg-primary/20 text-primary font-semibold border border-primary/30 shadow-[0_0_10px_-3px_hsl(var(--primary)/0.25)]"
-                          : "hover:bg-primary/8 hover:text-primary/90"
-                      }
-                    >
-                      <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase().replace(/\s+/g, "-")}`}>
-                        <item.icon className={isActive ? "text-primary" : "opacity-50"} />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {[...navGroups, ...(isAdmin ? [adminGroup] : [])].map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-medium px-3">
+              {group.label}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => {
+                  const isActive = location === item.url;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        data-active={isActive}
+                        className={
+                          isActive
+                            ? "!bg-primary/20 text-primary font-semibold border border-primary/30 shadow-[0_0_10px_-3px_hsl(var(--primary)/0.25)]"
+                            : "hover:bg-primary/8 hover:text-primary/90"
+                        }
+                      >
+                        <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase().replace(/\s+/g, "-")}`}>
+                          <item.icon className={isActive ? "text-primary" : "opacity-50"} />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
       <SidebarFooter className="border-t border-border/10 p-3 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:py-3">
         <div className="flex flex-col items-center gap-2 group-data-[state=expanded]:flex-row group-data-[state=expanded]:gap-2.5">
