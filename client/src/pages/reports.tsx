@@ -175,7 +175,7 @@ export default function ReportsPage() {
                         </div>
                         <div className="flex items-center gap-1 mt-2">
                           <Clock className="w-3 h-3 text-muted-foreground" />
-                          <span className="text-[10px] text-muted-foreground" data-testid={`text-template-last-generated-${template.id}`}>{template.lastGenerated}</span>
+                          <span className="text-[10px] text-muted-foreground" data-testid={`text-template-last-generated-${template.id}`}>Last generated: {template.lastGenerated}</span>
                         </div>
                       </div>
                     </div>
