@@ -354,7 +354,7 @@ function QueueItem({
           {session.customerCompany && (
             <p className="text-[10px] text-muted-foreground/70 truncate">{session.customerCompany}</p>
           )}
-          <p className="text-xs text-muted-foreground truncate">{session.topic}</p>
+          <p className="text-xs text-muted-foreground line-clamp-2">{session.topic}</p>
           <div className="flex items-center justify-between gap-1 mt-1">
             <div className="flex items-center gap-1.5">
               <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-4 border ${priorityBadgeClass(session.priority)}`}>
