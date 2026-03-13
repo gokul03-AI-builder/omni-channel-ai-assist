@@ -73,7 +73,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
                       data-active={isActive}
                       className={
                         isActive
-                          ? "bg-primary/10 text-primary font-medium border border-primary/15"
+                          ? "bg-primary/20 text-primary font-semibold border border-primary/30"
                           : ""
                       }
                     >
