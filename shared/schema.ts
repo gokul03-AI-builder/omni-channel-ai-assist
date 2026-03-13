@@ -112,3 +112,42 @@ export interface PastCall {
   topic: string;
   resolution: string;
 }
+
+export interface ChatSession {
+  id: string;
+  customerId: string;
+  customerName: string;
+  customerCompany: string;
+  customerInitials: string;
+  status: "waiting" | "active" | "on-hold" | "closed";
+  channel: "web" | "email" | "whatsapp" | "sms";
+  priority: "low" | "medium" | "high" | "urgent";
+  startTime: string;
+  lastMessageTime: string;
+  topic: string;
+  unreadCount: number;
+  waitTimeSec: number;
+  slaDeadlineSec: number;
+}
+
+export interface ChatConversationMessage {
+  id: string;
+  sessionId: string;
+  sender: "customer" | "agent" | "system";
+  text: string;
+  timestamp: string;
+  isInternal?: boolean;
+}
+
+export interface ClosedChatSummary {
+  id: string;
+  customerId: string;
+  customerName: string;
+  customerCompany: string;
+  channel: string;
+  topic: string;
+  duration: number;
+  messageCount: number;
+  closedAt: string;
+  ticketCreated?: string;
+}

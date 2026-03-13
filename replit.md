@@ -23,8 +23,18 @@ An omnichannel support agent assist platform branded for Verifone. Provides a un
 - **Past Calls & Tickets**: Historical support interactions
 - **Call Summary**: Auto-generated summary panel when call ends, showing customer issues, KB articles referenced, and recommended next actions
 
+### Chat Section
+- **Queue Sidebar** (280px): Lists waiting and active chat sessions; filter by channel (All/Web/Email/WhatsApp/SMS); search; queue/history tabs; SLA countdown timers (amber at <2min, red at <1min); accept/decline buttons on waiting chats; max 3 active sessions enforced
+- **Chat Thread**: Customer↔agent message bubbles with timestamps; internal notes (amber-styled, lock icon); typing indicator; "Seen" checkmarks; canned quick responses dropdown; auto-scrolling
+- **KB Assist** (320px): Auto-surfaces relevant KB articles based on customer messages; manual search; confidence bars; copy-to-chat; thumbs up/down feedback
+- **Info/AI Panel** (360px, collapsible): Tabbed — Info tab (customer profile, device, tickets, past interactions); AI Assist tab (per-session AI chat)
+- **Session Tabs**: Switch between up to 3 active chats with unread badges
+- **Actions**: Hold/resume, transfer (modal with agent list), close chat (triggers summary overlay), create email ticket (modal with pre-filled fields)
+- **Chat Summary**: Overlay after closing a chat showing duration, message count, transcript, ticket status
+- **Chat History**: Last 20 closed sessions persisted in localStorage, searchable in History tab
+- **Simulated Messages**: Customers send timed responses like the calls page; paused when chat is on hold
+
 ### Other Sections
-- **Chats**: Placeholder for chat-based support (waiting state)
 - **Feedback**: Two-tab view — Customer CSAT ratings, and KB Feedback (captures thumbs up/down votes from calls, persisted in localStorage)
 
 ## File Structure
@@ -32,10 +42,10 @@ An omnichannel support agent assist platform branded for Verifone. Provides a un
 - `client/src/pages/chats.tsx` - Chat support page
 - `client/src/pages/feedback.tsx` - Customer feedback page (two tabs: CSAT + KB Feedback)
 - `client/src/components/app-sidebar.tsx` - Navigation sidebar (logo always dark bg for cross-theme consistency)
-- `client/src/lib/mock-data.ts` - Simulated Verifone support data; KB articles now include fullContent, references, suggestedResponse
-- `client/src/lib/store.ts` - localStorage utilities for KB feedback and Chat Assist history persistence
+- `client/src/lib/mock-data.ts` - Simulated Verifone support data; KB articles with fullContent/references/suggestedResponse; chat sessions, simulated customer messages, canned responses, chat KB suggestions
+- `client/src/lib/store.ts` - localStorage utilities for KB feedback, Chat Assist history, and closed chat session history persistence
 - `client/src/lib/theme-provider.tsx` - Dark/light mode toggle
-- `shared/schema.ts` - TypeScript interfaces; AISuggestion extended with fullContent/references/suggestedResponse; KbFeedback interface added
+- `shared/schema.ts` - TypeScript interfaces; includes ChatSession, ChatConversationMessage, ClosedChatSummary for chat platform; AISuggestion with fullContent/references/suggestedResponse; KbFeedback interface
 
 ## Theme & Design
 

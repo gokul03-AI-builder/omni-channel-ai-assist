@@ -7,6 +7,8 @@ import type {
   ChatMessage,
   Ticket,
   PastCall,
+  ChatSession,
+  ChatConversationMessage,
 } from "@shared/schema";
 
 export const customers: Record<string, Customer> = {
@@ -527,3 +529,311 @@ export function formatDuration(seconds: number): string {
   const secs = seconds % 60;
   return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 }
+
+export const initialChatSessions: ChatSession[] = [
+  {
+    id: "chat-001",
+    customerId: "cust-001",
+    customerName: "Sarah Chen",
+    customerCompany: "Golden Wok Restaurant",
+    customerInitials: "SC",
+    status: "waiting",
+    channel: "web",
+    priority: "high",
+    startTime: new Date(Date.now() - 180000).toISOString(),
+    lastMessageTime: new Date(Date.now() - 30000).toISOString(),
+    topic: "P400 receipt printer not working",
+    unreadCount: 2,
+    waitTimeSec: 180,
+    slaDeadlineSec: 300,
+  },
+  {
+    id: "chat-002",
+    customerId: "cust-002",
+    customerName: "Michael Rodriguez",
+    customerCompany: "Urban Style Boutique",
+    customerInitials: "MR",
+    status: "waiting",
+    channel: "email",
+    priority: "medium",
+    startTime: new Date(Date.now() - 420000).toISOString(),
+    lastMessageTime: new Date(Date.now() - 60000).toISOString(),
+    topic: "V240m battery replacement inquiry",
+    unreadCount: 1,
+    waitTimeSec: 420,
+    slaDeadlineSec: 300,
+  },
+  {
+    id: "chat-003",
+    customerId: "cust-003",
+    customerName: "Emma Thompson",
+    customerCompany: "BrewCraft Coffee Chain",
+    customerInitials: "ET",
+    status: "waiting",
+    channel: "whatsapp",
+    priority: "urgent",
+    startTime: new Date(Date.now() - 90000).toISOString(),
+    lastMessageTime: new Date(Date.now() - 15000).toISOString(),
+    topic: "Batch settlement failing — end of day",
+    unreadCount: 3,
+    waitTimeSec: 90,
+    slaDeadlineSec: 300,
+  },
+  {
+    id: "chat-004",
+    customerId: "cust-004",
+    customerName: "David Kim",
+    customerCompany: "QuickFuel Gas Stations",
+    customerInitials: "DK",
+    status: "waiting",
+    channel: "sms",
+    priority: "low",
+    startTime: new Date(Date.now() - 600000).toISOString(),
+    lastMessageTime: new Date(Date.now() - 120000).toISOString(),
+    topic: "VX520 display settings question",
+    unreadCount: 1,
+    waitTimeSec: 600,
+    slaDeadlineSec: 300,
+  },
+];
+
+export const chatInitialMessages: Record<string, ChatConversationMessage[]> = {
+  "chat-001": [
+    {
+      id: "cm-001-1",
+      sessionId: "chat-001",
+      sender: "customer",
+      text: "Hi, our P400 receipt printer stopped working mid-shift. It was fine this morning but now nothing prints after transactions.",
+      timestamp: new Date(Date.now() - 180000).toISOString(),
+    },
+    {
+      id: "cm-001-2",
+      sessionId: "chat-001",
+      sender: "customer",
+      text: "Payments are going through fine, but customers aren't getting receipts. We need this fixed ASAP — lunch rush is coming.",
+      timestamp: new Date(Date.now() - 30000).toISOString(),
+    },
+  ],
+  "chat-002": [
+    {
+      id: "cm-002-1",
+      sessionId: "chat-002",
+      sender: "customer",
+      text: "Hello, I need to know about replacing the battery on my V240m. It barely lasts 2 hours now and we need it for roaming sales on the floor.",
+      timestamp: new Date(Date.now() - 420000).toISOString(),
+    },
+  ],
+  "chat-003": [
+    {
+      id: "cm-003-1",
+      sessionId: "chat-003",
+      sender: "customer",
+      text: "URGENT: Our batch settlement is failing! We've tried 3 times and keep getting error BS-504. All our stores close in 2 hours and we can't reconcile.",
+      timestamp: new Date(Date.now() - 90000).toISOString(),
+    },
+    {
+      id: "cm-003-2",
+      sessionId: "chat-003",
+      sender: "customer",
+      text: "This is affecting all 12 locations. We're an Enterprise account — is there an emergency line for this?",
+      timestamp: new Date(Date.now() - 60000).toISOString(),
+    },
+    {
+      id: "cm-003-3",
+      sessionId: "chat-003",
+      sender: "customer",
+      text: "Please respond quickly, our accounting team is waiting.",
+      timestamp: new Date(Date.now() - 15000).toISOString(),
+    },
+  ],
+  "chat-004": [
+    {
+      id: "cm-004-1",
+      sessionId: "chat-004",
+      sender: "customer",
+      text: "Hi there, quick question — how do I change the display brightness on my VX520? The screen is too dim in our gas station lighting.",
+      timestamp: new Date(Date.now() - 600000).toISOString(),
+    },
+  ],
+};
+
+export const simulatedChatResponses: Record<string, ChatConversationMessage[]> = {
+  "chat-001": [
+    {
+      id: "cm-001-s1",
+      sessionId: "chat-001",
+      sender: "customer",
+      text: "I tried restarting the terminal but the printer still won't work. The screen shows a small printer icon with an X.",
+      timestamp: "",
+    },
+    {
+      id: "cm-001-s2",
+      sessionId: "chat-001",
+      sender: "customer",
+      text: "Wait, I just noticed the paper roll might be jammed. There's a piece sticking out at an angle. Should I try to pull it out?",
+      timestamp: "",
+    },
+    {
+      id: "cm-001-s3",
+      sessionId: "chat-001",
+      sender: "customer",
+      text: "Okay, I cleared the paper jam and reloaded the roll like you said. Let me try a test print now...",
+      timestamp: "",
+    },
+    {
+      id: "cm-001-s4",
+      sessionId: "chat-001",
+      sender: "customer",
+      text: "It's printing again! Thank you so much! The receipt came out perfectly. You saved our lunch rush!",
+      timestamp: "",
+    },
+  ],
+  "chat-002": [
+    {
+      id: "cm-002-s1",
+      sessionId: "chat-002",
+      sender: "customer",
+      text: "The terminal is about a year and a half old. Is the battery replacement covered under our Enterprise warranty?",
+      timestamp: "",
+    },
+    {
+      id: "cm-002-s2",
+      sessionId: "chat-002",
+      sender: "customer",
+      text: "Great, I'd like to proceed with the replacement. Do I need to send the terminal in, or can I swap the battery myself?",
+      timestamp: "",
+    },
+    {
+      id: "cm-002-s3",
+      sessionId: "chat-002",
+      sender: "customer",
+      text: "Perfect, I'll keep the terminal plugged in until the new battery arrives. What's the estimated delivery time?",
+      timestamp: "",
+    },
+  ],
+  "chat-003": [
+    {
+      id: "cm-003-s1",
+      sessionId: "chat-003",
+      sender: "customer",
+      text: "Yes, all locations are running e285 terminals connected via Bluetooth to our POS. The error started about an hour ago across all stores simultaneously.",
+      timestamp: "",
+    },
+    {
+      id: "cm-003-s2",
+      sessionId: "chat-003",
+      sender: "customer",
+      text: "I can see the batch totals on the terminal — they look correct. It's just the submission to the processor that's failing.",
+      timestamp: "",
+    },
+    {
+      id: "cm-003-s3",
+      sessionId: "chat-003",
+      sender: "customer",
+      text: "Okay, I'll have my managers at each location try the manual batch force. Should we do all 12 at once or one at a time?",
+      timestamp: "",
+    },
+  ],
+  "chat-004": [
+    {
+      id: "cm-004-s1",
+      sessionId: "chat-004",
+      sender: "customer",
+      text: "I found the Display menu but I only see Contrast, not Brightness. Is it the same thing on the VX520?",
+      timestamp: "",
+    },
+    {
+      id: "cm-004-s2",
+      sessionId: "chat-004",
+      sender: "customer",
+      text: "Got it, I turned the contrast up to 80% and it's much more readable now. Thanks for the help!",
+      timestamp: "",
+    },
+  ],
+};
+
+export const chatCannedResponses = [
+  "Thank you for contacting Verifone Support. Let me look into this for you right away.",
+  "I understand the urgency. Let me check your account details and find a solution.",
+  "Could you please provide the serial number of your terminal? It's on the label on the back.",
+  "I'm going to escalate this to our Level 2 team for faster resolution. You'll receive an update within 2 hours.",
+  "I've created a support ticket for this issue. Your reference number is in the chat above.",
+  "Is there anything else I can help you with today?",
+  "Let me walk you through the troubleshooting steps. Please follow along on your terminal.",
+  "I can see your device details in our system. Let me check the current status.",
+];
+
+export const chatKbSuggestions: Record<string, AISuggestion[]> = {
+  "receipt": [
+    {
+      id: "ck-1",
+      title: "P400 Receipt Printer Troubleshooting",
+      content: "Common P400 printer issues: paper jam, thermal head dirty, paper roll loaded incorrectly. Check printer icon on screen for error type. Clear paper path, reload roll with thermal side facing up.",
+      fullContent: "## P400 Receipt Printer Troubleshooting\n\n## Common Issues\n- **Paper Jam**: Paper stuck in print mechanism. Open printer cover, gently remove jammed paper, reload.\n- **Thermal Head Dirty**: Faded or partial prints. Clean with isopropyl alcohol wipe.\n- **Paper Loaded Incorrectly**: Blank receipts. Ensure thermal (shiny) side faces the print head.\n- **Printer Icon with X**: Printer mechanism error. Power cycle the terminal.\n\n## Resolution Steps\n1. Open the printer cover (press release latch on back)\n2. Remove any jammed paper carefully — do not tear\n3. Clean the thermal print head with the provided cleaning card\n4. Reload paper roll with thermal side facing up\n5. Close cover firmly until it clicks\n6. Run a test print: **Settings** → **Printer** → **Test Print**\n\n## When to Escalate\n- Printer mechanism physically damaged\n- Thermal head shows burn marks\n- Error persists after paper reload and cleaning",
+      source: "KB-1205",
+      confidence: 0.95,
+      category: "Hardware",
+      references: [
+        { label: "P400 Printer Maintenance Guide", url: "#kb-printer-maint" },
+        { label: "Thermal Paper Specifications", url: "#kb-paper-specs" },
+      ],
+      suggestedResponse: "It sounds like you may have a paper jam. Let's try this: Open the printer cover using the release latch on the back of the P400, carefully remove any jammed paper, then reload the roll with the shiny (thermal) side facing up. Close the cover until it clicks, then try a test print from Settings → Printer → Test Print.",
+    },
+  ],
+  "battery": [
+    {
+      id: "ck-2",
+      title: "V240m Battery Replacement Program",
+      content: "V240m batteries degrade after ~18 months of daily use. Enterprise and Premium accounts qualify for free replacement under Verifone Care. Standard accounts can purchase replacement batteries at $45.",
+      fullContent: "## V240m Battery Replacement Program\n\n## Battery Lifecycle\n- Expected lifespan: 18–24 months with daily use\n- Capacity drops below 60% after ~500 charge cycles\n- Signs of degradation: less than 3 hours of active use, unexpected shutdowns\n\n## Replacement Options\n\n### Covered Under Warranty/Care Plan\n- **Enterprise accounts**: Free replacement, shipped next business day\n- **Premium accounts**: Free replacement under Verifone Care Plan\n- **Standard accounts**: $45 per replacement battery\n\n## Self-Replacement Process\n1. Power off the terminal completely\n2. Remove the battery cover (slide latch on bottom)\n3. Disconnect old battery (pull tab gently)\n4. Insert new battery (align connector, press until click)\n5. Replace battery cover\n6. Charge for minimum 2 hours before first use\n\n## Ordering\n- Part number: V240M-BAT-3200\n- Order via Device Management Portal or contact support\n- Shipping: Next business day (Enterprise), 3–5 days (Standard)",
+      source: "KB-2301",
+      confidence: 0.92,
+      category: "Hardware",
+      references: [
+        { label: "V240m Battery Specifications", url: "#kb-v240m-battery" },
+        { label: "Verifone Care Plan Details", url: "#kb-care-plan" },
+      ],
+      suggestedResponse: "The V240m battery typically needs replacement after 18–24 months of daily use. Since you're on an Enterprise account, you qualify for a free battery replacement shipped next business day. The battery is user-replaceable — I can walk you through the swap once it arrives. Would you like me to order one for you?",
+    },
+  ],
+  "batch": [
+    {
+      id: "ck-3",
+      title: "Batch Settlement Error BS-504: Processor Timeout",
+      content: "BS-504 indicates the batch submission timed out connecting to the payment processor. Common during processor maintenance windows. Retry after 15 minutes or use manual batch force.",
+      fullContent: "## Batch Settlement Error BS-504\n\n## Overview\nError BS-504 occurs when the terminal cannot establish a connection to the payment processor during batch settlement. This is distinct from BS-500 (authentication failure) and BS-510 (data format error).\n\n## Common Causes\n- Payment processor scheduled maintenance (check processor status page)\n- Network congestion during peak settlement hours (typically 9–11 PM local time)\n- Firewall or network configuration blocking outbound port 443\n- DNS resolution failure on the terminal\n\n## Immediate Resolution\n1. Wait 15 minutes and retry — most processor maintenance windows are brief\n2. If urgent, use **Manual Batch Force**: Settings → Batch → Force Settlement\n3. This bypasses the normal handshake and pushes transactions directly\n4. Manual force has a 99.2% success rate even during processor issues\n\n## Multi-Location Impact\nIf BS-504 affects multiple locations simultaneously, it is almost certainly a processor-side issue. Contact the processor's status line to confirm.\n\n## When to Escalate\n- BS-504 persists after 1 hour\n- Manual batch force also fails\n- Batch totals appear incorrect after forced settlement",
+      source: "KB-3891",
+      confidence: 0.97,
+      category: "Troubleshooting",
+      references: [
+        { label: "Batch Settlement Guide", url: "#kb-batch-settlement" },
+        { label: "Processor Status Dashboard", url: "#processor-status" },
+        { label: "BS Error Code Reference", url: "#kb-bs-errors" },
+      ],
+      suggestedResponse: "Error BS-504 means the batch submission timed out connecting to your payment processor. Since it's affecting all 12 locations simultaneously, this is almost certainly a processor-side issue — likely a brief maintenance window. You can either wait 15 minutes and retry, or use Manual Batch Force (Settings → Batch → Force Settlement) which bypasses the normal handshake. I'd recommend trying the manual force on one location first to confirm it works.",
+    },
+  ],
+  "display": [
+    {
+      id: "ck-4",
+      title: "VX520 Display Settings & Adjustments",
+      content: "The VX520 uses a monochrome LCD without backlight brightness control. The Contrast setting (0–100%) adjusts display visibility. Recommended: 70–85% for well-lit environments.",
+      fullContent: "## VX520 Display Settings\n\n## Display Specifications\n- Monochrome LCD, 128×64 pixels\n- No adjustable backlight (fixed intensity)\n- Contrast is the primary visibility control\n\n## Adjusting Contrast\n1. Press the **menu** key (or enter supervisor mode)\n2. Navigate to **Settings** → **Display** → **Contrast**\n3. Use the **+** and **–** keys to adjust (0–100%)\n4. Press **Enter** to confirm\n\n## Recommended Settings\n- **Bright environments** (gas stations, outdoor): 75–85%\n- **Normal indoor**: 60–70%\n- **Low light**: 45–55%\n\n## Troubleshooting\n- If display is completely blank: Hold power for 10 seconds to hard reset\n- If display shows artifacts: May indicate LCD cable issue (see KB-3500)\n- Contrast resets after firmware update: Re-apply manually",
+      source: "KB-1890",
+      confidence: 0.89,
+      category: "Configuration",
+      references: [
+        { label: "VX520 User Manual", url: "#kb-vx520-manual" },
+        { label: "Display Troubleshooting", url: "#kb-display-issues" },
+      ],
+      suggestedResponse: "The VX520 doesn't have a brightness control — it uses Contrast instead to adjust display visibility. Go to Settings → Display → Contrast, then use the + and – keys to adjust. For a gas station environment, I'd recommend setting it to 75–85% for best readability. Press Enter to save.",
+    },
+  ],
+};
+
+export const availableAgents = [
+  { id: "agent-01", name: "Alex Rivera", status: "available" },
+  { id: "agent-02", name: "Jordan Park", status: "available" },
+  { id: "agent-03", name: "Sam Mitchell", status: "busy" },
+  { id: "agent-04", name: "Casey Williams", status: "available" },
+];
