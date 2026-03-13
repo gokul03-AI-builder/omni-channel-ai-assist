@@ -1412,7 +1412,6 @@ export default function ChatsPage() {
   const [summarySession, setSummarySession] = useState<ChatSession | null>(null);
   const [summaryMessages, setSummaryMessages] = useState<ChatConversationMessage[]>([]);
   const [summaryDuration, setSummaryDuration] = useState(0);
-  const [channelFilter, setChannelFilter] = useState<string>("all");
   const [searchFilter, setSearchFilter] = useState("");
   const [queueTab, setQueueTab] = useState<"queue" | "history">("queue");
   const [closedHistory, setClosedHistory] = useState(getClosedChatSessions);
@@ -1433,7 +1432,6 @@ export default function ChatsPage() {
 
   const filteredWaiting = waitingSessions
     .filter(s => {
-      if (channelFilter !== "all" && s.channel !== channelFilter) return false;
       if (searchFilter && !s.customerName.toLowerCase().includes(searchFilter.toLowerCase()) && !s.topic.toLowerCase().includes(searchFilter.toLowerCase())) return false;
       return true;
     })
@@ -1443,7 +1441,6 @@ export default function ChatsPage() {
     });
 
   const filteredActive = activeSessions.filter(s => {
-    if (channelFilter !== "all" && s.channel !== channelFilter) return false;
     if (searchFilter && !s.customerName.toLowerCase().includes(searchFilter.toLowerCase()) && !s.topic.toLowerCase().includes(searchFilter.toLowerCase())) return false;
     return true;
   });
@@ -1768,7 +1765,7 @@ export default function ChatsPage() {
       <>
 
       <div className="shrink-0 glass-panel rounded-xl overflow-hidden">
-        <div className="px-3 py-2 flex items-center gap-3 flex-wrap">
+        <div className="px-3 py-2 flex items-center gap-3 flex-nowrap">
           <div className="flex items-center gap-2 shrink-0">
             <MessageSquare className="w-4 h-4 text-primary" />
             <h2 className="text-sm font-semibold" data-testid="text-chats-title">Chats</h2>
@@ -1793,19 +1790,6 @@ export default function ChatsPage() {
             >
               <History className="w-3 h-3" /> History
             </button>
-          </div>
-
-          <div className="flex gap-1 items-center shrink-0">
-            {["all", "web", "email", "whatsapp", "sms"].map((ch) => (
-              <button
-                key={ch}
-                onClick={() => setChannelFilter(ch)}
-                className={`text-[10px] px-2 py-1 rounded-full transition-colors ${channelFilter === ch ? "bg-primary/15 text-primary border border-primary/30" : "text-muted-foreground hover:bg-muted/30"}`}
-                data-testid={`filter-${ch}`}
-              >
-                {ch === "all" ? "All" : channelIcon(ch, "w-3 h-3 inline")}
-              </button>
-            ))}
           </div>
 
           <div className="relative shrink-0">
