@@ -117,6 +117,7 @@ export interface ChatSession {
   id: string;
   customerId: string;
   customerName: string;
+  customerEmail: string;
   customerCompany: string;
   customerInitials: string;
   status: "waiting" | "active" | "on-hold" | "closed";

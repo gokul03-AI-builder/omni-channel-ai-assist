@@ -313,99 +313,24 @@ function QueueItem({
   session,
   isSelected,
   onClick,
-  onAccept,
-  onDecline,
-  activeCount,
-  elapsed,
-  slaRemaining,
 }: {
   session: ChatSession;
   isSelected: boolean;
   onClick: () => void;
-  onAccept?: () => void;
-  onDecline?: () => void;
-  activeCount: number;
-  elapsed: number;
-  slaRemaining: number;
 }) {
   return (
     <div
-      className={`p-3 mx-2 rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? "glass-bubble-primary" : "hover-elevate"}`}
+      className={`px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 shrink-0 min-w-[180px] max-w-[220px] ${isSelected ? "glass-bubble-primary" : "hover-elevate"}`}
       onClick={onClick}
       data-testid={`card-chat-${session.id}`}
     >
-      <div className="flex items-center gap-3">
-        <Avatar className="h-9 w-9 shrink-0">
-          <AvatarFallback className={`text-xs font-medium ${isSelected ? "bg-primary/15 text-primary" : "bg-muted"}`}>
-            {session.customerInitials}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-1">
-            <p className="text-sm font-medium truncate">{session.customerName}</p>
-            <div className="flex items-center gap-1.5 shrink-0">
-              {session.unreadCount > 0 && (
-                <span className="min-w-[18px] h-[18px] rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center px-1">
-                  {session.unreadCount}
-                </span>
-              )}
-              <span className="text-muted-foreground">{channelIcon(session.channel, "w-3 h-3")}</span>
-            </div>
-          </div>
-          {session.customerCompany && (
-            <p className="text-[10px] text-muted-foreground/70 truncate">{session.customerCompany}</p>
-          )}
-          <p className="text-xs text-muted-foreground line-clamp-2">{session.topic}</p>
-          <div className="flex items-center justify-between gap-1 mt-1">
-            <div className="flex items-center gap-1.5">
-              <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-4 border ${priorityBadgeClass(session.priority)}`}>
-                {session.priority.toUpperCase()}
-              </Badge>
-              {session.status === "on-hold" && (
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border bg-yellow-500/15 text-yellow-400 border-yellow-500/30">
-                  HOLD
-                </Badge>
-              )}
-              {session.status === "active" && (
-                <span className="w-2 h-2 rounded-full bg-primary animate-breathing" />
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              {session.status === "waiting" && (
-                <span className={`text-[10px] font-mono ${slaColor(slaRemaining)}`}>
-                  <Clock className="w-2.5 h-2.5 inline mr-0.5" />
-                  {formatDuration(Math.max(0, slaRemaining))}
-                </span>
-              )}
-              <span className="text-[10px] text-muted-foreground font-mono">
-                {formatDuration(elapsed)}
-              </span>
-            </div>
-          </div>
+      <div className="min-w-0">
+        <div className="flex items-center justify-between gap-1">
+          <p className="text-xs font-medium truncate" data-testid={`text-name-${session.id}`}>{session.customerName}</p>
+          <span className="text-muted-foreground shrink-0">{channelIcon(session.channel, "w-3 h-3")}</span>
         </div>
+        <p className="text-[10px] text-muted-foreground truncate" data-testid={`text-email-${session.id}`}>{session.customerEmail}</p>
       </div>
-      {session.status === "waiting" && onAccept && (
-        <div className="flex gap-2 mt-2 pl-12">
-          <Button
-            size="sm"
-            className="h-7 flex-1 text-xs mint-glow-sm gap-1"
-            onClick={(e) => { e.stopPropagation(); onAccept(); }}
-            disabled={activeCount >= MAX_ACTIVE}
-            data-testid={`button-accept-${session.id}`}
-          >
-            <CheckCircle2 className="w-3 h-3" /> Accept
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-7 text-xs text-muted-foreground hover:text-red-400"
-            onClick={(e) => { e.stopPropagation(); onDecline?.(); }}
-            data-testid={`button-decline-${session.id}`}
-          >
-            <X className="w-3 h-3" />
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
@@ -1356,7 +1281,6 @@ export default function ChatsPage() {
   const [activeSlaTimes, setActiveSlaTimes] = useState<Record<string, number>>({});
   const [sortBy, setSortBy] = useState<"wait" | "priority">("wait");
   const [historySearch, setHistorySearch] = useState("");
-  const [queueCollapsed, setQueueCollapsed] = useState(false);
 
   const activeSessions = sessions.filter(s => s.status === "active" || s.status === "on-hold");
   const simEligibleSessions = sessions.filter(s => s.status === "active");
@@ -1720,180 +1644,161 @@ export default function ChatsPage() {
         )}
       </AnimatePresence>
 
-      <div className="flex flex-1 overflow-hidden gap-2 p-2">
+      <div className="flex flex-col flex-1 overflow-hidden gap-2 p-2">
 
-      <div className={`${queueCollapsed ? "w-[52px]" : "w-[280px]"} shrink-0 flex flex-col glass-panel rounded-xl overflow-hidden transition-all duration-200`}>
-        {queueCollapsed ? (
-          <div className="flex flex-col items-center py-3 gap-3">
-            <button onClick={() => setQueueCollapsed(false)} className="p-1.5 rounded-md hover:bg-muted/40 transition-colors" data-testid="button-expand-queue">
-              <PanelRightOpen className="w-4 h-4 text-muted-foreground" />
-            </button>
+      <div className="shrink-0 glass-panel rounded-xl overflow-hidden">
+        <div className="px-3 py-2 flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 shrink-0">
             <MessageSquare className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-semibold" data-testid="text-chats-title">Chats</h2>
             {waitingSessions.length > 0 && (
               <Badge className="text-[10px] px-1.5 h-4 bg-primary/15 text-primary">{waitingSessions.length}</Badge>
             )}
+            <span className="text-xs text-muted-foreground">{activeCount}/{MAX_ACTIVE} active</span>
           </div>
-        ) : (
-        <>
-        <div className="px-3 pt-3 pb-2 space-y-2">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-primary" />
-              Chats
-              {waitingSessions.length > 0 && (
-                <Badge className="text-[10px] px-1.5 h-4 bg-primary/15 text-primary">{waitingSessions.length}</Badge>
-              )}
-            </h2>
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-muted-foreground">{activeCount}/{MAX_ACTIVE} active</span>
-              <button onClick={() => setQueueCollapsed(true)} className="p-1 rounded-md hover:bg-muted/40 transition-colors" data-testid="button-collapse-queue">
-                <PanelRightClose className="w-3.5 h-3.5 text-muted-foreground" />
-              </button>
-            </div>
-          </div>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-            <Input
-              value={searchFilter}
-              onChange={(e) => setSearchFilter(e.target.value)}
-              placeholder="Search chats..."
-              className="glass-input pl-8 h-8 text-xs"
-              data-testid="input-chat-search"
-            />
-          </div>
-          <div className="flex gap-1 flex-wrap">
-            {["all", "web", "email", "whatsapp", "sms"].map((ch) => (
-              <button
-                key={ch}
-                onClick={() => setChannelFilter(ch)}
-                className={`text-[10px] px-2.5 py-1 rounded-full transition-colors ${channelFilter === ch ? "bg-primary/15 text-primary border border-primary/30" : "text-muted-foreground hover:bg-muted/30"}`}
-                data-testid={`filter-${ch}`}
-              >
-                {ch === "all" ? "All" : channelIcon(ch, "w-3 h-3 inline")}
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-1 items-center">
+
+          <div className="flex gap-1 items-center shrink-0">
             <button
               onClick={() => setQueueTab("queue")}
-              className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${queueTab === "queue" ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-muted/30"}`}
+              className={`text-xs px-2.5 py-1 rounded-md transition-colors ${queueTab === "queue" ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-muted/30"}`}
               data-testid="tab-queue"
             >
               Queue
             </button>
             <button
               onClick={() => setQueueTab("history")}
-              className={`flex-1 text-xs py-1.5 rounded-md transition-colors flex items-center justify-center gap-1 ${queueTab === "history" ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-muted/30"}`}
+              className={`text-xs px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 ${queueTab === "history" ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-muted/30"}`}
               data-testid="tab-history"
             >
               <History className="w-3 h-3" /> History
             </button>
-            <button
-              onClick={() => setSortBy(prev => prev === "wait" ? "priority" : "wait")}
-              className="flex items-center gap-1 text-[10px] px-2 py-1.5 rounded-md bg-muted/20 hover:bg-primary/10 hover:text-primary transition-colors text-muted-foreground shrink-0"
-              title={`Sort by ${sortBy === "wait" ? "Wait Time" : "Priority"}`}
-              data-testid="button-sort-toggle"
-            >
-              <ArrowUpDown className="w-3 h-3" />
-            </button>
           </div>
+
+          <div className="flex gap-1 items-center shrink-0">
+            {["all", "web", "email", "whatsapp", "sms"].map((ch) => (
+              <button
+                key={ch}
+                onClick={() => setChannelFilter(ch)}
+                className={`text-[10px] px-2 py-1 rounded-full transition-colors ${channelFilter === ch ? "bg-primary/15 text-primary border border-primary/30" : "text-muted-foreground hover:bg-muted/30"}`}
+                data-testid={`filter-${ch}`}
+              >
+                {ch === "all" ? "All" : channelIcon(ch, "w-3 h-3 inline")}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative shrink-0">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <Input
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+              placeholder="Search chats..."
+              className="glass-input pl-8 h-7 text-xs w-[160px]"
+              data-testid="input-chat-search"
+            />
+          </div>
+
+          <button
+            onClick={() => setSortBy(prev => prev === "wait" ? "priority" : "wait")}
+            className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-muted/20 hover:bg-primary/10 hover:text-primary transition-colors text-muted-foreground shrink-0"
+            title={`Sort by ${sortBy === "wait" ? "Wait Time" : "Priority"}`}
+            data-testid="button-sort-toggle"
+          >
+            <ArrowUpDown className="w-3 h-3" />
+          </button>
         </div>
 
-        <ScrollArea className="flex-1">
-          {queueTab === "queue" ? (
-            <div className="space-y-1 pb-3">
-              {filteredWaiting.length > 0 && (
-                <div>
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-2">
-                    Waiting ({filteredWaiting.length})
-                  </p>
+        {queueTab === "queue" ? (
+          <div className="px-3 pb-2">
+            {filteredWaiting.length > 0 && (
+              <div className="mb-1">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider pb-1">
+                  Waiting ({filteredWaiting.length})
+                </p>
+                <div className="flex gap-2 overflow-x-auto pb-1" data-testid="queue-waiting-row">
                   {filteredWaiting.map((session) => (
                     <QueueItem
                       key={session.id}
                       session={session}
                       isSelected={selectedId === session.id}
-                      onClick={() => handleSelectSession(session.id)}
-                      onAccept={() => handleAccept(session.id)}
-                      onDecline={() => handleDecline(session.id)}
-                      activeCount={activeCount}
-                      elapsed={elapsedTimes[session.id] || 0}
-                      slaRemaining={slaTimers[session.id] || 0}
+                      onClick={() => handleAccept(session.id)}
                     />
                   ))}
                 </div>
-              )}
-              {filteredActive.length > 0 && (
-                <div>
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-4 py-2 mt-2">
-                    Active ({filteredActive.length})
-                  </p>
+              </div>
+            )}
+            {filteredActive.length > 0 && (
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider pb-1">
+                  Active ({filteredActive.length})
+                </p>
+                <div className="flex gap-2 overflow-x-auto pb-1" data-testid="queue-active-row">
                   {filteredActive.map((session) => (
                     <QueueItem
                       key={session.id}
                       session={session}
                       isSelected={selectedId === session.id}
                       onClick={() => handleSelectSession(session.id)}
-                      activeCount={activeCount}
-                      elapsed={elapsedTimes[session.id] || 0}
-                      slaRemaining={0}
                     />
                   ))}
                 </div>
-              )}
-              {filteredWaiting.length === 0 && filteredActive.length === 0 && (
-                <div className="flex flex-col items-center py-8 text-muted-foreground">
-                  <Filter className="w-6 h-6 mb-2 opacity-30" />
-                  <p className="text-xs">No matching chats</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-1 pb-3 px-2">
-              <div className="relative mb-2">
+              </div>
+            )}
+            {filteredWaiting.length === 0 && filteredActive.length === 0 && (
+              <div className="flex items-center justify-center py-2 text-muted-foreground">
+                <Filter className="w-4 h-4 mr-2 opacity-30" />
+                <p className="text-xs">No matching chats</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="px-3 pb-2">
+            <div className="flex gap-2 items-start">
+              <div className="relative shrink-0">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <Input
                   value={historySearch}
                   onChange={(e) => setHistorySearch(e.target.value)}
                   placeholder="Search history..."
-                  className="glass-input pl-8 h-7 text-xs"
+                  className="glass-input pl-8 h-7 text-xs w-[160px]"
                   data-testid="input-history-search"
                 />
               </div>
               {filteredHistory.length === 0 ? (
-                <div className="flex flex-col items-center py-8 text-muted-foreground">
-                  <History className="w-6 h-6 mb-2 opacity-30" />
+                <div className="flex items-center py-1 text-muted-foreground">
+                  <History className="w-4 h-4 mr-2 opacity-30" />
                   <p className="text-xs">{historySearch ? "No matching history" : "No chat history yet"}</p>
                 </div>
               ) : (
-                filteredHistory.map((h) => (
-                  <Card key={h.id} className="p-3 space-y-1" data-testid={`card-history-${h.id}`}>
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium truncate">{h.customerName}</p>
-                      <span className="text-[10px] text-muted-foreground">{new Date(h.closedAt).toLocaleDateString()}</span>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground truncate">{h.topic}</p>
-                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                      <span>{formatDuration(h.duration)}</span>
-                      <span>·</span>
-                      <span>{h.messageCount} msgs</span>
-                      {h.ticketCreated && (
-                        <>
-                          <span>·</span>
-                          <span className="text-primary">{h.ticketCreated}</span>
-                        </>
-                      )}
-                    </div>
-                  </Card>
-                ))
+                <div className="flex gap-2 overflow-x-auto pb-1" data-testid="queue-history-row">
+                  {filteredHistory.map((h) => (
+                    <Card key={h.id} className="p-2 shrink-0 min-w-[180px] max-w-[220px] space-y-0.5" data-testid={`card-history-${h.id}`}>
+                      <div className="flex items-center justify-between gap-1">
+                        <p className="text-xs font-medium truncate">{h.customerName}</p>
+                        <span className="text-[10px] text-muted-foreground shrink-0">{new Date(h.closedAt).toLocaleDateString()}</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground truncate">{h.topic}</p>
+                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                        <span>{formatDuration(h.duration)}</span>
+                        <span>·</span>
+                        <span>{h.messageCount} msgs</span>
+                        {h.ticketCreated && (
+                          <>
+                            <span>·</span>
+                            <span className="text-primary">{h.ticketCreated}</span>
+                          </>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               )}
             </div>
-          )}
-        </ScrollArea>
-        </>
+          </div>
         )}
       </div>
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {!selectedSession || (selectedSession.status === "waiting") ? (
           <div className="flex flex-col items-center justify-center h-full glass-panel rounded-xl text-muted-foreground">
             <div className="w-16 h-16 rounded-2xl glass flex items-center justify-center mb-4">
@@ -1903,7 +1808,7 @@ export default function ChatsPage() {
               {selectedSession ? "Accept chat to start" : "Select a chat"}
             </h3>
             <p className="text-sm">
-              {selectedSession ? `${selectedSession.customerName} is waiting` : "Choose from the queue on the left"}
+              {selectedSession ? `${selectedSession.customerName} is waiting` : "Choose from the queue above"}
             </p>
           </div>
         ) : (
