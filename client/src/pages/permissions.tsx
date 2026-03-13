@@ -159,10 +159,10 @@ export default function PermissionsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {permissionsMatrix.map((row, i) => (
+                  {permissionsMatrix.map((row) => (
                     <tr
                       key={row.capability}
-                      className={`border-b border-border/10 last:border-0 hover:bg-primary/5 transition-colors ${i % 2 === 0 ? "" : "glass-subtle"}`}
+                      className="glass-subtle border-b border-border/10 last:border-0 hover:bg-primary/5 transition-colors"
                       data-testid={`row-perm-${row.capability.toLowerCase().replace(/[\s&()]/g, "-")}`}
                     >
                       <td className="px-4 py-2.5 text-xs">{row.capability}</td>
@@ -170,10 +170,10 @@ export default function PermissionsPage() {
                         <span className={`inline-block w-3 h-3 rounded-full ${row.admin ? "bg-primary shadow-[0_0_6px_rgba(110,255,210,0.3)]" : "border-2 border-muted-foreground/20"}`} />
                       </td>
                       <td className="px-4 py-2.5 text-center">
-                        <span className={`inline-block w-3 h-3 rounded-full ${row.supervisor ? "bg-blue-400 shadow-[0_0_6px_rgba(96,165,250,0.3)]" : "border-2 border-muted-foreground/20"}`} />
+                        <span className={`inline-block w-3 h-3 rounded-full ${row.supervisor ? "bg-primary shadow-[0_0_6px_rgba(110,255,210,0.3)]" : "border-2 border-muted-foreground/20"}`} />
                       </td>
                       <td className="px-4 py-2.5 text-center">
-                        <span className={`inline-block w-3 h-3 rounded-full ${row.agent ? "bg-muted-foreground/60" : "border-2 border-muted-foreground/20"}`} />
+                        <span className={`inline-block w-3 h-3 rounded-full ${row.agent ? "bg-primary shadow-[0_0_6px_rgba(110,255,210,0.3)]" : "border-2 border-muted-foreground/20"}`} />
                       </td>
                     </tr>
                   ))}
