@@ -46,18 +46,21 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="space-y-1">
-          <div className="rounded-lg overflow-hidden group-data-[collapsible=icon]:hidden">
-            <img
-              src={verifoneLogo}
-              alt="Verifone"
-              className="h-12 w-auto object-contain dark:invert dark:brightness-100"
-              data-testid="img-logo"
-            />
+          <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
+            <div className="rounded-lg overflow-hidden shrink-0">
+              <img
+                src={verifoneLogo}
+                alt="Verifone"
+                className="h-8 w-auto object-contain dark:invert dark:brightness-100"
+                data-testid="img-logo"
+              />
+            </div>
+            <span className="text-sm font-semibold tracking-tight" data-testid="text-wingman-title">Verifone's Wingman</span>
           </div>
           <div className="hidden w-full group-data-[collapsible=icon]:flex items-center justify-center">
             <span className="text-sm font-bold text-primary" data-testid="img-logo-collapsed">V</span>
           </div>
-          <p className="text-xs text-muted-foreground pl-0.5 group-data-[collapsible=icon]:hidden">Agent Console</p>
+          <p className="text-xs text-muted-foreground pl-0.5 group-data-[collapsible=icon]:hidden">AI-Powered Agent Assist</p>
         </div>
       </SidebarHeader>
       <SidebarContent>
