@@ -1793,7 +1793,7 @@ export default function CallsPage() {
           <div className="flex flex-col flex-1 min-w-0 gap-2">
 
             <div className="flex flex-1 min-h-0 gap-2">
-              <div className="w-[220px] shrink-0 flex flex-col glass-panel rounded-xl overflow-hidden">
+              <div className="w-[350px] shrink-0 flex flex-col glass-panel rounded-xl overflow-hidden">
                 <LiveTranscription
                   entries={transcript}
                   isLive={selectedCall!.status === "active"}
