@@ -351,7 +351,7 @@ function QueueItem({
               <span className="text-muted-foreground">{channelIcon(session.channel, "w-3 h-3")}</span>
             </div>
           </div>
-          <p className="text-xs text-muted-foreground truncate">{session.topic}</p>
+          <p className="text-xs text-muted-foreground truncate">{session.customerCompany ? `${session.customerCompany} · ` : ""}{session.topic}</p>
           <div className="flex items-center justify-between gap-1 mt-1">
             <div className="flex items-center gap-1.5">
               <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-4 border ${priorityBadgeClass(session.priority)}`}>
@@ -1015,6 +1015,15 @@ function TicketTabForm({
   const [priority, setPriority] = useState("medium");
   const [cc, setCc] = useState("");
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    const lastMsgs = chatMessages.slice(-5).map(m => `[${m.sender}] ${m.text}`).join("\n");
+    setSubject(`Chat: ${session.topic}`);
+    setBody(`Customer: ${customer.name}\nChannel: ${session.channel}\n\nRecent messages:\n${lastMsgs}`);
+    setPriority("medium");
+    setCc("");
+    setSubmitted(!!createdTicketId);
+  }, [session.id]);
 
   useEffect(() => {
     if (createdTicketId) setSubmitted(true);
@@ -1707,7 +1716,19 @@ export default function ChatsPage() {
         )}
       </AnimatePresence>
 
-      <div className="w-[280px] shrink-0 flex flex-col h-full border-r border-border/30 glass-panel">
+      <div className={`${queueCollapsed ? "w-[52px]" : "w-[280px]"} shrink-0 flex flex-col h-full border-r border-border/30 glass-panel transition-all duration-200`}>
+        {queueCollapsed ? (
+          <div className="flex flex-col items-center py-3 gap-3">
+            <button onClick={() => setQueueCollapsed(false)} className="p-1.5 rounded-md hover:bg-muted/40 transition-colors" data-testid="button-expand-queue">
+              <PanelRightOpen className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <MessageSquare className="w-4 h-4 text-primary" />
+            {waitingSessions.length > 0 && (
+              <Badge className="text-[10px] px-1.5 h-4 bg-primary/15 text-primary">{waitingSessions.length}</Badge>
+            )}
+          </div>
+        ) : (
+        <>
         <div className="px-3 pt-3 pb-2 space-y-2">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold flex items-center gap-2">
@@ -1717,7 +1738,12 @@ export default function ChatsPage() {
                 <Badge className="text-[10px] px-1.5 h-4 bg-primary/15 text-primary">{waitingSessions.length}</Badge>
               )}
             </h2>
-            <span className="text-xs text-muted-foreground">{activeCount}/{MAX_ACTIVE} active</span>
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-muted-foreground">{activeCount}/{MAX_ACTIVE} active</span>
+              <button onClick={() => setQueueCollapsed(true)} className="p-1 rounded-md hover:bg-muted/40 transition-colors" data-testid="button-collapse-queue">
+                <PanelRightClose className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
+            </div>
           </div>
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -1860,6 +1886,8 @@ export default function ChatsPage() {
             </div>
           )}
         </ScrollArea>
+        </>
+        )}
       </div>
 
       <div className="flex-1 flex flex-col h-full min-w-0">
