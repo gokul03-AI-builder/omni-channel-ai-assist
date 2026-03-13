@@ -4,9 +4,10 @@ import {
   Sparkles,
   Clock,
   MessageSquare,
-  Languages,
+  Star,
   ChevronDown,
-  Asterisk,
+  PhoneCall,
+  BookOpen,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,48 +29,48 @@ const resolutionSparkline = [
 
 const metricCards = [
   {
-    id: "model-accuracy",
-    title: "Model accuracy",
+    id: "csat",
+    title: "CSAT score",
     value: "4.2",
     unit: "out of 5",
-    sub: "Based on 74 user ratings",
-    icon: Asterisk,
+    sub: "Based on 74 customer ratings",
+    icon: Star,
     iconColor: "text-primary",
   },
   {
-    id: "translation",
-    title: "Translation capabilities",
-    value: "4.5",
-    unit: "out of 5",
-    sub: "Based on 74 user ratings",
-    icon: Languages,
+    id: "fcr",
+    title: "First contact resolution",
+    value: "87",
+    unit: "%",
+    sub: "Resolved without escalation",
+    icon: PhoneCall,
     iconColor: "text-primary",
   },
   {
-    id: "latency",
-    title: "Model latency",
+    id: "handle-time",
+    title: "Avg handle time",
     value: "8",
-    unit: "sec",
-    sub: "Average session usage",
+    unit: "min",
+    sub: "Per support session",
     icon: Clock,
     iconColor: "text-primary",
   },
   {
-    id: "feedback",
-    title: "Feedback gathered",
+    id: "kb-assists",
+    title: "KB articles surfaced",
     value: "45",
     unit: "",
-    sub: "responses received",
-    icon: MessageSquare,
+    sub: "Suggested by Wingman today",
+    icon: BookOpen,
     iconColor: "text-primary",
   },
 ];
 
 const reviewItems = [
-  { id: "rv-1", initials: "AS", name: "Alex Storm", topic: "P400 contactless failure — needs L2 escalation", time: "2h ago", color: "bg-violet-100 text-violet-600" },
-  { id: "rv-2", initials: "MR", name: "Michael Rodriguez", topic: "V240m Wi-Fi setup — config review required", time: "3h ago", color: "bg-blue-100 text-blue-600" },
-  { id: "rv-3", initials: "ET", name: "Emma Thompson", topic: "e285 batch processing — recurring error pattern", time: "4h ago", color: "bg-emerald-100 text-emerald-600" },
-  { id: "rv-4", initials: "DK", name: "David Kim", topic: "VX520 display issue — warranty claim review", time: "5h ago", color: "bg-amber-100 text-amber-600" },
+  { id: "rv-1", initials: "AS", name: "Alex Storm", topic: "P400 contactless failure — needs L2 escalation", time: "2h ago", color: "bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400" },
+  { id: "rv-2", initials: "MR", name: "Michael Rodriguez", topic: "V240m Wi-Fi setup — config review required", time: "3h ago", color: "bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400" },
+  { id: "rv-3", initials: "ET", name: "Emma Thompson", topic: "e285 batch processing — recurring error pattern", time: "4h ago", color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400" },
+  { id: "rv-4", initials: "DK", name: "David Kim", topic: "VX520 display issue — warranty claim review", time: "5h ago", color: "bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400" },
 ];
 
 export default function HomePage() {
@@ -98,7 +99,7 @@ export default function HomePage() {
             </div>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <span className="text-primary font-bold text-base">»</span>
+                <span className="text-primary font-bold text-base leading-none">»</span>
                 <span className="text-sm text-muted-foreground">Resolved</span>
                 <span className="ml-1 text-xs font-semibold bg-primary/15 text-primary px-2 py-0.5 rounded-full" data-testid="text-resolved-count">
                   1,300 conversations
@@ -124,9 +125,9 @@ export default function HomePage() {
             </div>
           </Card>
 
-          {/* Powered by subtitle */}
+          {/* Wingman subtitle */}
           <p className="text-sm text-muted-foreground text-center">
-            AI agents powered by <span className="text-primary font-medium">Nemotron models</span>
+            Intelligent support, powered by <span className="text-primary font-medium">Verifone Wingman</span>
           </p>
 
           {/* Main metrics grid: big resolution card + 2x2 right */}
@@ -145,7 +146,7 @@ export default function HomePage() {
               </div>
               <div>
                 <p className="text-5xl font-bold tracking-tight" data-testid="text-resolution-rate">75%</p>
-                <p className="text-xs text-muted-foreground mt-1">Resolved by Agent without human handoff</p>
+                <p className="text-xs text-muted-foreground mt-1">Resolved by Wingman without human handoff</p>
               </div>
               <div className="flex-1 min-h-[100px]">
                 <ResponsiveContainer width="100%" height={100}>
@@ -212,6 +213,9 @@ export default function HomePage() {
               ))}
             </div>
           </Card>
+
+          {/* Bottom spacing */}
+          <div className="h-4" />
 
         </div>
       </ScrollArea>
