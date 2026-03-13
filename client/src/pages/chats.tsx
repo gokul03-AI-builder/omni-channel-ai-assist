@@ -1769,48 +1769,17 @@ export default function ChatsPage() {
           <div className="flex items-center gap-2 shrink-0">
             <MessageSquare className="w-4 h-4 text-primary" />
             <h2 className="text-sm font-semibold" data-testid="text-chats-title">Chats</h2>
-            {waitingSessions.length > 0 && (
+          </div>
+          <div className="flex items-center gap-2 flex-1">
+            <span className="flex items-center gap-1 text-xs text-muted-foreground" data-testid="label-waiting">
+              Waiting
               <Badge className="text-[10px] px-1.5 h-4 bg-primary/15 text-primary">{waitingSessions.length}</Badge>
-            )}
-            <span className="text-xs text-muted-foreground">{activeCount}/{MAX_ACTIVE} active</span>
+            </span>
+            <span className="text-muted-foreground/40 text-xs">·</span>
+            <span className="text-xs text-muted-foreground" data-testid="label-active">
+              Active <span className="font-semibold text-foreground">{activeCount}</span>/{MAX_ACTIVE}
+            </span>
           </div>
-
-          <div className="flex gap-1 items-center shrink-0">
-            <button
-              onClick={() => setQueueTab("queue")}
-              className={`text-xs px-2.5 py-1 rounded-md transition-colors ${queueTab === "queue" ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-muted/30"}`}
-              data-testid="tab-queue"
-            >
-              Queue
-            </button>
-            <button
-              onClick={() => setQueueTab("history")}
-              className={`text-xs px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 ${queueTab === "history" ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-muted/30"}`}
-              data-testid="tab-history"
-            >
-              <History className="w-3 h-3" /> History
-            </button>
-          </div>
-
-          <div className="relative shrink-0">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-            <Input
-              value={searchFilter}
-              onChange={(e) => setSearchFilter(e.target.value)}
-              placeholder="Search chats..."
-              className="glass-input pl-8 h-7 text-xs w-[160px]"
-              data-testid="input-chat-search"
-            />
-          </div>
-
-          <button
-            onClick={() => setSortBy(prev => prev === "wait" ? "priority" : "wait")}
-            className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-muted/20 hover:bg-primary/10 hover:text-primary transition-colors text-muted-foreground shrink-0"
-            title={`Sort by ${sortBy === "wait" ? "Wait Time" : "Priority"}`}
-            data-testid="button-sort-toggle"
-          >
-            <ArrowUpDown className="w-3 h-3" />
-          </button>
         </div>
 
         {queueTab === "queue" ? (
