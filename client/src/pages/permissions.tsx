@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -41,24 +40,22 @@ interface Person {
   initials: string;
   role: Role;
   joinedDate: string;
-  marUsage: number;
-  totalUsage: number;
-  creditLimit: number;
+  lastLoginAt: string;
   type: "collaborator" | "invitation";
 }
 
 const people: Person[] = [
-  { id: "u-1", name: "Alex Morgan", email: "alex.morgan@verifone.com", initials: "AM", role: "Admin", joinedDate: "2025-01-15", marUsage: 1240, totalUsage: 8320, creditLimit: 10000, type: "collaborator" },
-  { id: "u-2", name: "Jordan Lee", email: "jordan.lee@verifone.com", initials: "JL", role: "Owner", joinedDate: "2024-11-03", marUsage: 890, totalUsage: 6540, creditLimit: 8000, type: "collaborator" },
-  { id: "u-3", name: "Taylor Brooks", email: "taylor.brooks@verifone.com", initials: "TB", role: "Editor", joinedDate: "2025-02-20", marUsage: 450, totalUsage: 2100, creditLimit: 5000, type: "collaborator" },
-  { id: "u-4", name: "Casey Patel", email: "casey.patel@verifone.com", initials: "CP", role: "Editor", joinedDate: "2025-03-01", marUsage: 320, totalUsage: 1800, creditLimit: 5000, type: "collaborator" },
-  { id: "u-5", name: "Riley Nguyen", email: "riley.nguyen@verifone.com", initials: "RN", role: "Editor", joinedDate: "2025-01-28", marUsage: 670, totalUsage: 4300, creditLimit: 5000, type: "collaborator" },
-  { id: "u-6", name: "Morgan Davis", email: "morgan.davis@verifone.com", initials: "MD", role: "Editor", joinedDate: "2024-12-10", marUsage: 210, totalUsage: 3100, creditLimit: 5000, type: "collaborator" },
-  { id: "u-7", name: "Sam Torres", email: "sam.torres@verifone.com", initials: "ST", role: "Owner", joinedDate: "2024-10-05", marUsage: 1100, totalUsage: 7200, creditLimit: 8000, type: "collaborator" },
-  { id: "u-8", name: "Jamie Chen", email: "jamie.chen@verifone.com", initials: "JC", role: "Editor", joinedDate: "2025-03-05", marUsage: 180, totalUsage: 900, creditLimit: 5000, type: "invitation" },
-  { id: "u-9", name: "Avery Kim", email: "avery.kim@verifone.com", initials: "AK", role: "Admin", joinedDate: "2024-09-18", marUsage: 1500, totalUsage: 9800, creditLimit: 10000, type: "collaborator" },
-  { id: "u-10", name: "Dakota Reeves", email: "dakota.reeves@verifone.com", initials: "DR", role: "Editor", joinedDate: "2025-02-14", marUsage: 390, totalUsage: 1500, creditLimit: 5000, type: "invitation" },
-  { id: "u-11", name: "Quinn Harper", email: "quinn.harper@verifone.com", initials: "QH", role: "Owner", joinedDate: "2024-08-22", marUsage: 920, totalUsage: 7800, creditLimit: 8000, type: "collaborator" },
+  { id: "u-1", name: "Alex Morgan", email: "alex.morgan@verifone.com", initials: "AM", role: "Admin", joinedDate: "2025-01-15", lastLoginAt: "2026-03-13T09:15:00", type: "collaborator" },
+  { id: "u-2", name: "Jordan Lee", email: "jordan.lee@verifone.com", initials: "JL", role: "Owner", joinedDate: "2024-11-03", lastLoginAt: "2026-03-12T16:42:00", type: "collaborator" },
+  { id: "u-3", name: "Taylor Brooks", email: "taylor.brooks@verifone.com", initials: "TB", role: "Editor", joinedDate: "2025-02-20", lastLoginAt: "2026-03-11T11:08:00", type: "collaborator" },
+  { id: "u-4", name: "Casey Patel", email: "casey.patel@verifone.com", initials: "CP", role: "Editor", joinedDate: "2025-03-01", lastLoginAt: "2026-03-13T08:30:00", type: "collaborator" },
+  { id: "u-5", name: "Riley Nguyen", email: "riley.nguyen@verifone.com", initials: "RN", role: "Editor", joinedDate: "2025-01-28", lastLoginAt: "2026-03-10T14:55:00", type: "collaborator" },
+  { id: "u-6", name: "Morgan Davis", email: "morgan.davis@verifone.com", initials: "MD", role: "Editor", joinedDate: "2024-12-10", lastLoginAt: "2026-03-09T10:22:00", type: "collaborator" },
+  { id: "u-7", name: "Sam Torres", email: "sam.torres@verifone.com", initials: "ST", role: "Owner", joinedDate: "2024-10-05", lastLoginAt: "2026-03-12T19:37:00", type: "collaborator" },
+  { id: "u-8", name: "Jamie Chen", email: "jamie.chen@verifone.com", initials: "JC", role: "Editor", joinedDate: "2025-03-05", lastLoginAt: "2026-03-08T15:10:00", type: "invitation" },
+  { id: "u-9", name: "Avery Kim", email: "avery.kim@verifone.com", initials: "AK", role: "Admin", joinedDate: "2024-09-18", lastLoginAt: "2026-03-13T07:48:00", type: "collaborator" },
+  { id: "u-10", name: "Dakota Reeves", email: "dakota.reeves@verifone.com", initials: "DR", role: "Editor", joinedDate: "2025-02-14", lastLoginAt: "2026-03-07T13:05:00", type: "invitation" },
+  { id: "u-11", name: "Quinn Harper", email: "quinn.harper@verifone.com", initials: "QH", role: "Owner", joinedDate: "2024-08-22", lastLoginAt: "2026-03-12T22:14:00", type: "collaborator" },
 ];
 
 const roleColors: Record<Role, { text: string; bg: string; border: string }> = {
@@ -67,7 +64,7 @@ const roleColors: Record<Role, { text: string; bg: string; border: string }> = {
   Editor: { text: "text-muted-foreground", bg: "bg-muted/50", border: "border-border/30" },
 };
 
-type SortField = "name" | "role" | "joinedDate" | "marUsage" | "totalUsage" | "creditLimit";
+type SortField = "name" | "role" | "joinedDate" | "lastLoginAt";
 type SortDir = "asc" | "desc";
 
 const ROWS_PER_PAGE = 8;
@@ -99,9 +96,7 @@ export default function PermissionsPage() {
       if (sortField === "name") cmp = a.name.localeCompare(b.name);
       else if (sortField === "role") cmp = a.role.localeCompare(b.role);
       else if (sortField === "joinedDate") cmp = a.joinedDate.localeCompare(b.joinedDate);
-      else if (sortField === "marUsage") cmp = a.marUsage - b.marUsage;
-      else if (sortField === "totalUsage") cmp = a.totalUsage - b.totalUsage;
-      else if (sortField === "creditLimit") cmp = a.creditLimit - b.creditLimit;
+      else if (sortField === "lastLoginAt") cmp = a.lastLoginAt.localeCompare(b.lastLoginAt);
       return sortDir === "asc" ? cmp : -cmp;
     });
     return list;
@@ -133,6 +128,13 @@ export default function PermissionsPage() {
   const formatDate = (d: string) => {
     const date = new Date(d);
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  };
+
+  const formatDateTime = (d: string) => {
+    const date = new Date(d);
+    const datePart = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const timePart = date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+    return `${datePart} · ${timePart}`;
   };
 
   return (
@@ -206,14 +208,8 @@ export default function PermissionsPage() {
                     <th className="text-left px-4 py-3 font-medium text-xs uppercase tracking-wider text-muted-foreground cursor-pointer select-none" onClick={() => toggleSort("joinedDate")} data-testid="th-joined">
                       <span className="inline-flex items-center">Joined date <SortIcon field="joinedDate" /></span>
                     </th>
-                    <th className="text-right px-4 py-3 font-medium text-xs uppercase tracking-wider text-muted-foreground cursor-pointer select-none" onClick={() => toggleSort("marUsage")} data-testid="th-mar-usage">
-                      <span className="inline-flex items-center justify-end">Mar usage <SortIcon field="marUsage" /></span>
-                    </th>
-                    <th className="text-right px-4 py-3 font-medium text-xs uppercase tracking-wider text-muted-foreground cursor-pointer select-none" onClick={() => toggleSort("totalUsage")} data-testid="th-total-usage">
-                      <span className="inline-flex items-center justify-end">Total usage <SortIcon field="totalUsage" /></span>
-                    </th>
-                    <th className="text-right px-4 py-3 font-medium text-xs uppercase tracking-wider text-muted-foreground cursor-pointer select-none" onClick={() => toggleSort("creditLimit")} data-testid="th-credit-limit">
-                      <span className="inline-flex items-center justify-end">Credit limit <SortIcon field="creditLimit" /></span>
+                    <th className="text-left px-4 py-3 font-medium text-xs uppercase tracking-wider text-muted-foreground cursor-pointer select-none" onClick={() => toggleSort("lastLoginAt")} data-testid="th-last-login">
+                      <span className="inline-flex items-center">Last logged in <SortIcon field="lastLoginAt" /></span>
                     </th>
                     <th className="w-12 px-4 py-3"></th>
                   </tr>
@@ -221,7 +217,7 @@ export default function PermissionsPage() {
                 <tbody>
                   {paginated.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground" data-testid="text-no-results">
+                      <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground" data-testid="text-no-results">
                         No people found.
                       </td>
                     </tr>
@@ -262,14 +258,8 @@ export default function PermissionsPage() {
                           <td className="px-4 py-3 text-xs text-muted-foreground" data-testid={`text-joined-${person.id}`}>
                             {formatDate(person.joinedDate)}
                           </td>
-                          <td className="px-4 py-3 text-right text-xs tabular-nums" data-testid={`text-mar-usage-${person.id}`}>
-                            {person.marUsage.toLocaleString()}
-                          </td>
-                          <td className="px-4 py-3 text-right text-xs tabular-nums" data-testid={`text-total-usage-${person.id}`}>
-                            {person.totalUsage.toLocaleString()}
-                          </td>
-                          <td className="px-4 py-3 text-right text-xs tabular-nums" data-testid={`text-credit-limit-${person.id}`}>
-                            {person.creditLimit.toLocaleString()}
+                          <td className="px-4 py-3 text-xs text-muted-foreground" data-testid={`text-last-login-${person.id}`}>
+                            {formatDateTime(person.lastLoginAt)}
                           </td>
                           <td className="px-4 py-3">
                             <DropdownMenu>
