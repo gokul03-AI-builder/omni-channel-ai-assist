@@ -1507,7 +1507,7 @@ function FloatingCallWidget({
         style={{ cursor: isDragging ? "grabbing" : "grab" }}
         data-testid="floating-call-widget"
       >
-        <div className="glass-panel rounded-2xl p-3 flex items-center gap-3 shadow-xl">
+        <div className="glass-panel rounded-2xl p-3 flex items-center gap-3 shadow-xl ring-2 ring-emerald-500/60 dark:ring-emerald-400/40">
         <div className="flex flex-col items-start gap-0.5 min-w-0">
           <div className="flex items-center gap-2">
             <span className={`w-2 h-2 rounded-full ${statusColor} animate-breathing shrink-0`} />
