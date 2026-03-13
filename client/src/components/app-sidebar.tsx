@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/lib/theme-provider";
-import verifoneLogo from "@assets/Screenshot_2026-03-05_at_5.50.17_PM_1772713220675.png";
+import verifoneLogo from "@assets/verifone_1773393343272.png";
 
 const navItems = [
   { title: "Calls", url: "/", icon: Phone },
@@ -46,11 +46,11 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="space-y-1">
-          <div className="rounded-lg overflow-hidden bg-slate-900 group-data-[collapsible=icon]:hidden">
+          <div className="rounded-lg overflow-hidden group-data-[collapsible=icon]:hidden">
             <img
               src={verifoneLogo}
               alt="Verifone"
-              className="h-12 w-full object-cover"
+              className="h-12 w-auto object-contain dark:invert dark:brightness-100"
               data-testid="img-logo"
             />
           </div>

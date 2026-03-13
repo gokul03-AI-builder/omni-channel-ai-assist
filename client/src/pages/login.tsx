@@ -5,7 +5,7 @@ import { Headphones, Shield, Check, ArrowRight, ArrowLeft, Mail, Globe, AlertCir
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import verifoneLogo from "@assets/verifone_logo_1772712551074.png";
+import verifoneLogo from "@assets/verifone_1773393343272.png";
 
 const regions = [
   { value: "north-america", label: "North America" },
@@ -134,11 +134,11 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
-              <div className="rounded-lg overflow-hidden bg-slate-900 w-full h-full">
+              <div className="rounded-lg overflow-hidden w-full h-full flex items-center justify-center p-2">
                 <img
                   src={verifoneLogo}
                   alt="Verifone"
-                  className="w-full h-full object-cover"
+                  className="max-w-full max-h-full object-contain dark:invert dark:brightness-100"
                   data-testid="img-login-logo"
                 />
               </div>
