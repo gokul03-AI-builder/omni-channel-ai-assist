@@ -21,6 +21,9 @@ import {
   ThumbsDown,
   ExternalLink,
   Zap,
+  FileText,
+  Pencil,
+  Check,
   TicketPlus,
   X,
   Copy,
@@ -1192,57 +1195,131 @@ function ChatSummaryOverlay({
   ticketId?: string;
   onClose: () => void;
 }) {
+  const [agentNotes, setAgentNotes] = useState("");
+  const { toast } = useToast();
+
+  const nextActions = [
+    "Send follow-up email with resolution summary",
+    "Update CRM with chat interaction notes",
+    session.priority === "high" || session.priority === "urgent" ? "Escalate to team lead for review" : null,
+    "Flag for CSAT survey",
+  ].filter(Boolean) as string[];
+
+  const handleCopy = () => {
+    const transcript = messages.filter(m => m.sender !== "system").map(m =>
+      `${m.sender === "agent" ? "Agent" : "Customer"}: ${m.text}`
+    ).join("\n");
+    const fullText = `Chat Summary — ${session.customerName}\n\n${transcript}${agentNotes ? `\n\nAgent Notes:\n${agentNotes}` : ""}`;
+    navigator.clipboard.writeText(fullText).catch(() => {});
+    toast({ title: "Copied to clipboard", description: "Chat transcript and notes have been copied." });
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="absolute inset-0 z-20 flex items-center justify-center p-8"
-    >
-      <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" />
-      <Card className="relative glass-panel border-border/30 w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
-        <div className="px-5 pt-5 pb-3 border-b border-border/30">
-          <div className="flex items-center gap-2 mb-2">
-            <CheckCircle2 className="w-5 h-5 text-primary" />
-            <h3 className="text-sm font-semibold">Chat Summary</h3>
+    <div className="flex flex-col h-full overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col h-full"
+      >
+        <div className="flex items-center gap-3 px-5 py-3 border-b border-border/30 shrink-0">
+          <div className="w-9 h-9 rounded-lg glass-bubble-primary flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-4.5 h-4.5 text-primary" />
           </div>
-          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-            <span>{session.customerName}</span>
-            <span>·</span>
-            <span>{session.customerCompany}</span>
-            <span>·</span>
-            <span>{formatDuration(duration)}</span>
-            <span>·</span>
-            <span>{messages.filter(m => m.sender !== "system").length} messages</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold" data-testid="text-chat-summary-title">Chat Ended — {session.customerName}</p>
+            <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+              <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{formatDuration(duration)}</span>
+              <span className="text-xs text-muted-foreground">{session.customerCompany}</span>
+              <span className="text-xs text-muted-foreground">{messages.filter(m => m.sender !== "system").length} messages</span>
+              <Badge variant="outline" className="text-xs">{session.channel}</Badge>
+              <Badge variant="outline" className={`text-xs ${priorityBadgeClass(session.priority)}`}>{session.priority}</Badge>
+            </div>
           </div>
-          <div className="flex items-center gap-2 mt-2">
-            <Badge variant="outline" className="text-xs">{session.channel}</Badge>
-            <Badge variant="outline" className={`text-xs ${priorityBadgeClass(session.priority)}`}>{session.priority}</Badge>
-            {ticketId && <Badge className="text-xs bg-blue-500/15 text-blue-400">Ticket: {ticketId}</Badge>}
-          </div>
-        </div>
-        <ScrollArea className="flex-1 min-h-0">
-          <div className="px-5 py-3 space-y-2">
-            {messages.filter(m => m.sender !== "system").map((msg) => (
-              <div key={msg.id} className={`flex gap-2 ${msg.sender === "agent" ? "flex-row-reverse" : ""}`}>
-                <span className={`text-[10px] font-medium shrink-0 mt-1 ${msg.sender === "agent" ? "text-primary" : "text-muted-foreground"}`}>
-                  {msg.sender === "agent" ? "Agent" : "Customer"}
-                </span>
-                <p className={`text-xs leading-relaxed rounded-lg px-2.5 py-1.5 max-w-[80%] ${msg.sender === "agent" ? "glass-bubble-primary" : "glass-bubble"} ${msg.isInternal ? "border border-amber-500/20 bg-amber-500/5" : ""}`}>
-                  {msg.isInternal && <Lock className="w-2.5 h-2.5 inline mr-1 text-amber-400" />}
-                  {msg.text}
-                </p>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-        <div className="px-5 py-3 border-t border-border/30">
-          <Button className="w-full mint-glow-sm" onClick={onClose} data-testid="button-close-summary">
-            Close Summary
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 shrink-0"
+            onClick={handleCopy}
+            data-testid="button-copy-chat-summary"
+          >
+            <Copy className="w-3.5 h-3.5" />
           </Button>
         </div>
-      </Card>
-    </motion.div>
+
+        <div className="flex-1 grid grid-cols-[1fr_340px] gap-4 p-4 overflow-hidden min-h-0">
+          <div className="flex flex-col gap-3 overflow-y-auto min-h-0 pr-1">
+            <div className="glass-panel rounded-xl p-4 space-y-2">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5" /> Chat Transcript
+              </h4>
+              <div className="space-y-2">
+                {messages.filter(m => m.sender !== "system").map((msg) => (
+                  <div key={msg.id} className={`flex gap-2 ${msg.sender === "agent" ? "flex-row-reverse" : ""}`} data-testid={`message-${msg.id}`}>
+                    <span className={`text-[10px] font-medium shrink-0 mt-1 ${msg.sender === "agent" ? "text-primary" : "text-muted-foreground"}`}>
+                      {msg.sender === "agent" ? "Agent" : "Customer"}
+                    </span>
+                    <p className={`text-xs leading-relaxed rounded-lg px-2.5 py-1.5 max-w-[80%] ${msg.sender === "agent" ? "glass-bubble-primary" : "glass-bubble"} ${msg.isInternal ? "border border-amber-500/20 bg-amber-500/5" : ""}`}>
+                      {msg.isInternal && <Lock className="w-2.5 h-2.5 inline mr-1 text-amber-400" />}
+                      {msg.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 overflow-y-auto min-h-0 pr-1">
+            <div className="glass-panel rounded-xl p-4 space-y-2">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5" /> Agent Notes
+              </h4>
+              <Textarea
+                value={agentNotes}
+                onChange={(e) => setAgentNotes(e.target.value)}
+                placeholder="Add notes, follow-up actions, or observations for the record..."
+                className="min-h-[100px] text-xs resize-y glass-subtle border-border/30 focus:border-primary/40"
+                data-testid="textarea-chat-agent-notes"
+              />
+            </div>
+
+            <div className="glass-panel rounded-xl p-4 space-y-2">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5" /> Recommended Next Actions
+              </h4>
+              <ul className="space-y-1.5">
+                {nextActions.map((action, i) => (
+                  <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                    <ChevronRight className="w-3 h-3 text-primary shrink-0 mt-0.5" />
+                    {action}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="glass-panel rounded-xl p-4 space-y-2">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <TicketPlus className="w-3.5 h-3.5" /> Support Ticket
+              </h4>
+              {ticketId ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Badge className="text-xs bg-emerald-500/15 text-emerald-400 border-emerald-500/20" data-testid="text-chat-ticket-ref">{ticketId}</Badge>
+                    <span className="text-xs text-muted-foreground">Created during chat</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Transcript and notes have been attached to the ticket.</p>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No ticket was created during this chat.</p>
+              )}
+            </div>
+
+            <Button className="w-full mint-glow-sm shrink-0" onClick={onClose} data-testid="button-close-summary">
+              Close Summary
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
   );
 }
 
@@ -1632,19 +1709,32 @@ export default function ChatsPage() {
 
   return (
     <div className="h-full flex flex-col" data-testid="page-chats">
-      <AnimatePresence>
-        {summarySession && (
-          <ChatSummaryOverlay
-            session={summarySession}
-            messages={summaryMessages}
-            duration={summaryDuration}
-            ticketId={createdTickets[summarySession.id]}
-            onClose={() => setSummarySession(null)}
-          />
-        )}
-      </AnimatePresence>
-
       <div className="flex flex-col flex-1 overflow-hidden gap-2 p-2">
+
+      {summarySession ? (
+        <div className="flex-1 flex flex-col gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSummarySession(null)}
+            className="self-start gap-1.5 text-muted-foreground hover:text-foreground"
+            data-testid="button-back-from-chat-summary"
+          >
+            <ChevronRight className="w-4 h-4 rotate-180" />
+            Back to Queue
+          </Button>
+          <div className="flex-1 glass-panel rounded-xl overflow-hidden">
+            <ChatSummaryOverlay
+              session={summarySession}
+              messages={summaryMessages}
+              duration={summaryDuration}
+              ticketId={createdTickets[summarySession.id]}
+              onClose={() => setSummarySession(null)}
+            />
+          </div>
+        </div>
+      ) : (
+      <>
 
       <div className="shrink-0 glass-panel rounded-xl overflow-hidden">
         <div className="px-3 py-2 flex items-center gap-3 flex-wrap">
@@ -1972,6 +2062,9 @@ export default function ChatsPage() {
           </div>
         )}
       </div>
+
+      </>
+      )}
 
       </div>
 

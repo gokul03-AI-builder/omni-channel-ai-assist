@@ -1220,15 +1220,15 @@ function CallSummary({
   };
 
   return (
-    <div className="flex flex-col items-center justify-start h-full py-6 px-4 overflow-y-auto">
+    <div className="flex flex-col h-full overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-xl space-y-4"
+        className="flex flex-col h-full"
       >
-        <div className="flex items-center gap-3 glass-panel rounded-xl p-4">
-          <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-5 h-5 text-primary" />
+        <div className="flex items-center gap-3 px-5 py-3 border-b border-border/30 shrink-0">
+          <div className="w-9 h-9 rounded-lg glass-bubble-primary flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-4.5 h-4.5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold" data-testid="text-call-summary-title">Call Ended — {customer?.name ?? call.customerName}</p>
@@ -1249,111 +1249,117 @@ function CallSummary({
           </Button>
         </div>
 
-        <div className="glass-panel rounded-xl p-4 space-y-2">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5" /> AI-Generated Summary
-            </h4>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 px-2 text-xs gap-1 text-muted-foreground hover:text-foreground"
-              onClick={() => setIsEditingSummary((v) => !v)}
-              data-testid="button-toggle-edit-summary"
-            >
-              {isEditingSummary ? <><Check className="w-3 h-3 text-primary" /> Save</> : <><Pencil className="w-3 h-3" /> Edit</>}
-            </Button>
-          </div>
-          {isEditingSummary ? (
-            <Textarea
-              value={editableSummary}
-              onChange={(e) => setEditableSummary(e.target.value)}
-              className="min-h-[180px] text-xs font-mono resize-y glass-subtle border-border/30 focus:border-primary/40"
-              data-testid="textarea-edit-summary"
-            />
-          ) : (
-            <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed" data-testid="text-summary-content">
-              {editableSummary}
-            </pre>
-          )}
-        </div>
-
-        <div className="glass-panel rounded-xl p-4 space-y-2">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <MessageSquare className="w-3.5 h-3.5" /> Agent Notes
-          </h4>
-          <Textarea
-            value={agentNotes}
-            onChange={(e) => setAgentNotes(e.target.value)}
-            placeholder="Add notes, follow-up actions, or observations for the record..."
-            className="min-h-[80px] text-xs resize-y glass-subtle border-border/30 focus:border-primary/40"
-            data-testid="textarea-agent-notes"
-          />
-        </div>
-
-        {suggestions.length > 0 && (
-          <div className="glass-panel rounded-xl p-4 space-y-2">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5" /> KB Articles Referenced
-            </h4>
-            <div className="space-y-1.5">
-              {suggestions.map((s) => (
-                <div key={s.id} className="flex items-center gap-2">
-                  <Badge variant="secondary" className="text-xs shrink-0">{s.source}</Badge>
-                  <span className="text-xs text-muted-foreground truncate">{s.title}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="glass-panel rounded-xl p-4 space-y-2">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5" /> Recommended Next Actions
-          </h4>
-          <ul className="space-y-1.5">
-            {nextActions.map((action, i) => (
-              <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
-                <ChevronRight className="w-3 h-3 text-primary shrink-0 mt-0.5" />
-                {action}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="glass-panel rounded-xl p-4 space-y-2">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <TicketPlus className="w-3.5 h-3.5" /> Support Ticket
-          </h4>
-          {createdTicket ? (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Badge className="text-xs bg-emerald-500/15 text-emerald-400 border-emerald-500/20" data-testid="text-ticket-ref">{createdTicket.id}</Badge>
-                <span className="text-xs text-muted-foreground">Created during call</span>
-              </div>
-              <p className="text-xs text-muted-foreground">Summary and notes have been attached to the ticket.</p>
-              {createdTicket.notes && (
-                <div className="glass-subtle rounded-lg p-2">
-                  <p className="text-xs text-muted-foreground italic">{createdTicket.notes}</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">No ticket was created during this call.</p>
-              {onOpenTicketDialog && (
+        <div className="flex-1 grid grid-cols-[1fr_340px] gap-4 p-4 overflow-hidden min-h-0">
+          <div className="flex flex-col gap-3 overflow-y-auto min-h-0 pr-1">
+            <div className="glass-panel rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5" /> AI-Generated Summary
+                </h4>
                 <Button
-                  size="sm"
                   variant="ghost"
-                  className="h-7 gap-1.5 text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20"
-                  onClick={onOpenTicketDialog}
-                  data-testid="button-create-ticket-from-summary"
+                  size="sm"
+                  className="h-6 px-2 text-xs gap-1 text-muted-foreground hover:text-foreground"
+                  onClick={() => setIsEditingSummary((v) => !v)}
+                  data-testid="button-toggle-edit-summary"
                 >
-                  <TicketPlus className="w-3.5 h-3.5" /> Create Ticket Now
+                  {isEditingSummary ? <><Check className="w-3 h-3 text-primary" /> Save</> : <><Pencil className="w-3 h-3" /> Edit</>}
                 </Button>
+              </div>
+              {isEditingSummary ? (
+                <Textarea
+                  value={editableSummary}
+                  onChange={(e) => setEditableSummary(e.target.value)}
+                  className="min-h-[180px] text-xs font-mono resize-y glass-subtle border-border/30 focus:border-primary/40"
+                  data-testid="textarea-edit-summary"
+                />
+              ) : (
+                <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed" data-testid="text-summary-content">
+                  {editableSummary}
+                </pre>
               )}
             </div>
-          )}
+
+            {suggestions.length > 0 && (
+              <div className="glass-panel rounded-xl p-4 space-y-2">
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5" /> KB Articles Referenced
+                </h4>
+                <div className="space-y-1.5">
+                  {suggestions.map((s) => (
+                    <div key={s.id} className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs shrink-0">{s.source}</Badge>
+                      <span className="text-xs text-muted-foreground truncate">{s.title}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 overflow-y-auto min-h-0 pr-1">
+            <div className="glass-panel rounded-xl p-4 space-y-2">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5" /> Agent Notes
+              </h4>
+              <Textarea
+                value={agentNotes}
+                onChange={(e) => setAgentNotes(e.target.value)}
+                placeholder="Add notes, follow-up actions, or observations for the record..."
+                className="min-h-[100px] text-xs resize-y glass-subtle border-border/30 focus:border-primary/40"
+                data-testid="textarea-agent-notes"
+              />
+            </div>
+
+            <div className="glass-panel rounded-xl p-4 space-y-2">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5" /> Recommended Next Actions
+              </h4>
+              <ul className="space-y-1.5">
+                {nextActions.map((action, i) => (
+                  <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                    <ChevronRight className="w-3 h-3 text-primary shrink-0 mt-0.5" />
+                    {action}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="glass-panel rounded-xl p-4 space-y-2">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <TicketPlus className="w-3.5 h-3.5" /> Support Ticket
+              </h4>
+              {createdTicket ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Badge className="text-xs bg-emerald-500/15 text-emerald-400 border-emerald-500/20" data-testid="text-ticket-ref">{createdTicket.id}</Badge>
+                    <span className="text-xs text-muted-foreground">Created during call</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Summary and notes have been attached to the ticket.</p>
+                  {createdTicket.notes && (
+                    <div className="glass-subtle rounded-lg p-2">
+                      <p className="text-xs text-muted-foreground italic">{createdTicket.notes}</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">No ticket was created during this call.</p>
+                  {onOpenTicketDialog && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 gap-1.5 text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20"
+                      onClick={onOpenTicketDialog}
+                      data-testid="button-create-ticket-from-summary"
+                    >
+                      <TicketPlus className="w-3.5 h-3.5" /> Create Ticket Now
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </motion.div>
     </div>
