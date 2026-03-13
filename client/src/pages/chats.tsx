@@ -1956,11 +1956,6 @@ export default function ChatsPage() {
                   >
                     <X className="w-3.5 h-3.5" />
                   </Button>
-                  {!rightPanelOpen && (
-                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground" onClick={() => setRightPanelOpen(true)} data-testid="button-open-right-panel">
-                      <PanelRightOpen className="w-3.5 h-3.5" />
-                    </Button>
-                  )}
                 </div>
               </div>
 
@@ -2014,22 +2009,56 @@ export default function ChatsPage() {
               />
             </div>
 
-            {rightPanelOpen && currentCustomer && currentDevice && (
-              <div className="w-[360px] shrink-0 glass-panel rounded-xl overflow-hidden">
-                <ChatInfoPanel
-                  session={selectedSession}
-                  customer={currentCustomer}
-                  device={currentDevice}
-                  tickets={currentTickets}
-                  pastCalls={currentPastCalls}
-                  aiMessages={currentAiMessages}
-                  onSendAI={(text) => handleSendAI(selectedId!, text)}
-                  onCollapse={() => setRightPanelOpen(false)}
-                  onNewAIChat={handleNewAIChat}
-                  onCreateTicket={(t) => handleCreateTicket(selectedId!, t)}
-                  createdTicketId={createdTickets[selectedId!]}
-                  chatMessages={currentMessages}
-                />
+            {currentCustomer && currentDevice && (
+              <div className="shrink-0 flex">
+                <AnimatePresence initial={false}>
+                  {rightPanelOpen ? (
+                    <motion.div
+                      key="right-panel-expanded"
+                      initial={{ width: 0, opacity: 0 }}
+                      animate={{ width: 360, opacity: 1 }}
+                      exit={{ width: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="h-full w-[360px] glass-panel rounded-xl overflow-hidden">
+                        <ChatInfoPanel
+                          session={selectedSession}
+                          customer={currentCustomer}
+                          device={currentDevice}
+                          tickets={currentTickets}
+                          pastCalls={currentPastCalls}
+                          aiMessages={currentAiMessages}
+                          onSendAI={(text) => handleSendAI(selectedId!, text)}
+                          onCollapse={() => setRightPanelOpen(false)}
+                          onNewAIChat={handleNewAIChat}
+                          onCreateTicket={(t) => handleCreateTicket(selectedId!, t)}
+                          createdTicketId={createdTickets[selectedId!]}
+                          chatMessages={currentMessages}
+                        />
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="right-panel-collapsed"
+                      initial={{ width: 0, opacity: 0 }}
+                      animate={{ width: 36, opacity: 1 }}
+                      exit={{ width: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="h-full w-[36px] glass-panel rounded-xl flex flex-col items-center pt-3 gap-2">
+                        <button
+                          onClick={() => setRightPanelOpen(true)}
+                          className="p-1 rounded-md hover:bg-muted/40 transition-colors"
+                          data-testid="button-expand-right-panel"
+                        >
+                          <PanelRightOpen className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
           </div>
