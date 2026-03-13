@@ -11,6 +11,8 @@ import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
 import CallsPage from "@/pages/calls";
 import ChatsPage from "@/pages/chats";
+import CallHistoryPage from "@/pages/call-history";
+import ChatHistoryPage from "@/pages/chat-history";
 import FeedbackPage from "@/pages/feedback";
 import AnalyticsPage from "@/pages/analytics";
 import ReportsPage from "@/pages/reports";
@@ -28,7 +30,9 @@ function AuthenticatedRouter() {
         <HomePage />
       </Route>
       <Route path="/calls" component={CallsPage} />
+      <Route path="/calls/history" component={CallHistoryPage} />
       <Route path="/chats" component={ChatsPage} />
+      <Route path="/chats/history" component={ChatHistoryPage} />
       <Route path="/feedback" component={FeedbackPage} />
       <Route path="/analytics" component={AnalyticsPage} />
       <Route path="/reports" component={ReportsPage} />

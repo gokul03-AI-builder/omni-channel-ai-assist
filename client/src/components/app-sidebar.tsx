@@ -1,5 +1,6 @@
 import { useLocation, Link } from "wouter";
-import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon, Home, BarChart3, FileText, Shield, Activity } from "lucide-react";
+import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon, Home, BarChart3, FileText, Shield, Activity, History, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -11,9 +12,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +29,19 @@ import {
 import { useTheme } from "@/lib/theme-provider";
 import verifoneLogo from "@assets/verifone_1773393343272.png";
 
-const navGroups = [
+interface NavItem {
+  title: string;
+  url: string;
+  icon: typeof Home;
+  children?: { title: string; url: string; icon: typeof Home }[];
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
   {
     label: "OVERVIEW",
     items: [
@@ -35,8 +52,22 @@ const navGroups = [
   {
     label: "CHANNELS",
     items: [
-      { title: "Calls", url: "/calls", icon: Phone },
-      { title: "Chats", url: "/chats", icon: MessageSquare },
+      {
+        title: "Calls",
+        url: "/calls",
+        icon: Phone,
+        children: [
+          { title: "History", url: "/calls/history", icon: History },
+        ],
+      },
+      {
+        title: "Chats",
+        url: "/chats",
+        icon: MessageSquare,
+        children: [
+          { title: "History", url: "/chats/history", icon: History },
+        ],
+      },
     ],
   },
   {
@@ -48,7 +79,7 @@ const navGroups = [
   },
 ];
 
-const adminGroup = {
+const adminGroup: NavGroup = {
   label: "SYSTEM",
   items: [
     { title: "Permissions", url: "/permissions", icon: Shield },
@@ -59,6 +90,22 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
   const [location] = useLocation();
   const { toggleSidebar, open } = useSidebar();
   const { theme, toggleTheme } = useTheme();
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
+    Calls: location.startsWith("/calls"),
+    Chats: location.startsWith("/chats"),
+  });
+
+  useEffect(() => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      Calls: location.startsWith("/calls") ? true : prev.Calls,
+      Chats: location.startsWith("/chats") ? true : prev.Chats,
+    }));
+  }, [location]);
+
+  const toggleExpanded = (title: string) => {
+    setExpandedItems((prev) => ({ ...prev, [title]: !prev[title] }));
+  };
   const storedEmail = localStorage.getItem("wingman_email") || "";
   const authRole = localStorage.getItem("wingman_auth");
   const isAdmin = authRole === "admin";
@@ -100,22 +147,120 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
               <SidebarMenu>
                 {group.items.map((item) => {
                   const isActive = location === item.url;
-                  return (
-                    <SidebarMenuItem key={item.title}>
+                  const hasChildren = item.children && item.children.length > 0;
+                  const isExpanded = expandedItems[item.title] || false;
+                  const isChildActive = hasChildren && item.children!.some((c) => location === c.url);
+
+                  const menuButton = hasChildren ? (
+                    <div className="flex items-center">
                       <SidebarMenuButton
                         asChild
                         data-active={isActive}
-                        className={
+                        className={`flex-1 ${
                           isActive
                             ? "!bg-primary/20 text-primary font-semibold border border-primary/30 shadow-[0_0_10px_-3px_hsl(var(--primary)/0.25)]"
-                            : "hover:bg-primary/8 hover:text-primary/90"
-                        }
+                            : isChildActive
+                              ? "text-primary/80"
+                              : "hover:bg-primary/8 hover:text-primary/90"
+                        }`}
                       >
                         <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase().replace(/\s+/g, "-")}`}>
-                          <item.icon className={isActive ? "text-primary" : "opacity-50"} />
+                          <item.icon className={isActive || isChildActive ? "text-primary" : "opacity-50"} />
                           <span>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleExpanded(item.title);
+                        }}
+                        className="p-1 rounded hover:bg-muted/30 transition-colors shrink-0 group-data-[collapsible=icon]:hidden"
+                        data-testid={`button-expand-${item.title.toLowerCase()}`}
+                        aria-label={`Expand ${item.title}`}
+                      >
+                        <ChevronRight className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`} />
+                      </button>
+                    </div>
+                  ) : (
+                    <SidebarMenuButton
+                      asChild
+                      data-active={isActive}
+                      className={
+                        isActive
+                          ? "!bg-primary/20 text-primary font-semibold border border-primary/30 shadow-[0_0_10px_-3px_hsl(var(--primary)/0.25)]"
+                          : "hover:bg-primary/8 hover:text-primary/90"
+                      }
+                    >
+                      <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase().replace(/\s+/g, "-")}`}>
+                        <item.icon className={isActive ? "text-primary" : "opacity-50"} />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  );
+
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      {hasChildren && !open ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            {menuButton}
+                          </TooltipTrigger>
+                          <TooltipContent side="right" align="start" className="glass-panel border-border/30 p-1">
+                            <div className="flex flex-col gap-0.5 min-w-[120px]">
+                              <Link
+                                href={item.url}
+                                className="text-xs px-2.5 py-1.5 rounded hover:bg-primary/10 hover:text-primary transition-colors"
+                                data-testid={`link-tooltip-${item.title.toLowerCase()}`}
+                              >
+                                {item.title}
+                              </Link>
+                              {item.children!.map((child) => (
+                                <Link
+                                  key={child.url}
+                                  href={child.url}
+                                  className={`text-xs px-2.5 py-1.5 rounded transition-colors flex items-center gap-1.5 ${
+                                    location === child.url
+                                      ? "bg-primary/15 text-primary font-medium"
+                                      : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                                  }`}
+                                  data-testid={`link-tooltip-${item.title.toLowerCase()}-${child.title.toLowerCase()}`}
+                                >
+                                  <child.icon className="w-3 h-3" />
+                                  {child.title}
+                                </Link>
+                              ))}
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        menuButton
+                      )}
+                      {hasChildren && isExpanded && open && (
+                        <SidebarMenuSub>
+                          {item.children!.map((child) => {
+                            const isSubActive = location === child.url;
+                            return (
+                              <SidebarMenuSubItem key={child.title}>
+                                <SidebarMenuSubButton
+                                  asChild
+                                  data-active={isSubActive}
+                                  className={
+                                    isSubActive
+                                      ? "!bg-primary/15 text-primary font-medium"
+                                      : "text-muted-foreground hover:text-primary/80"
+                                  }
+                                >
+                                  <Link href={child.url} data-testid={`link-nav-${item.title.toLowerCase()}-${child.title.toLowerCase()}`}>
+                                    <child.icon className={`w-3.5 h-3.5 ${isSubActive ? "text-primary" : "opacity-50"}`} />
+                                    <span>{child.title}</span>
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            );
+                          })}
+                        </SidebarMenuSub>
+                      )}
                     </SidebarMenuItem>
                   );
                 })}

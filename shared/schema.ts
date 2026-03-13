@@ -152,3 +152,36 @@ export interface ClosedChatSummary {
   closedAt: string;
   ticketCreated?: string;
 }
+
+export interface CallHistoryRecord {
+  id: string;
+  customerId: string;
+  customerName: string;
+  customerCompany: string;
+  date: string;
+  duration: number;
+  topic: string;
+  outcome: "resolved" | "escalated" | "follow-up" | "unresolved";
+  summary: string;
+  agentNotes: string;
+  transcriptHighlights: string[];
+  resolution: string;
+  agentName: string;
+}
+
+export interface ChatHistoryRecord {
+  id: string;
+  customerId: string;
+  customerName: string;
+  customerCompany: string;
+  date: string;
+  channel: "web" | "email" | "whatsapp" | "sms";
+  topic: string;
+  outcome: "resolved" | "escalated" | "follow-up" | "unresolved";
+  summary: string;
+  agentNotes: string;
+  messages: { sender: "customer" | "agent"; text: string; time: string }[];
+  resolution: string;
+  agentName: string;
+  messageCount: number;
+}
