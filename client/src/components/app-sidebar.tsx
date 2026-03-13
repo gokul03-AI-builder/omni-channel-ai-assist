@@ -84,7 +84,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
                       data-active={isActive}
                       className={
                         isActive
-                          ? "!bg-primary/12 text-primary font-semibold border border-primary/20 shadow-[0_0_10px_-3px_hsl(var(--primary)/0.15)]"
+                          ? "!bg-primary/20 text-primary font-semibold border border-primary/30 shadow-[0_0_10px_-3px_hsl(var(--primary)/0.25)]"
                           : "hover:bg-primary/8 hover:text-primary/90"
                       }
                     >
