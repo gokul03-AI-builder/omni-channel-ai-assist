@@ -121,8 +121,8 @@ function priorityBadgeClass(p: string) {
 
 function slaColor(sec: number) {
   if (sec <= 0) return "text-red-400 animate-pulse";
-  if (sec < 60) return "text-red-400";
-  if (sec < 120) return "text-amber-400";
+  if (sec < 120) return "text-red-400";
+  if (sec < 180) return "text-amber-400";
   return "text-muted-foreground";
 }
 

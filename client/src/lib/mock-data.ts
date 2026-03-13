@@ -553,7 +553,7 @@ export const initialChatSessions: ChatSession[] = [
     customerName: "Michael Rodriguez",
     customerCompany: "Urban Style Boutique",
     customerInitials: "MR",
-    status: "waiting",
+    status: "active",
     channel: "email",
     priority: "medium",
     startTime: new Date(Date.now() - 420000).toISOString(),
