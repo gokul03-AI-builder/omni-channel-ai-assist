@@ -43,8 +43,8 @@ function AuthenticatedRouter() {
 }
 
 const sidebarStyle = {
-  "--sidebar-width": "14rem",
-  "--sidebar-width-icon": "3rem",
+  "--sidebar-width": "15rem",
+  "--sidebar-width-icon": "4rem",
 };
 
 function App() {

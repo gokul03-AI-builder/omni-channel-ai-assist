@@ -84,12 +84,12 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
                       data-active={isActive}
                       className={
                         isActive
-                          ? "data-[active=true]:bg-transparent text-primary font-semibold border border-primary/30"
-                          : ""
+                          ? "data-[active=true]:bg-primary/12 text-primary font-semibold shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.25),0_0_12px_-3px_hsl(var(--primary)/0.15)]"
+                          : "hover:bg-primary/8 hover:text-primary/90"
                       }
                     >
                       <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase().replace(/\s+/g, "-")}`}>
-                        <item.icon className={isActive ? "text-primary" : "opacity-60"} />
+                        <item.icon className={isActive ? "text-primary" : "opacity-50"} />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -100,7 +100,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-border/20 glass-subtle p-3 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:py-3">
+      <SidebarFooter className="border-t border-border/10 p-3 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:py-3">
         <div className="flex flex-col items-center gap-2 group-data-[state=expanded]:flex-row group-data-[state=expanded]:gap-2.5">
           <button
             onClick={toggleSidebar}
