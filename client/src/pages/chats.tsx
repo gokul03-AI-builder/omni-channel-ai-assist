@@ -629,7 +629,7 @@ function KbAssistPanel({
     const initialVotes: Record<string, "up" | "down" | null> = {};
     suggestions.forEach((s) => { initialVotes[s.id] = getKbVote(s.id); });
     setVotes(initialVotes);
-  }, [suggestions.length]);
+  }, [suggestions.map(s => s.id).join(",")]);
 
   const handleVote = (s: AISuggestion, v: "up" | "down", e: React.MouseEvent) => {
     e.stopPropagation();
@@ -1102,12 +1102,10 @@ function TicketTabForm({
 function TransferModal({
   open,
   onOpenChange,
-  sessionId,
   onTransfer,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  sessionId: string;
   onTransfer: (agentId: string, agentName: string) => void;
 }) {
   const [selected, setSelected] = useState("");
@@ -2049,7 +2047,6 @@ export default function ChatsPage() {
           <TransferModal
             open={transferOpen}
             onOpenChange={setTransferOpen}
-            sessionId={selectedId!}
             onTransfer={handleTransfer}
           />
           <TicketModal
