@@ -25,7 +25,6 @@ import {
   Pencil,
   Check,
   TicketPlus,
-  X,
   Copy,
   ClipboardCheck,
   ChevronDown,
@@ -39,13 +38,13 @@ import {
   Pause,
   Play,
   ArrowRightLeft,
+  X,
   Filter,
   History,
   Hash,
   Paperclip,
   Ticket as TicketIcon,
   ArrowUpDown,
-  Timer,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { Card } from "@/components/ui/card";
@@ -689,6 +688,10 @@ function ChatInfoPanel({
   onCreateTicket,
   createdTicketId,
   chatMessages,
+  onHoldToggle,
+  onTransfer,
+  onTicket,
+  onCloseChat,
 }: {
   session: ChatSession;
   customer: Customer;
@@ -702,6 +705,10 @@ function ChatInfoPanel({
   onCreateTicket: (ticket: { subject: string; body: string; priority: string; cc: string }) => void;
   createdTicketId?: string;
   chatMessages: ChatConversationMessage[];
+  onHoldToggle?: () => void;
+  onTransfer?: () => void;
+  onTicket?: () => void;
+  onCloseChat?: () => void;
 }) {
   const devStatus = device.status.toLowerCase();
   const statusColor = devStatus === "active" ? "text-status-online" : devStatus === "maintenance" ? "text-status-away" : "text-status-offline";
@@ -848,6 +855,62 @@ function ChatInfoPanel({
                     )}
                   </div>
                 </CollapsibleSection>
+
+                {(onHoldToggle || onTransfer || onTicket || onCloseChat) && (
+                  <div className="pt-2 border-t border-border/30">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Actions</h4>
+                    <div className="flex flex-wrap gap-1.5">
+                      {onHoldToggle && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className={`h-7 text-xs gap-1.5 ${session.status === "on-hold" ? "text-yellow-400 border-yellow-500/30" : ""}`}
+                          onClick={onHoldToggle}
+                          data-testid="button-hold"
+                        >
+                          {session.status === "on-hold" ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
+                          {session.status === "on-hold" ? "Resume" : "Hold"}
+                        </Button>
+                      )}
+                      {onTransfer && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs gap-1.5"
+                          onClick={onTransfer}
+                          data-testid="button-transfer"
+                        >
+                          <ArrowRightLeft className="w-3 h-3" />
+                          Transfer
+                        </Button>
+                      )}
+                      {onTicket && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs gap-1.5"
+                          onClick={onTicket}
+                          data-testid="button-ticket"
+                        >
+                          <TicketPlus className="w-3 h-3" />
+                          Ticket
+                        </Button>
+                      )}
+                      {onCloseChat && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs gap-1.5 text-red-400 border-red-500/30 hover:bg-red-500/10"
+                          onClick={onCloseChat}
+                          data-testid="button-close-chat"
+                        >
+                          <X className="w-3 h-3" />
+                          Close
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </ScrollArea>
           </TabsContent>
@@ -1355,7 +1418,6 @@ export default function ChatsPage() {
   const [closedHistory, setClosedHistory] = useState(getClosedChatSessions);
   const [elapsedTimes, setElapsedTimes] = useState<Record<string, number>>({});
   const [slaTimers, setSlaTimers] = useState<Record<string, number>>({});
-  const [activeSlaTimes, setActiveSlaTimes] = useState<Record<string, number>>({});
   const [sortBy, setSortBy] = useState<"wait" | "priority">("wait");
   const [historySearch, setHistorySearch] = useState("");
 
@@ -1419,38 +1481,7 @@ export default function ChatsPage() {
     return () => clearInterval(interval);
   }, [sessions]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveSlaTimes(prev => {
-        const next = { ...prev };
-        activeSessions.forEach(s => {
-          if (!(s.id in next)) next[s.id] = 300;
-          if (s.status === "active") {
-            next[s.id] = next[s.id] - 1;
-          }
-        });
-        Object.keys(next).forEach(k => {
-          if (!activeSessions.find(s => s.id === k)) delete next[k];
-        });
-        return next;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [activeSessions.map(s => `${s.id}-${s.status}`).join(",")]);
 
-  const getSlaBadgeClass = (remaining: number) => {
-    if (remaining <= 0) return "bg-red-500/20 text-red-400 border-red-500/40 animate-pulse";
-    if (remaining < 60) return "bg-red-500/15 text-red-400 border-red-500/30";
-    if (remaining < 120) return "bg-amber-500/15 text-amber-400 border-amber-500/30";
-    return "bg-muted/30 text-muted-foreground";
-  };
-
-  const formatSla = (secs: number) => {
-    const abs = Math.abs(secs);
-    const m = Math.floor(abs / 60);
-    const s = abs % 60;
-    return `${secs < 0 ? "-" : ""}${m}:${s.toString().padStart(2, "0")}`;
-  };
 
   useEffect(() => {
     const outerTimers: ReturnType<typeof setTimeout>[] = [];
@@ -1904,31 +1935,7 @@ export default function ChatsPage() {
         ) : (
           <div className="flex h-full gap-2">
             <div className="flex-1 flex flex-col h-full min-w-0 glass-panel rounded-xl overflow-hidden">
-              {activeSessions.length > 1 && (
-                <div className="flex gap-1 px-3 py-1.5 border-b border-border/30 bg-muted/5">
-                  {activeSessions.map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => handleSelectSession(s.id)}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-all ${selectedId === s.id ? "bg-primary/15 text-primary font-medium border border-primary/30" : "text-muted-foreground hover:bg-muted/30"}`}
-                      data-testid={`tab-session-${s.id}`}
-                    >
-                      {channelIcon(s.channel, "w-3 h-3")}
-                      <span className="truncate max-w-[80px]">{s.customerName.split(" ")[0]}</span>
-                      {s.unreadCount > 0 && selectedId !== s.id && (
-                        <span className="min-w-[14px] h-[14px] rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center px-0.5">
-                          {s.unreadCount}
-                        </span>
-                      )}
-                      {s.status === "on-hold" && (
-                        <Pause className="w-2.5 h-2.5 text-yellow-400" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex items-center justify-between gap-2 px-4 py-2 glass-header mx-2 mt-2 rounded-xl">
+              <div className="flex items-center gap-2 px-4 py-2 glass-header mx-2 mt-2 rounded-xl">
                 <div className="flex items-center gap-2 min-w-0">
                   <Avatar className="h-7 w-7 shrink-0">
                     <AvatarFallback className="text-xs bg-primary/15 text-primary">{selectedSession.customerInitials}</AvatarFallback>
@@ -1937,47 +1944,6 @@ export default function ChatsPage() {
                     <p className="text-sm font-medium truncate">{selectedSession.customerName}</p>
                     <p className="text-[10px] text-muted-foreground truncate">{selectedSession.topic}</p>
                   </div>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  {selectedSession.status === "on-hold" && (
-                    <Badge className="text-[10px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 mr-1">ON HOLD</Badge>
-                  )}
-                  {(selectedSession.status === "active" || selectedSession.status === "on-hold") && activeSlaTimes[selectedId!] !== undefined && (
-                    <Badge className={`text-[10px] font-mono border mr-1 ${getSlaBadgeClass(activeSlaTimes[selectedId!])}`} data-testid="badge-active-sla">
-                      <Timer className="w-3 h-3 mr-1" />
-                      SLA {formatSla(activeSlaTimes[selectedId!])}
-                    </Badge>
-                  )}
-                  <span className="text-xs text-muted-foreground font-mono mr-2">{formatDuration(elapsedTimes[selectedId!] || 0)}</span>
-                  <Button
-                    size="sm" variant="ghost"
-                    className={`h-7 w-7 p-0 ${selectedSession.status === "on-hold" ? "text-yellow-400" : "text-muted-foreground"}`}
-                    onClick={handleHoldToggle}
-                    data-testid="button-hold"
-                  >
-                    {selectedSession.status === "on-hold" ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
-                  </Button>
-                  <Button
-                    size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground"
-                    onClick={() => setTransferOpen(true)}
-                    data-testid="button-transfer"
-                  >
-                    <ArrowRightLeft className="w-3.5 h-3.5" />
-                  </Button>
-                  <Button
-                    size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground"
-                    onClick={() => setTicketOpen(true)}
-                    data-testid="button-ticket"
-                  >
-                    <TicketPlus className="w-3.5 h-3.5" />
-                  </Button>
-                  <Button
-                    size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                    onClick={handleCloseChat}
-                    data-testid="button-close-chat"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </Button>
                 </div>
               </div>
 
@@ -2033,6 +1999,10 @@ export default function ChatsPage() {
                           onCreateTicket={(t) => handleCreateTicket(selectedId!, t)}
                           createdTicketId={createdTickets[selectedId!]}
                           chatMessages={currentMessages}
+                          onHoldToggle={handleHoldToggle}
+                          onTransfer={() => setTransferOpen(true)}
+                          onTicket={() => setTicketOpen(true)}
+                          onCloseChat={handleCloseChat}
                         />
                       </div>
                     </motion.div>
