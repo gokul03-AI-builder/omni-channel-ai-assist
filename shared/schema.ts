@@ -30,13 +30,22 @@ export interface Customer {
 }
 
 export interface DeviceInfo {
-  model: string;
   serialNumber: string;
-  firmwareVersion: string;
-  lastUpdated: string;
-  status: "active" | "inactive" | "maintenance";
-  connectionType: string;
-  osVersion: string;
+  model: string;
+  deviceId: string | null;
+  mid: string;
+  tid: string | null;
+  status: string;
+  softwareVersion: string;
+  agentVersion: string;
+  lastHeartbeat: string;
+  lastCommunication: string;
+  network: string;
+  ipAddress: string;
+  macAddress: string | null;
+  hierarchyId: string;
+  hierarchyPath: string | null;
+  refSetId: string | null;
 }
 
 export interface Call {

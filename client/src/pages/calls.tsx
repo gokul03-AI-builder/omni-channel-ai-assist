@@ -820,10 +820,11 @@ function RightPanel({
   onNewChat?: () => void;
   onCollapse?: () => void;
 }) {
+  const devStatus = device.status.toLowerCase();
   const statusColor =
-    device.status === "active"
+    devStatus === "active"
       ? "text-status-online"
-      : device.status === "maintenance"
+      : devStatus === "maintenance"
         ? "text-status-away"
         : "text-status-offline";
 
@@ -946,7 +947,7 @@ function RightPanel({
                       <div>
                         <h4 className="font-semibold text-sm" data-testid="text-device-model">{device.model}</h4>
                         <div className="flex items-center gap-1.5">
-                          <span className={`w-2 h-2 rounded-full ${device.status === "active" ? "bg-status-online" : device.status === "maintenance" ? "bg-status-away" : "bg-status-offline"}`} />
+                          <span className={`w-2 h-2 rounded-full ${devStatus === "active" ? "bg-status-online" : devStatus === "maintenance" ? "bg-status-away" : "bg-status-offline"}`} />
                           <span className={`text-xs capitalize ${statusColor}`}>{device.status}</span>
                         </div>
                       </div>
@@ -956,25 +957,32 @@ function RightPanel({
 
                     <div className="space-y-3">
                       <InfoRow label="Serial Number" value={device.serialNumber} mono />
-                      <InfoRow label="Firmware" value={device.firmwareVersion} mono />
-                      <InfoRow label="OS" value={device.osVersion} />
-                      <InfoRow label="Connection" value={device.connectionType} />
-                      <InfoRow label="Last Updated" value={device.lastUpdated} />
+                      <InfoRow label="Device ID" value={device.deviceId || "—"} mono />
+                      <InfoRow label="MID" value={device.mid} mono />
+                      <InfoRow label="TID" value={device.tid || "—"} mono />
                     </div>
 
-                    {device.firmwareVersion !== "v4.2.1" && device.model.includes("P400") && (
-                      <Card className="p-3">
-                        <div className="flex items-start gap-2">
-                          <AlertCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                          <div>
-                            <p className="text-xs font-medium text-primary">Firmware Update Available</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              v4.2.1 available with NFC fixes. Can be pushed remotely.
-                            </p>
-                          </div>
-                        </div>
-                      </Card>
-                    )}
+                    <Separator className="bg-border/50" />
+
+                    <div className="space-y-3">
+                      <InfoRow label="Software Version" value={device.softwareVersion} mono />
+                      <InfoRow label="Agent Version" value={device.agentVersion} mono />
+                    </div>
+
+                    <Separator className="bg-border/50" />
+
+                    <div className="space-y-3">
+                      <InfoRow label="Network" value={device.network} />
+                      <InfoRow label="IP Address" value={device.ipAddress} mono />
+                      <InfoRow label="MAC Address" value={device.macAddress || "—"} mono />
+                    </div>
+
+                    <Separator className="bg-border/50" />
+
+                    <div className="space-y-3">
+                      <InfoRow label="Last Heartbeat" value={new Date(device.lastHeartbeat).toLocaleString()} />
+                      <InfoRow label="Last Communication" value={new Date(device.lastCommunication).toLocaleString()} />
+                    </div>
                   </div>
                 </CollapsibleSection>
 
