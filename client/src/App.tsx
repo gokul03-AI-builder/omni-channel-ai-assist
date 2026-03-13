@@ -8,19 +8,32 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeProvider } from "@/lib/theme-provider";
 import NotFound from "@/pages/not-found";
+import HomePage from "@/pages/home";
 import CallsPage from "@/pages/calls";
 import ChatsPage from "@/pages/chats";
 import FeedbackPage from "@/pages/feedback";
+import AnalyticsPage from "@/pages/analytics";
+import ReportsPage from "@/pages/reports";
+import PermissionsPage from "@/pages/permissions";
+import AIStatusPage from "@/pages/ai-status";
 import LoginPage from "@/pages/login";
 
 function AuthenticatedRouter() {
+  const authRole = localStorage.getItem("wingman_auth");
+  const isAdmin = authRole === "admin";
+
   return (
     <Switch>
       <Route path="/">
-        <CallsPage />
+        <HomePage />
       </Route>
+      <Route path="/calls" component={CallsPage} />
       <Route path="/chats" component={ChatsPage} />
       <Route path="/feedback" component={FeedbackPage} />
+      <Route path="/analytics" component={AnalyticsPage} />
+      <Route path="/reports" component={ReportsPage} />
+      {isAdmin && <Route path="/permissions" component={PermissionsPage} />}
+      {isAdmin && <Route path="/ai-status" component={AIStatusPage} />}
       <Route path="/login">
         <Redirect to="/" />
       </Route>

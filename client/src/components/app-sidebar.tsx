@@ -1,5 +1,5 @@
 import { useLocation, Link } from "wouter";
-import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon } from "lucide-react";
+import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon, Home, BarChart3, FileText, Shield, Bot } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -24,9 +24,17 @@ import { useTheme } from "@/lib/theme-provider";
 import verifoneLogo from "@assets/verifone_1773393343272.png";
 
 const navItems = [
-  { title: "Calls", url: "/", icon: Phone },
+  { title: "Home", url: "/", icon: Home },
+  { title: "Calls", url: "/calls", icon: Phone },
   { title: "Chats", url: "/chats", icon: MessageSquare },
   { title: "Feedback", url: "/feedback", icon: ThumbsUp },
+  { title: "Analytics", url: "/analytics", icon: BarChart3 },
+  { title: "Reports", url: "/reports", icon: FileText },
+];
+
+const adminNavItems = [
+  { title: "Permissions", url: "/permissions", icon: Shield },
+  { title: "AI Status", url: "/ai-status", icon: Bot },
 ];
 
 export function AppSidebar({ onLogout }: { onLogout: () => void }) {
@@ -67,7 +75,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
+              {[...navItems, ...(isAdmin ? adminNavItems : [])].map((item) => {
                 const isActive = location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -80,7 +88,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
                           : ""
                       }
                     >
-                      <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase()}`}>
+                      <Link href={item.url} data-testid={`link-nav-${item.title.toLowerCase().replace(/\s+/g, "-")}`}>
                         <item.icon className={isActive ? "text-primary" : "opacity-60"} />
                         <span>{item.title}</span>
                       </Link>
