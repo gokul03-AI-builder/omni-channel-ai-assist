@@ -351,7 +351,10 @@ function QueueItem({
               <span className="text-muted-foreground">{channelIcon(session.channel, "w-3 h-3")}</span>
             </div>
           </div>
-          <p className="text-xs text-muted-foreground truncate">{session.customerCompany ? `${session.customerCompany} · ` : ""}{session.topic}</p>
+          <p className="text-xs text-muted-foreground truncate">{session.topic}</p>
+          {session.customerCompany && (
+            <p className="text-[10px] text-muted-foreground/70 truncate">{session.customerCompany}</p>
+          )}
           <div className="flex items-center justify-between gap-1 mt-1">
             <div className="flex items-center gap-1.5">
               <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-4 border ${priorityBadgeClass(session.priority)}`}>
@@ -1701,7 +1704,7 @@ export default function ChatsPage() {
   }
 
   return (
-    <div className="flex h-full overflow-hidden relative" data-testid="page-chats">
+    <div className="h-full flex flex-col" data-testid="page-chats">
       <AnimatePresence>
         {summarySession && (
           <ChatSummaryOverlay
@@ -1714,7 +1717,9 @@ export default function ChatsPage() {
         )}
       </AnimatePresence>
 
-      <div className={`${queueCollapsed ? "w-[52px]" : "w-[280px]"} shrink-0 flex flex-col h-full border-r border-border/30 glass-panel transition-all duration-200`}>
+      <div className="flex flex-1 overflow-hidden gap-2 p-2">
+
+      <div className={`${queueCollapsed ? "w-[52px]" : "w-[280px]"} shrink-0 flex flex-col glass-panel rounded-xl overflow-hidden transition-all duration-200`}>
         {queueCollapsed ? (
           <div className="flex flex-col items-center py-3 gap-3">
             <button onClick={() => setQueueCollapsed(false)} className="p-1.5 rounded-md hover:bg-muted/40 transition-colors" data-testid="button-expand-queue">
@@ -1753,30 +1758,19 @@ export default function ChatsPage() {
               data-testid="input-chat-search"
             />
           </div>
-          <div className="flex items-center justify-between gap-1">
-            <div className="flex gap-1 flex-1">
-              {["all", "web", "email", "whatsapp", "sms"].map((ch) => (
-                <button
-                  key={ch}
-                  onClick={() => setChannelFilter(ch)}
-                  className={`text-[10px] px-2 py-1 rounded-full transition-colors ${channelFilter === ch ? "bg-primary/15 text-primary border border-primary/30" : "text-muted-foreground hover:bg-muted/30"}`}
-                  data-testid={`filter-${ch}`}
-                >
-                  {ch === "all" ? "All" : channelIcon(ch, "w-3 h-3 inline")}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => setSortBy(prev => prev === "wait" ? "priority" : "wait")}
-              className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-full bg-muted/30 hover:bg-primary/10 hover:text-primary transition-colors text-muted-foreground"
-              title={`Sort by ${sortBy === "wait" ? "Wait Time" : "Priority"}`}
-              data-testid="button-sort-toggle"
-            >
-              <ArrowUpDown className="w-3 h-3" />
-              {sortBy === "wait" ? "Time" : "Priority"}
-            </button>
+          <div className="flex gap-1 flex-wrap">
+            {["all", "web", "email", "whatsapp", "sms"].map((ch) => (
+              <button
+                key={ch}
+                onClick={() => setChannelFilter(ch)}
+                className={`text-[10px] px-2.5 py-1 rounded-full transition-colors ${channelFilter === ch ? "bg-primary/15 text-primary border border-primary/30" : "text-muted-foreground hover:bg-muted/30"}`}
+                data-testid={`filter-${ch}`}
+              >
+                {ch === "all" ? "All" : channelIcon(ch, "w-3 h-3 inline")}
+              </button>
+            ))}
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 items-center">
             <button
               onClick={() => setQueueTab("queue")}
               className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${queueTab === "queue" ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:bg-muted/30"}`}
@@ -1790,6 +1784,14 @@ export default function ChatsPage() {
               data-testid="tab-history"
             >
               <History className="w-3 h-3" /> History
+            </button>
+            <button
+              onClick={() => setSortBy(prev => prev === "wait" ? "priority" : "wait")}
+              className="flex items-center gap-1 text-[10px] px-2 py-1.5 rounded-md bg-muted/20 hover:bg-primary/10 hover:text-primary transition-colors text-muted-foreground shrink-0"
+              title={`Sort by ${sortBy === "wait" ? "Wait Time" : "Priority"}`}
+              data-testid="button-sort-toggle"
+            >
+              <ArrowUpDown className="w-3 h-3" />
             </button>
           </div>
         </div>
@@ -1888,9 +1890,9 @@ export default function ChatsPage() {
         )}
       </div>
 
-      <div className="flex-1 flex flex-col h-full min-w-0">
+      <div className="flex-1 flex flex-col min-w-0">
         {!selectedSession || (selectedSession.status === "waiting") ? (
-          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+          <div className="flex flex-col items-center justify-center h-full glass-panel rounded-xl text-muted-foreground">
             <div className="w-16 h-16 rounded-2xl glass flex items-center justify-center mb-4">
               <MessageSquare className="w-7 h-7 text-primary opacity-60" />
             </div>
@@ -1902,8 +1904,8 @@ export default function ChatsPage() {
             </p>
           </div>
         ) : (
-          <div className="flex h-full">
-            <div className="flex-1 flex flex-col h-full min-w-0 border-r border-border/30">
+          <div className="flex h-full gap-2">
+            <div className="flex-1 flex flex-col h-full min-w-0 glass-panel rounded-xl overflow-hidden">
               <div className="flex items-center justify-between gap-2 px-4 py-2 glass-header">
                 <div className="flex items-center gap-2 min-w-0">
                   <Avatar className="h-7 w-7 shrink-0">
@@ -2001,7 +2003,7 @@ export default function ChatsPage() {
               />
             </div>
 
-            <div className="w-[320px] shrink-0 border-r border-border/30 glass-panel">
+            <div className="w-[320px] shrink-0 glass-panel rounded-xl overflow-hidden">
               <KbAssistPanel
                 suggestions={currentKbSuggestions}
                 onOpenArticle={(s) => { setSelectedArticle(s); setArticleModalOpen(true); }}
@@ -2013,7 +2015,7 @@ export default function ChatsPage() {
             </div>
 
             {rightPanelOpen && currentCustomer && currentDevice && (
-              <div className="w-[360px] shrink-0 glass-panel">
+              <div className="w-[360px] shrink-0 glass-panel rounded-xl overflow-hidden">
                 <ChatInfoPanel
                   session={selectedSession}
                   customer={currentCustomer}
@@ -2032,6 +2034,8 @@ export default function ChatsPage() {
             )}
           </div>
         )}
+      </div>
+
       </div>
 
       <KbArticleModal
