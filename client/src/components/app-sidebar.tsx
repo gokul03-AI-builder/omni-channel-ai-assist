@@ -89,8 +89,8 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-3 border-t border-border/20 glass-subtle">
-        <div className="flex items-center gap-2.5">
+      <SidebarFooter className="border-t border-border/20 glass-subtle p-3 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:py-3">
+        <div className="flex flex-col items-center gap-2 group-data-[state=expanded]:flex-row group-data-[state=expanded]:gap-2.5">
           <button
             onClick={toggleSidebar}
             className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
@@ -98,7 +98,6 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
           >
             {open ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
           </button>
-          <div className="group-data-[collapsible=icon]:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="focus:outline-none" data-testid="button-profile-dropdown">
@@ -130,7 +129,6 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          </div>
         </div>
       </SidebarFooter>
     </Sidebar>
