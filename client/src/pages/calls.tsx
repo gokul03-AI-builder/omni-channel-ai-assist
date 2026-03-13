@@ -1669,8 +1669,7 @@ export default function CallsPage() {
     setTranscript([]);
     setAiSuggestions([]);
     setTranscriptIndex(0);
-    clearChatHistory();
-    setAiChatMessages([]);
+    setAiChatMessages(getChatHistory());
     setCalls(initialCalls.map((c) => ({ ...c, status: c.status === "active" ? "incoming" as const : c.status })));
     setTimeout(() => setSelectedCallId("call-001"), 3000);
   };
@@ -1692,8 +1691,7 @@ export default function CallsPage() {
     setAiSuggestions([]);
     setTranscriptIndex(0);
     setEndedCallSummary(summaryData);
-    setAiChatMessages([]);
-    clearChatHistory();
+    setAiChatMessages(getChatHistory());
   };
 
   const handleToggleHold = () => {
