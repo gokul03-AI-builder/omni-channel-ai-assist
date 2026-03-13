@@ -1793,7 +1793,7 @@ export default function CallsPage() {
           <div className="flex flex-col flex-1 min-w-0 gap-2">
 
             <div className="flex flex-1 min-h-0 gap-2">
-              <div className="flex-1 flex flex-col min-w-0 glass-panel rounded-xl overflow-hidden">
+              <div className="w-[220px] shrink-0 flex flex-col glass-panel rounded-xl overflow-hidden">
                 <LiveTranscription
                   entries={transcript}
                   isLive={selectedCall!.status === "active"}
@@ -1816,12 +1816,12 @@ export default function CallsPage() {
                       <motion.div
                         key="right-panel-expanded"
                         initial={{ width: 0, opacity: 0 }}
-                        animate={{ width: 300, opacity: 1 }}
+                        animate={{ width: 380, opacity: 1 }}
                         exit={{ width: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <div className="h-full w-[300px] glass-panel rounded-xl overflow-hidden">
+                        <div className="h-full w-[380px] glass-panel rounded-xl overflow-hidden">
                           <RightPanel
                             customer={currentCustomer}
                             device={currentDevice}
