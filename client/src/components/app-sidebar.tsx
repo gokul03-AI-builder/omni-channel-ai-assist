@@ -93,7 +93,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
       <SidebarContent>
         {[...navGroups, ...(isAdmin ? [adminGroup] : [])].map((group) => (
           <SidebarGroup key={group.label}>
-            <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-medium px-3">
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-medium px-3 group-data-[collapsible=icon]:hidden">
               {group.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
