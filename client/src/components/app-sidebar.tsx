@@ -1,5 +1,5 @@
 import { useLocation, Link } from "wouter";
-import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon, Home, BarChart3, FileText, Shield, Bot } from "lucide-react";
+import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon, Home, BarChart3, FileText, Shield, Activity } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -51,7 +51,6 @@ const navGroups = [
 const adminGroup = {
   label: "SYSTEM",
   items: [
-    { title: "AI Status", url: "/ai-status", icon: Bot },
     { title: "Permissions", url: "/permissions", icon: Shield },
   ],
 };
@@ -90,6 +89,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
           <p className="text-xs text-muted-foreground pl-0.5 group-data-[collapsible=icon]:hidden">AI-Powered Agent Assist</p>
         </div>
       </SidebarHeader>
+
       <SidebarContent>
         {[...navGroups, ...(isAdmin ? [adminGroup] : [])].map((group) => (
           <SidebarGroup key={group.label}>
@@ -123,7 +123,38 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+
+        {/* AI Status mini-widget — hidden in icon-only collapsed mode */}
+        <div className="px-3 pb-2 mt-auto group-data-[collapsible=icon]:hidden" data-testid="widget-ai-status">
+          <div className="glass-panel rounded-xl p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-semibold">AI Status</span>
+              </div>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-muted-foreground">Active agents</span>
+                <span className="text-[10px] font-medium" data-testid="text-ai-status-agents">4 online</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-muted-foreground">Handling now</span>
+                <span className="text-[10px] font-medium" data-testid="text-ai-status-handling">23 conversations</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-muted-foreground">Avg response</span>
+                <span className="text-[10px] font-medium text-primary" data-testid="text-ai-status-response">1.2s</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </SidebarContent>
+
       <SidebarFooter className="border-t border-border/10 p-3 group-data-[collapsible=icon]:px-1.5 group-data-[collapsible=icon]:py-3">
         <div className="flex flex-col items-center gap-2 group-data-[state=expanded]:flex-row group-data-[state=expanded]:gap-2.5">
           <button
