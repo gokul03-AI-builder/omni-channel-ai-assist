@@ -147,7 +147,7 @@ export default function HomePage() {
     <div className="flex flex-col h-full overflow-auto" data-testid="page-home">
         <div className="px-6 py-6 space-y-6 flex-1 flex flex-col">
 
-          <div className="flex flex-col items-center text-center pt-2 pb-1" data-testid="section-welcome">
+          <div className="flex flex-col items-center text-center px-6 py-4 glass-header rounded-2xl" data-testid="section-welcome">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
               <Globe className="w-6 h-6 text-primary" />
             </div>

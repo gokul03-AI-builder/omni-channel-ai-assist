@@ -56,7 +56,7 @@ export default function FeedbackPage() {
 
   return (
     <div className="flex flex-col h-full" data-testid="page-feedback">
-      <div className="px-6 py-4 glass-header">
+      <div className="px-6 py-4 glass-header mx-4 mt-4 rounded-2xl">
         <h2 className="text-lg font-semibold">Feedback</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Customer satisfaction & knowledge base ratings</p>
       </div>

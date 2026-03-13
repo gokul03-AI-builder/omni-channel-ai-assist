@@ -585,7 +585,7 @@ function KbAssistPanel({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header">
+      <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header mx-2 mt-2 rounded-xl">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-semibold">KB Assist</h3>
@@ -1838,7 +1838,7 @@ export default function ChatsPage() {
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-2 px-4 py-2 glass-header">
+              <div className="flex items-center justify-between gap-2 px-4 py-2 glass-header mx-2 mt-2 rounded-xl">
                 <div className="flex items-center gap-2 min-w-0">
                   <Avatar className="h-7 w-7 shrink-0">
                     <AvatarFallback className="text-xs bg-primary/15 text-primary">{selectedSession.customerInitials}</AvatarFallback>

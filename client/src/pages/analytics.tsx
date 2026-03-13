@@ -169,7 +169,7 @@ export default function AnalyticsPage() {
 
   return (
     <div className="flex flex-col h-full" data-testid="page-analytics">
-      <div className="px-6 py-4 glass-header flex items-center justify-between">
+      <div className="px-6 py-4 glass-header mx-4 mt-4 rounded-2xl flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold" data-testid="text-analytics-title">Analytics</h2>
           <p className="text-sm text-muted-foreground mt-0.5">

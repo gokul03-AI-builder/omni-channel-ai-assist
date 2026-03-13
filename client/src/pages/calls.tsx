@@ -392,7 +392,7 @@ function LiveTranscription({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header">
+      <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header mx-2 mt-2 rounded-xl">
         <div className="flex items-center gap-2">
           <Headphones className="w-4 h-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold">Live Transcription</h3>
@@ -530,7 +530,7 @@ function AISuggestionsPanel({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header">
+      <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header mx-2 mt-2 rounded-xl">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-semibold">KB Assist</h3>

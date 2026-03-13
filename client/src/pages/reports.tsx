@@ -135,7 +135,7 @@ export default function ReportsPage() {
 
   return (
     <div className="flex flex-col h-full" data-testid="page-reports">
-      <div className="px-6 py-4 glass-header">
+      <div className="px-6 py-4 glass-header mx-4 mt-4 rounded-2xl">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h1 className="text-2xl font-bold tracking-tight" data-testid="text-page-title">Reports</h1>

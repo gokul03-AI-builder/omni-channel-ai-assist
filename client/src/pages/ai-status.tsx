@@ -332,7 +332,7 @@ export default function AIStatusPage() {
         }
       `}</style>
 
-      <div className="px-6 py-4 glass-header">
+      <div className="px-6 py-4 glass-header mx-4 mt-4 rounded-2xl">
         <h2 className="text-lg font-semibold">AI Status</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
           AI service health & performance monitoring
