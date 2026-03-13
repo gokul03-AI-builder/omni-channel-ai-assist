@@ -292,7 +292,7 @@ function KbArticleModal({
               data-testid="button-copy-to-chat"
             >
               {copied ? <ClipboardCheck className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-              Copy to AI Chat
+              Copy to Chat Assist
             </Button>
           )}
         </div>
@@ -533,7 +533,7 @@ function AISuggestionsPanel({
       <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-semibold">AI KB Assist</h3>
+          <h3 className="text-sm font-semibold">KB Assist</h3>
         </div>
         <Badge variant="secondary" className="text-xs">RAG</Badge>
       </div>
@@ -858,7 +858,7 @@ function RightPanel({
             )}
             <TabsList className="flex-1 glass-subtle">
               <TabsTrigger value="ai-chat" className="flex-1 text-xs" data-testid="tab-ai-chat">
-                AI Chat
+                Chat Assist
               </TabsTrigger>
               <TabsTrigger value="info" className="flex-1 text-xs" data-testid="tab-info">
                 Info

@@ -14,10 +14,10 @@ An omnichannel support agent assist platform branded for Verifone. Provides a un
 ### Call Section
 - **Incoming Call Alert**: Animated alert with accept/decline buttons
 - **Live Call Transcription**: Real-time simulated transcript with sentiment analysis indicator (Positive/Neutral/Concerned/Frustrated) based on customer speech
-- **AI KB Assist (RAG)**: Contextual KB suggestions that appear based on conversation; clickable to open full article modal; thumbs up/down feedback on each card
-- **KB Article Full View**: Dialog modal showing full article content, formatted sections, references as clickable links, feedback rating buttons, and "Copy to AI Chat" action
+- **KB Assist (RAG)**: Contextual KB suggestions that appear based on conversation; clickable to open full article modal; thumbs up/down feedback on each card
+- **KB Article Full View**: Dialog modal showing full article content, formatted sections, references as clickable links, feedback rating buttons, and "Copy to Chat Assist" action
 - **Quick Actions**: Context-aware action buttons (Push Firmware, Escalate L2, Create Ticket, Schedule Technician) shown when KB suggestions are present; each triggers a confirmation toast
-- **Agent AI Chat**: Interactive chat with localStorage persistence across sessions; quick prompt chips (Firmware, Warranty, Escalate, RMA); KB article "Copy to AI Chat" prefill
+- **Chat Assist**: Interactive chat with localStorage persistence across sessions; quick prompt chips (Firmware, Warranty, Escalate, RMA); KB article "Copy to Chat Assist" prefill
 - **Customer Profile**: Full customer details with account type, contact info
 - **Device Information**: Terminal model, firmware, serial number, connection type; firmware update alert for P400
 - **Past Calls & Tickets**: Historical support interactions
@@ -25,15 +25,15 @@ An omnichannel support agent assist platform branded for Verifone. Provides a un
 
 ### Other Sections
 - **Chats**: Placeholder for chat-based support (waiting state)
-- **Feedback**: Two-tab view — Customer CSAT ratings, and AI KB Feedback (captures thumbs up/down votes from calls, persisted in localStorage)
+- **Feedback**: Two-tab view — Customer CSAT ratings, and KB Feedback (captures thumbs up/down votes from calls, persisted in localStorage)
 
 ## File Structure
 - `client/src/pages/calls.tsx` - Main calls page with all call-related components
 - `client/src/pages/chats.tsx` - Chat support page
-- `client/src/pages/feedback.tsx` - Customer feedback page (two tabs: CSAT + AI KB Feedback)
+- `client/src/pages/feedback.tsx` - Customer feedback page (two tabs: CSAT + KB Feedback)
 - `client/src/components/app-sidebar.tsx` - Navigation sidebar (logo always dark bg for cross-theme consistency)
 - `client/src/lib/mock-data.ts` - Simulated Verifone support data; KB articles now include fullContent, references, suggestedResponse
-- `client/src/lib/store.ts` - localStorage utilities for KB feedback and AI chat history persistence
+- `client/src/lib/store.ts` - localStorage utilities for KB feedback and Chat Assist history persistence
 - `client/src/lib/theme-provider.tsx` - Dark/light mode toggle
 - `shared/schema.ts` - TypeScript interfaces; AISuggestion extended with fullContent/references/suggestedResponse; KbFeedback interface added
 

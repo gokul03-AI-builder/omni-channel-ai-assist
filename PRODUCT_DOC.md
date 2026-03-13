@@ -57,7 +57,7 @@ This is the primary workspace. It is a four-panel layout that assembles itself a
 
 ---
 
-### 5. AI KB Assist — RAG Suggestions *(center-right)*
+### 5. KB Assist — RAG Suggestions *(center-right)*
 - Suggestion cards appear contextually as the transcript progresses (tied to specific transcript entries)
 - Each card displays:
   - Article title
@@ -73,18 +73,18 @@ This is the primary workspace. It is a four-panel layout that assembles itself a
 - Source, category, and confidence displayed in the header
 - References section with clickable links (opens in new tab)
 - Thumbs up / down vote (persisted to localStorage, synced to Feedback page)
-- **"Copy Suggested Response to AI Chat"** button — closes modal and prefills the AI Chat input with the article's suggested response
+- **"Copy Suggested Response to Chat Assist"** button — closes modal and prefills the Chat Assist input with the article's suggested response
 
 ---
 
 ### 6. Right Panel *(right, 4 tabs)*
 
-**Tab 1 — AI Chat**
+**Tab 1 — Chat Assist**
 - Header: "Chat History" label + message count (e.g., "Chat History · 6 messages")
 - **New Chat** button — clears conversation history (also cleared automatically on call end)
 - **Quick Prompt Chips** — shown only when chat is empty: *Firmware Rollback?, Warranty Status?, Escalate to L2?, RMA Process?*
 - Conversation bubbles — agent messages (right-aligned) and AI responses (left-aligned), each with a timestamp
-- AI simulates contextual responses keyed to the current call topic
+- Simulates contextual responses keyed to the current call topic
 - Text input + Send button (Enter key also sends)
 - **Quick Actions bar** — appears at the top of the chat tab when KB suggestions are present:
   - **Escalate L2** — triggers a confirmation toast notification
@@ -143,7 +143,7 @@ Two-tab view for reviewing quality signals.
 - Aggregate metrics: average CSAT rating, total reviews count
 - Individual feedback cards showing: customer name, star rating (1–5), comment, call topic, and date
 
-**Tab 2 — AI KB Feedback**
+**Tab 2 — KB Feedback**
 - Lists all thumbs up / thumbs down votes submitted on KB articles during calls
 - Each entry shows: article title, source ID, vote (Helpful / Not Helpful), associated call topic, and timestamp
 - Persisted in localStorage; survives page refresh
@@ -155,5 +155,5 @@ Two-tab view for reviewing quality signals.
 | What | Where |
 |---|---|
 | KB article votes (thumbs up/down) | localStorage (`vf-kb-feedback`) |
-| AI Chat history (current call) | localStorage (`vf-chat-history`), cleared on call end |
+| Chat Assist history (current call) | localStorage (`vf-chat-history`), cleared on call end |
 | Theme preference | localStorage (`verifone-theme`) |

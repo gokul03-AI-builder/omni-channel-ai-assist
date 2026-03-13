@@ -58,7 +58,7 @@ export default function FeedbackPage() {
     <div className="flex flex-col h-full" data-testid="page-feedback">
       <div className="px-6 py-4 glass-header">
         <h2 className="text-lg font-semibold">Feedback</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Customer satisfaction & AI knowledge base ratings</p>
+        <p className="text-sm text-muted-foreground mt-0.5">Customer satisfaction & knowledge base ratings</p>
       </div>
 
       <div className="px-6 py-4 grid grid-cols-3 gap-4 shrink-0">
@@ -104,7 +104,7 @@ export default function FeedbackPage() {
           <TabsList className="glass-subtle mb-3 shrink-0 w-fit">
             <TabsTrigger value="customer" className="text-xs">Customer Feedback</TabsTrigger>
             <TabsTrigger value="ai-kb" className="text-xs" data-testid="tab-ai-kb-feedback">
-              AI KB Feedback
+              KB Feedback
               {kbFeedback.length > 0 && (
                 <Badge variant="secondary" className="ml-1.5 text-xs px-1 py-0 h-4">{kbFeedback.length}</Badge>
               )}
@@ -169,7 +169,7 @@ export default function FeedbackPage() {
                 {kbFeedback.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                     <Sparkles className="w-10 h-10 mb-3 opacity-20 text-primary" />
-                    <p className="text-sm font-medium text-foreground">No AI KB feedback yet</p>
+                    <p className="text-sm font-medium text-foreground">No KB feedback yet</p>
                     <p className="text-xs mt-1 text-center max-w-xs">
                       Rate KB articles during a call using the thumbs up / down buttons on each suggestion card.
                     </p>
