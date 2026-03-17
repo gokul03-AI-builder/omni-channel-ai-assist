@@ -90,7 +90,7 @@ function App() {
                   <div className="absolute top-1/2 left-1/3 w-64 h-64 rounded-full bg-mint-100/30 dark:bg-primary/[0.04] blur-3xl" />
                 </div>
                 <AppSidebar onLogout={handleLogout} />
-                <main className="flex-1 h-full relative z-10">
+                <main className="flex-1 h-full">
                   <AuthenticatedRouter />
                 </main>
               </div>
