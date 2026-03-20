@@ -89,7 +89,10 @@ export default function HomePage() {
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="px-8 py-8 space-y-6 max-w-4xl mx-auto">
+        <div className="space-y-6 py-8">
+
+          {/* Centred: AI Summary + subtitle */}
+          <div className="px-8 space-y-6 max-w-4xl mx-auto">
 
           {/* AI Summary card */}
           <Card className="p-5 border-primary/15 bg-primary/5" data-testid="card-ai-summary">
@@ -129,6 +132,11 @@ export default function HomePage() {
           <p className="text-sm text-muted-foreground text-center">
             Intelligent support, powered by <span className="text-primary font-medium">Verifone Wingman</span>
           </p>
+
+          </div>{/* end centred section */}
+
+          {/* Full-width: metrics + review */}
+          <div className="px-8 space-y-6">
 
           {/* Main metrics grid: big resolution card + 2x2 right */}
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-4" data-testid="section-metrics">
@@ -216,6 +224,8 @@ export default function HomePage() {
 
           {/* Bottom spacing */}
           <div className="h-4" />
+
+          </div>{/* end full-width section */}
 
         </div>
       </ScrollArea>
