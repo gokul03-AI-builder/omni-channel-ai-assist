@@ -148,7 +148,7 @@ export default function ReportsPage() {
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="px-6 py-6 space-y-6 max-w-[1200px] mx-auto">
+        <div className="px-6 py-4 space-y-6">
 
           <div>
             <h2 className="text-sm font-semibold mb-3" data-testid="text-section-templates">Report Templates</h2>

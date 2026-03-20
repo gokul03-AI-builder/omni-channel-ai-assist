@@ -78,18 +78,18 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col h-full" data-testid="page-home">
-      <ScrollArea className="flex-1">
-        <div className="px-8 py-8 space-y-6 max-w-4xl mx-auto">
+      <div className="px-6 py-4 glass-header mx-4 mt-4 rounded-2xl flex items-center gap-3" data-testid="section-welcome">
+        <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+          <Globe className="w-4 h-4 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold" data-testid="text-welcome-name">Welcome, <span className="text-primary">{firstName}</span></h2>
+          <p className="text-sm text-muted-foreground mt-0.5">Your daily support overview</p>
+        </div>
+      </div>
 
-          {/* Welcome */}
-          <div className="flex items-center gap-3" data-testid="section-welcome">
-            <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
-              <Globe className="w-5 h-5 text-primary" />
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight" data-testid="text-welcome-name">
-              Welcome, <span className="text-primary">{firstName}</span>
-            </h1>
-          </div>
+      <ScrollArea className="flex-1">
+        <div className="px-6 py-4 space-y-6">
 
           {/* AI Summary card */}
           <Card className="p-5 border-primary/15 bg-primary/5" data-testid="card-ai-summary">

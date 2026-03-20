@@ -139,15 +139,17 @@ export default function PermissionsPage() {
 
   return (
     <div className="flex flex-col h-full" data-testid="page-permissions">
-      <div className="px-6 py-4 glass-header">
-        <h1 className="text-2xl font-bold tracking-tight" data-testid="text-page-title">People</h1>
-        <p className="text-sm text-muted-foreground mt-0.5" data-testid="text-page-subtitle">
-          Inviting people to Verifone's Wingman gives access to workspace shared projects and credits. You have {peopleState.length} agents in this workspace.
-        </p>
+      <div className="px-6 py-4 glass-header mx-4 mt-4 rounded-2xl flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold" data-testid="text-page-title">People</h2>
+          <p className="text-sm text-muted-foreground mt-0.5" data-testid="text-page-subtitle">
+            {peopleState.length} agents in this workspace
+          </p>
+        </div>
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="px-6 py-6 space-y-4 max-w-[1400px] mx-auto">
+        <div className="px-6 py-4 space-y-4">
           <Tabs value={tab} onValueChange={(v) => { setTab(v as typeof tab); setPage(1); }}>
             <TabsList className="glass-panel" data-testid="tabs-people">
               <TabsTrigger value="all" data-testid="tab-all">All</TabsTrigger>
