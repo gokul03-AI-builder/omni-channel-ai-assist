@@ -708,24 +708,28 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
         {/* Right panel */}
         <div className="w-[300px] shrink-0 glass-panel rounded-xl overflow-hidden">
           <Tabs defaultValue="properties" className="flex flex-col h-full">
-            <TabsList className="w-full rounded-none border-b border-border/20 bg-transparent h-auto p-0 shrink-0">
-              {[
-                { value: "properties", icon: Ticket, label: "Properties" },
-                { value: "customer", icon: UserCircle, label: "Customer" },
-                { value: "kb", icon: BookOpen, label: "KB" },
-                { value: "ai", icon: Bot, label: "AI" },
-              ].map(tab => (
-                <TabsTrigger key={tab.value} value={tab.value}
-                  className="flex-1 text-[10px] py-2.5 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none"
-                  data-testid={`tab-${tab.value}`}>
-                  <tab.icon className="w-3 h-3 mr-1" />{tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="px-3 pt-3 pb-2 shrink-0">
+              <TabsList className="w-full glass-subtle">
+                {[
+                  { value: "properties", icon: Ticket, label: "Properties" },
+                  { value: "customer", icon: UserCircle, label: "Customer" },
+                  { value: "kb", icon: BookOpen, label: "KB" },
+                  { value: "ai", icon: Bot, label: "AI" },
+                ].map(tab => (
+                  <TabsTrigger key={tab.value} value={tab.value}
+                    className="flex-1 text-[10px]"
+                    data-testid={`tab-${tab.value}`}>
+                    <tab.icon className="w-3 h-3 mr-1" />{tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+
+            <div className="relative flex-1 min-h-0">
 
             {/* ── Properties Tab ── */}
-            <TabsContent value="properties" className="flex-1 overflow-hidden mt-0">
-              <ScrollArea className="h-full">
+            <TabsContent value="properties" className="absolute inset-0 mt-0 overflow-hidden">
+              <ScrollArea className="h-full px-0">
                 <div className="p-3 space-y-4">
 
                   {/* Status — dropdown */}
@@ -848,7 +852,7 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
             </TabsContent>
 
             {/* ── Customer Tab ── */}
-            <TabsContent value="customer" className="flex-1 overflow-hidden mt-0">
+            <TabsContent value="customer" className="absolute inset-0 mt-0 overflow-hidden">
               <ScrollArea className="h-full">
                 <div className="p-4 space-y-4">
                   <CollapsibleSection title="Customer Profile">
@@ -934,7 +938,7 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
             </TabsContent>
 
             {/* ── KB Assist Tab ── */}
-            <TabsContent value="kb" className="flex-1 overflow-hidden mt-0 flex flex-col">
+            <TabsContent value="kb" className="absolute inset-0 mt-0 overflow-hidden flex flex-col">
               <div className="px-3 pt-3 pb-2 shrink-0">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -952,7 +956,7 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
             </TabsContent>
 
             {/* ── AI Assist Tab ── */}
-            <TabsContent value="ai" className="flex-1 overflow-hidden mt-0 flex flex-col">
+            <TabsContent value="ai" className="absolute inset-0 mt-0 overflow-hidden flex flex-col">
               <ScrollArea className="flex-1">
                 <div className="p-3 space-y-4">
                   {/* Summary */}
@@ -1032,6 +1036,8 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
                 </div>
               </ScrollArea>
             </TabsContent>
+
+            </div>{/* end relative flex-1 min-h-0 */}
           </Tabs>
         </div>
       </div>
