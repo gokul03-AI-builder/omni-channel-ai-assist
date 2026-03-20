@@ -989,11 +989,9 @@ function RightPanel({
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-medium truncate">{ticket.subject}</p>
-                                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                  <span className="text-xs text-muted-foreground font-mono">{ticket.id}</span>
-                                  <span className={`text-xs px-1.5 py-0.5 rounded-sm capitalize ${ticketStatusColor(ticket.status)}`}>
-                                    {ticket.status}
-                                  </span>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge className={`text-[10px] px-1.5 py-0 h-4 ${ticketStatusColor(ticket.status)}`}>{ticket.status}</Badge>
+                                  <span className="text-[10px] text-muted-foreground">{ticket.id}</span>
                                 </div>
                               </div>
                             </div>
@@ -1012,30 +1010,14 @@ function RightPanel({
 
                     <div>
                       <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                        Past Calls ({pastCalls.length})
+                        Past Interactions ({pastCalls.length})
                       </h4>
                       <div className="space-y-2">
                         {pastCalls.map((pc) => (
                           <Card key={pc.id} className="p-3" data-testid={`card-past-call-${pc.id}`}>
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-medium">{pc.topic}</p>
-                                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <Calendar className="w-3 h-3" />
-                                    {pc.date}
-                                  </span>
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    {formatDuration(pc.duration)}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
-                              <ChevronRight className="w-3 h-3 shrink-0 mt-0.5 text-primary" />
-                              {pc.resolution}
-                            </p>
+                            <p className="text-xs font-medium">{pc.topic}</p>
+                            <p className="text-[10px] text-muted-foreground mt-1">{pc.date} · {formatDuration(pc.duration)}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{pc.resolution}</p>
                           </Card>
                         ))}
                       </div>

@@ -6,10 +6,11 @@ import {
   UserCircle, Clock, Tag, User, Phone, Globe, CheckCircle2,
   Reply, ReplyAll, Forward, Copy, Ticket, Building2, CalendarDays,
   Hash, Zap, ChevronLeft, BookOpen, ChevronDown, ChevronUp,
-  MapPin, Briefcase, ShieldCheck, PenLine, Lock,
+  MapPin, Briefcase, ShieldCheck, PenLine, Lock, Cpu,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -158,6 +159,62 @@ const kbArticles = [
   { id: "kb-4", title: "e285 batch error E_BATCH_408 — known issue", relevance: 95, preview: "Batch settlement failure with E_BATCH_408 affects firmware 3.2.1. Hotfix available. Do not attempt manual batch close.", tags: ["e285", "batch"] },
   { id: "kb-5", title: "VX520 display cache reset procedure", relevance: 84, preview: "Corrupted display characters are resolved by clearing the font cache: Settings > Maintenance > Reset Display Cache.", tags: ["VX520", "display"] },
 ];
+
+// ─── Email-channel Device Info ────────────────────────────────────────────────
+
+const emailDeviceInfo: Record<string, {
+  model: string; serialNumber: string; deviceId: string; mid: string; tid: string;
+  status: "active" | "maintenance" | "offline";
+  softwareVersion: string; agentVersion: string;
+  network: string; ipAddress: string; macAddress: string;
+  lastHeartbeat: string; lastCommunication: string;
+}> = {
+  "em-001": { model: "Verifone P400", serialNumber: "P400-SN-884721", deviceId: "DEV-P400-001", mid: "MID-884721", tid: "TID-2201", status: "active", softwareVersion: "5.4.2", agentVersion: "3.1.0", network: "Wi-Fi", ipAddress: "192.168.1.42", macAddress: "AA:BB:CC:11:22:33", lastHeartbeat: "2026-03-17T09:00:00Z", lastCommunication: "2026-03-17T09:15:00Z" },
+  "em-002": { model: "Verifone V240m", serialNumber: "V240M-SN-339821", deviceId: "DEV-V240M-003", mid: "MID-339821", tid: "TID-5503", status: "maintenance", softwareVersion: "2.1.5", agentVersion: "2.8.1", network: "Wi-Fi", ipAddress: "192.168.2.15", macAddress: "DD:EE:FF:44:55:66", lastHeartbeat: "2026-03-16T13:55:00Z", lastCommunication: "2026-03-16T14:00:00Z" },
+  "em-003": { model: "Verifone e285", serialNumber: "E285-SN-221347", deviceId: "DEV-E285-012", mid: "MID-221347", tid: "TID-7712", status: "offline", softwareVersion: "3.2.1", agentVersion: "2.5.0", network: "4G LTE", ipAddress: "10.0.0.34", macAddress: "11:22:33:AA:BB:CC", lastHeartbeat: "2026-03-15T09:45:00Z", lastCommunication: "2026-03-15T10:00:00Z" },
+  "em-004": { model: "Verifone VX520", serialNumber: "VX520-SN-112233", deviceId: "DEV-VX520-007", mid: "MID-112233", tid: "TID-3308", status: "active", softwareVersion: "4.8.3", agentVersion: "3.0.2", network: "Ethernet", ipAddress: "10.10.0.22", macAddress: "CC:DD:EE:77:88:99", lastHeartbeat: "2026-03-17T06:55:00Z", lastCommunication: "2026-03-17T07:00:00Z" },
+  "em-005": { model: "Verifone MX915", serialNumber: "MX915-SN-998877", deviceId: "DEV-MX915-050", mid: "MID-998877", tid: "TID-1104", status: "active", softwareVersion: "3.6.0", agentVersion: "2.9.0", network: "USB", ipAddress: "—", macAddress: "—", lastHeartbeat: "2026-03-13T10:55:00Z", lastCommunication: "2026-03-13T11:00:00Z" },
+};
+
+const emailSupportTickets: Record<string, { id: string; subject: string; status: EmailStatus; resolution?: string }[]> = {
+  "em-001": [
+    { id: "TKT-4801", subject: "P400 paper jam issue", status: "resolved", resolution: "Replaced paper feeder assembly" },
+    { id: "TKT-4793", subject: "NFC calibration request", status: "closed", resolution: "NFC antenna re-calibrated" },
+  ],
+  "em-002": [
+    { id: "TKT-4790", subject: "V240m initial Wi-Fi setup", status: "closed" },
+  ],
+  "em-003": [
+    { id: "TKT-4798", subject: "e285 OTA update failure", status: "resolved", resolution: "Cleared OTA queue, update completed" },
+    { id: "TKT-4771", subject: "Terminal EOL replacement query", status: "closed" },
+  ],
+  "em-004": [
+    { id: "TKT-4785", subject: "VX520 network timeout issues", status: "resolved", resolution: "Network timeout config updated" },
+  ],
+  "em-005": [
+    { id: "TKT-4776", subject: "MX915 driver compatibility", status: "closed", resolution: "Updated POS driver to v8.2" },
+  ],
+};
+
+const emailPastInteractions: Record<string, { id: string; topic: string; date: string; duration: string; resolution: string }[]> = {
+  "em-001": [
+    { id: "pi-1a", topic: "P400 EMV chip reader calibration", date: "Jan 15, 2026", duration: "22 min", resolution: "Recalibrated EMV reader via maintenance menu" },
+    { id: "pi-1b", topic: "Contactless payment decline rate review", date: "Dec 8, 2025", duration: "35 min", resolution: "Reset NFC antenna, resolved intermittent declines" },
+  ],
+  "em-002": [
+    { id: "pi-2a", topic: "V240m Wi-Fi dropout during peak hours", date: "Feb 20, 2026", duration: "18 min", resolution: "Updated to firmware 2.1.4, improved connectivity" },
+  ],
+  "em-003": [
+    { id: "pi-3a", topic: "e285 firmware rollback after 3.2.0 issue", date: "Mar 1, 2026", duration: "45 min", resolution: "Rolled back to firmware 3.1.9, batch issue resolved" },
+    { id: "pi-3b", topic: "e285 batch settlement timeout", date: "Jan 28, 2026", duration: "30 min", resolution: "Adjusted settlement window, no more timeouts" },
+  ],
+  "em-004": [
+    { id: "pi-4a", topic: "VX520 receipt paper alignment", date: "Feb 5, 2026", duration: "12 min", resolution: "Replaced paper guide mechanism" },
+  ],
+  "em-005": [
+    { id: "pi-5a", topic: "MX915 PIN pad keypad sensitivity", date: "Feb 28, 2026", duration: "20 min", resolution: "Updated PIN pad firmware to 3.5.9" },
+  ],
+};
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -370,9 +427,36 @@ function MessageBubble({ message }: { message: EmailMessage }) {
   );
 }
 
-// ─── Collapsible Section ──────────────────────────────────────────────────────
+// ─── Collapsible Section (benchmark: matches Chat / Calls exactly) ─────────────
 
-function CollapsibleSection({ title, children, defaultOpen = true }: {
+function CollapsibleSection({ title, icon, open, onToggle, children }: {
+  title: string; icon: React.ReactNode; open: boolean; onToggle: () => void; children: React.ReactNode;
+}) {
+  return (
+    <div className="glass-panel rounded-xl overflow-hidden">
+      <button onClick={onToggle} className="w-full flex items-center justify-between px-3 py-2.5 text-left hover:bg-muted/10 transition-colors" data-testid={`section-toggle-${title.toLowerCase()}`}>
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {icon} {title}
+        </div>
+        <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && <div className="px-3 pb-3">{children}</div>}
+    </div>
+  );
+}
+
+function InfoRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex items-start justify-between gap-2">
+      <span className="text-xs text-muted-foreground shrink-0">{label}</span>
+      <span className={`text-xs text-foreground text-right ${mono ? "font-mono" : ""}`}>{value}</span>
+    </div>
+  );
+}
+
+// ─── Collapsible Block (for AI tab accordion — simple internal state) ──────────
+
+function CollapsibleBlock({ title, children, defaultOpen = true }: {
   title: string; children: React.ReactNode; defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -451,6 +535,12 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
   const [aiChatLoading, setAiChatLoading] = useState(false);
   const replyRef = useRef<HTMLTextAreaElement>(null);
   const sla = slaRemaining(thread.slaDeadline);
+  const [profileOpen, setProfileOpen] = useState(true);
+  const [deviceOpen, setDeviceOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const device = emailDeviceInfo[thread.id];
+  const supportTickets = emailSupportTickets[thread.id] || [];
+  const pastInteractions = emailPastInteractions[thread.id] || [];
 
   // Auto-resize textarea whenever replyText changes programmatically
   useEffect(() => {
@@ -854,85 +944,126 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
             {/* ── Customer Tab ── */}
             <TabsContent value="customer" className="absolute inset-0 mt-0 overflow-hidden">
               <ScrollArea className="h-full">
-                <div className="p-4 space-y-4">
-                  <CollapsibleSection title="Customer Profile">
+                <div className="p-3 space-y-2">
+
+                  {/* Profile */}
+                  <CollapsibleSection title="Profile" icon={<UserCircle className="w-3.5 h-3.5" />} open={profileOpen} onToggle={() => setProfileOpen(!profileOpen)}>
                     <div className="space-y-4">
-                      {/* Avatar + name */}
-                      <div className="flex flex-col items-center text-center gap-3 pb-2">
+                      <div className="flex flex-col items-center text-center space-y-3">
                         <div className="relative">
-                          <Avatar className="h-16 w-16 border-2 border-primary/20">
-                            <AvatarFallback className={`text-lg font-bold ${thread.avatarColor}`}>
+                          <Avatar className="h-16 w-16 border border-primary/20">
+                            <AvatarFallback className={`bg-primary/10 text-primary font-semibold text-lg ${thread.avatarColor}`}>
                               {thread.avatarInitials}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-background" />
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-status-online border-2 border-background" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-sm">{thread.customerName}</h3>
-                          <p className="text-xs text-muted-foreground">{thread.customerCompany}</p>
+                          <h3 className="font-semibold" data-testid="text-email-customer-name">{thread.customerName}</h3>
+                          <p className="text-sm text-muted-foreground">{thread.customerCompany}</p>
                         </div>
-                        <Badge className="bg-primary/15 text-primary text-[10px] px-2">{thread.customerAccountType}</Badge>
+                        <Badge variant="default" className="text-xs">{thread.customerAccountType}</Badge>
                       </div>
-
-                      <Separator className="bg-border/30" />
-
-                      {/* Contact info rows */}
+                      <Separator className="bg-border/50" />
                       <div className="space-y-3">
-                        {[
-                          { icon: Mail,     label: "Email",    value: thread.customerEmail },
-                          { icon: Phone,    label: "Phone",    value: thread.customerPhone },
-                          { icon: MapPin,   label: "Location", value: thread.customerLocation },
-                          { icon: Briefcase,label: "Company",  value: thread.customerCompany },
-                          { icon: ShieldCheck, label: "Since", value: thread.customerSince },
-                        ].map((row, i) => (
-                          <div key={i} className="flex items-start gap-2.5">
-                            <div className="w-7 h-7 rounded-md bg-muted/30 flex items-center justify-center shrink-0">
-                              <row.icon className="w-3.5 h-3.5 text-muted-foreground" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[10px] text-muted-foreground">{row.label}</p>
-                              <p className="text-xs font-medium truncate">{row.value}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <Separator className="bg-border/30" />
-
-                      {/* Account stats */}
-                      <div className="grid grid-cols-3 gap-2">
-                        {[["12", "Total"], ["10", "Resolved"], ["4.3", "CSAT"]].map(([v, l]) => (
-                          <div key={l} className="text-center p-2 rounded-lg bg-muted/20 border border-border/20">
-                            <p className="text-sm font-bold text-primary">{v}</p>
-                            <p className="text-[10px] text-muted-foreground">{l}</p>
-                          </div>
-                        ))}
+                        <InfoRow label="Email" value={thread.customerEmail} />
+                        <InfoRow label="Phone" value={thread.customerPhone} />
+                        <InfoRow label="Location" value={thread.customerLocation} />
+                        <InfoRow label="Member Since" value={thread.customerSince} />
                       </div>
                     </div>
                   </CollapsibleSection>
 
-                  <Separator className="bg-border/30" />
-
-                  {/* Past tickets */}
-                  <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Past Tickets</p>
-                    {[
-                      { id: "TKT-4801", subject: "P400 paper jam issue", status: "resolved" as EmailStatus, date: "Mar 10" },
-                      { id: "TKT-4793", subject: "NFC calibration request", status: "closed" as EmailStatus, date: "Feb 28" },
-                      { id: "TKT-4771", subject: "Terminal EOL replacement", status: "closed" as EmailStatus, date: "Feb 14" },
-                    ].map(t => (
-                      <div key={t.id} className="flex items-start gap-2 py-2 border-b border-border/10 last:border-0">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-medium truncate">{t.subject}</p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[9px] font-mono text-muted-foreground">{t.id}</span>
-                            <span className={`text-[9px] px-1 py-0.5 rounded-full ${statusConfig[t.status].color}`}>{statusConfig[t.status].label}</span>
+                  {/* Device */}
+                  {device && (
+                    <CollapsibleSection title="Device" icon={<Cpu className="w-3.5 h-3.5" />} open={deviceOpen} onToggle={() => setDeviceOpen(!deviceOpen)}>
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center">
+                            <Cpu className="w-5 h-5 text-primary" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-sm" data-testid="text-email-device-model">{device.model}</h4>
+                            <div className="flex items-center gap-1.5">
+                              <span className={`w-2 h-2 rounded-full ${device.status === "active" ? "bg-status-online" : device.status === "maintenance" ? "bg-status-away" : "bg-status-offline"}`} />
+                              <span className={`text-xs capitalize ${device.status === "active" ? "text-status-online" : device.status === "maintenance" ? "text-status-away" : "text-status-offline"}`}>{device.status}</span>
+                            </div>
                           </div>
                         </div>
-                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">{t.date}</span>
+                        <Separator className="bg-border/50" />
+                        <div className="space-y-3">
+                          <InfoRow label="Serial Number" value={device.serialNumber} mono />
+                          <InfoRow label="Device ID" value={device.deviceId} mono />
+                          <InfoRow label="MID" value={device.mid} mono />
+                          <InfoRow label="TID" value={device.tid} mono />
+                        </div>
+                        <Separator className="bg-border/50" />
+                        <div className="space-y-3">
+                          <InfoRow label="Software Version" value={device.softwareVersion} mono />
+                          <InfoRow label="Agent Version" value={device.agentVersion} mono />
+                        </div>
+                        <Separator className="bg-border/50" />
+                        <div className="space-y-3">
+                          <InfoRow label="Network" value={device.network} />
+                          <InfoRow label="IP Address" value={device.ipAddress} mono />
+                          <InfoRow label="MAC Address" value={device.macAddress} mono />
+                        </div>
+                        <Separator className="bg-border/50" />
+                        <div className="space-y-3">
+                          <InfoRow label="Last Heartbeat" value={new Date(device.lastHeartbeat).toLocaleString()} />
+                          <InfoRow label="Last Communication" value={new Date(device.lastCommunication).toLocaleString()} />
+                        </div>
                       </div>
-                    ))}
-                  </div>
+                    </CollapsibleSection>
+                  )}
+
+                  {/* History */}
+                  <CollapsibleSection title="History" icon={<Clock className="w-3.5 h-3.5" />} open={historyOpen} onToggle={() => setHistoryOpen(!historyOpen)}>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Support Tickets ({supportTickets.length})</h4>
+                        <div className="space-y-2">
+                          {supportTickets.map(ticket => (
+                            <Card key={ticket.id} className="p-3" data-testid={`card-email-ticket-${ticket.id}`}>
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-medium truncate">{ticket.subject}</p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Badge className={`text-[10px] px-1.5 py-0 h-4 ${statusConfig[ticket.status].color}`}>{statusConfig[ticket.status].label}</Badge>
+                                    <span className="text-[10px] text-muted-foreground">{ticket.id}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              {ticket.resolution && (
+                                <p className="text-xs text-muted-foreground mt-2 flex items-start gap-1">
+                                  <CheckCircle2 className="w-3 h-3 text-status-online shrink-0 mt-0.5" />
+                                  {ticket.resolution}
+                                </p>
+                              )}
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                      {pastInteractions.length > 0 && (
+                        <>
+                          <Separator className="bg-border/50" />
+                          <div>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Past Interactions ({pastInteractions.length})</h4>
+                            <div className="space-y-2">
+                              {pastInteractions.map(pi => (
+                                <Card key={pi.id} className="p-3" data-testid={`card-email-interaction-${pi.id}`}>
+                                  <p className="text-xs font-medium">{pi.topic}</p>
+                                  <p className="text-[10px] text-muted-foreground mt-1">{pi.date} · {pi.duration}</p>
+                                  <p className="text-[10px] text-muted-foreground mt-0.5">{pi.resolution}</p>
+                                </Card>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </CollapsibleSection>
+
                 </div>
               </ScrollArea>
             </TabsContent>
@@ -960,15 +1091,15 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
               <ScrollArea className="flex-1">
                 <div className="p-3 space-y-4">
                   {/* Summary */}
-                  <CollapsibleSection title="AI Summary">
+                  <CollapsibleBlock title="AI Summary">
                     <p className="text-[10px] text-muted-foreground leading-relaxed p-2.5 rounded-lg bg-primary/5 border border-primary/15">
                       Customer reports {thread.category.toLowerCase()} — ticket {thread.ticketId} is currently {statusConfig[thread.status].label.toLowerCase()} with {thread.priority} priority. {thread.messages.length} message{thread.messages.length !== 1 ? "s" : ""} in thread.
                     </p>
-                  </CollapsibleSection>
+                  </CollapsibleBlock>
                   <Separator className="bg-border/20" />
 
                   {/* Sentiment */}
-                  <CollapsibleSection title="Sentiment">
+                  <CollapsibleBlock title="Sentiment">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
@@ -985,11 +1116,11 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
                         ))}
                       </div>
                     </div>
-                  </CollapsibleSection>
+                  </CollapsibleBlock>
                   <Separator className="bg-border/20" />
 
                   {/* Recommendations */}
-                  <CollapsibleSection title="Recommendations">
+                  <CollapsibleBlock title="Recommendations">
                     <div className="space-y-2">
                       {["Prioritise immediate resolution — customer is affected during business hours.", "SLA breach risk detected. Escalate to L2 if unresolved within 30 minutes.", "Consider offering a temporary workaround while investigating root cause."].map((s, i) => (
                         <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-muted/10 border border-border/20">
@@ -998,7 +1129,7 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
                         </div>
                       ))}
                     </div>
-                  </CollapsibleSection>
+                  </CollapsibleBlock>
                   <Separator className="bg-border/20" />
 
                   {/* AI chat with KB */}
