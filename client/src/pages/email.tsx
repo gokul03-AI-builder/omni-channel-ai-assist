@@ -706,7 +706,7 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
         </div>
 
         {/* Right panel */}
-        <div className="w-[380px] shrink-0 glass-panel rounded-xl overflow-hidden">
+        <div className="w-[350px] shrink-0 glass-panel rounded-xl overflow-hidden">
           <Tabs defaultValue="properties" className="flex flex-col h-full">
             <div className="px-3 pt-3 pb-2 shrink-0">
               <TabsList className="w-full glass-subtle">
