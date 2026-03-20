@@ -435,7 +435,7 @@ function CollapsibleSection({ title, icon, open, onToggle, children }: {
   return (
     <div className="glass-panel rounded-xl overflow-hidden">
       <button onClick={onToggle} className="w-full flex items-center justify-between px-3 py-2.5 text-left hover:bg-muted/10 transition-colors" data-testid={`section-toggle-${title.toLowerCase()}`}>
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           {icon} {title}
         </div>
         <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
@@ -464,7 +464,7 @@ function CollapsibleBlock({ title, children, defaultOpen = true }: {
     <div>
       <button
         onClick={() => setOpen(p => !p)}
-        className="flex items-center justify-between w-full text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 hover:text-foreground transition-colors group"
+        className="flex items-center justify-between w-full text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 hover:text-foreground transition-colors group"
         data-testid={`section-toggle-${title.toLowerCase().replace(/\s+/g, "-")}`}
       >
         <span>{title}</span>
@@ -485,24 +485,24 @@ function KBArticleCard({ article, onInsert }: { article: typeof kbArticles[0]; o
     <div className="rounded-lg border border-border/30 bg-muted/10 hover:bg-primary/5 hover:border-primary/20 transition-colors" data-testid={`card-kb-${article.id}`}>
       <div className="p-2.5">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <p className="text-[10px] font-medium leading-relaxed flex-1">{article.title}</p>
-          <span className="text-[9px] font-bold text-primary shrink-0 bg-primary/10 px-1.5 py-0.5 rounded-full">{article.relevance}%</span>
+          <p className="text-xs font-medium leading-relaxed flex-1">{article.title}</p>
+          <span className="text-[10px] font-bold text-primary shrink-0 bg-primary/10 px-1.5 py-0.5 rounded-full">{article.relevance}%</span>
         </div>
         <div className="flex flex-wrap gap-1 mb-2">
           {article.tags.map(tag => (
-            <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-full bg-muted/50 text-muted-foreground">#{tag}</span>
+            <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted/50 text-muted-foreground">#{tag}</span>
           ))}
         </div>
         {expanded && (
-          <p className="text-[10px] text-muted-foreground leading-relaxed mb-2 p-2 rounded-md bg-background/50 border border-border/20">
+          <p className="text-xs text-muted-foreground leading-relaxed mb-2 p-2 rounded-md bg-background/50 border border-border/20">
             {article.preview}
           </p>
         )}
         <div className="flex items-center gap-3">
-          <button onClick={() => setExpanded(p => !p)} className="flex items-center gap-1 text-[9px] text-primary hover:underline" data-testid={`button-kb-expand-${article.id}`}>
+          <button onClick={() => setExpanded(p => !p)} className="flex items-center gap-1 text-[10px] text-primary hover:underline" data-testid={`button-kb-expand-${article.id}`}>
             {expanded ? <><ChevronUp className="w-3 h-3" />Hide</> : <><ChevronDown className="w-3 h-3" />View article</>}
           </button>
-          <button onClick={onInsert} className="text-[9px] text-muted-foreground hover:text-primary transition-colors" data-testid={`button-kb-insert-${article.id}`}>
+          <button onClick={onInsert} className="text-[10px] text-muted-foreground hover:text-primary transition-colors" data-testid={`button-kb-insert-${article.id}`}>
             Insert in reply
           </button>
         </div>
@@ -824,17 +824,17 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
 
                   {/* Status — dropdown */}
                   <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Status</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Status</p>
                     <Select value={thread.status} onValueChange={v => { onUpdateThread({ status: v as EmailStatus }); toast({ title: `Status → ${statusConfig[v as EmailStatus].label}` }); }}>
                       <SelectTrigger className="h-8 text-xs glass-input" data-testid="select-status">
                         <div className="flex items-center gap-2">
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusConfig[thread.status].color}`}>{statusConfig[thread.status].label}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusConfig[thread.status].color}`}>{statusConfig[thread.status].label}</span>
                         </div>
                       </SelectTrigger>
                       <SelectContent>
                         {(Object.keys(statusConfig) as EmailStatus[]).map(s => (
                           <SelectItem key={s} value={s}>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusConfig[s].color}`}>{statusConfig[s].label}</span>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusConfig[s].color}`}>{statusConfig[s].label}</span>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -843,17 +843,17 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
 
                   {/* Priority — dropdown */}
                   <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Priority</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Priority</p>
                     <Select value={thread.priority} onValueChange={v => { onUpdateThread({ priority: v as EmailPriority }); toast({ title: `Priority → ${v}` }); }}>
                       <SelectTrigger className="h-8 text-xs glass-input" data-testid="select-priority">
                         <div className="flex items-center gap-2">
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium capitalize ${priorityConfig[thread.priority].color}`}>{thread.priority}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${priorityConfig[thread.priority].color}`}>{thread.priority}</span>
                         </div>
                       </SelectTrigger>
                       <SelectContent>
                         {(["urgent", "high", "medium", "low"] as EmailPriority[]).map(p => (
                           <SelectItem key={p} value={p}>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium capitalize ${priorityConfig[p].color}`}>{p}</span>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${priorityConfig[p].color}`}>{p}</span>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -864,20 +864,20 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
 
                   {/* Ticket Details — category & assignee editable */}
                   <div className="space-y-3">
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Ticket Details</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ticket Details</p>
 
                     <div className="flex items-center gap-2">
                       <Hash className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span className="text-[10px] text-muted-foreground w-16 shrink-0">Ticket ID</span>
-                      <span className="text-[10px] font-mono font-medium flex-1 text-right">{thread.ticketId}</span>
+                      <span className="text-xs text-muted-foreground w-16 shrink-0">Ticket ID</span>
+                      <span className="text-xs font-mono font-medium flex-1 text-right">{thread.ticketId}</span>
                     </div>
 
                     {/* Category — editable */}
                     <div className="flex items-center gap-2">
                       <Tag className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span className="text-[10px] text-muted-foreground w-16 shrink-0">Category</span>
+                      <span className="text-xs text-muted-foreground w-16 shrink-0">Category</span>
                       <Select value={thread.category} onValueChange={v => { onUpdateThread({ category: v }); toast({ title: `Category updated` }); }}>
-                        <SelectTrigger className="h-6 text-[10px] glass-input flex-1 border-border/30" data-testid="select-category">
+                        <SelectTrigger className="h-6 text-xs glass-input flex-1 border-border/30" data-testid="select-category">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -889,9 +889,9 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
                     {/* Assignee — editable */}
                     <div className="flex items-center gap-2">
                       <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span className="text-[10px] text-muted-foreground w-16 shrink-0">Assignee</span>
+                      <span className="text-xs text-muted-foreground w-16 shrink-0">Assignee</span>
                       <Select value={thread.assignee} onValueChange={v => { onUpdateThread({ assignee: v }); toast({ title: `Assigned to ${v}` }); }}>
-                        <SelectTrigger className="h-6 text-[10px] glass-input flex-1 border-border/30" data-testid="select-assignee">
+                        <SelectTrigger className="h-6 text-xs glass-input flex-1 border-border/30" data-testid="select-assignee">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -902,13 +902,13 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
 
                     <div className="flex items-center gap-2">
                       <CalendarDays className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span className="text-[10px] text-muted-foreground w-16 shrink-0">Created</span>
-                      <span className="text-[10px] font-medium flex-1 text-right">{formatDate(thread.createdAt)}</span>
+                      <span className="text-xs text-muted-foreground w-16 shrink-0">Created</span>
+                      <span className="text-xs font-medium flex-1 text-right">{formatDate(thread.createdAt)}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <RefreshCw className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span className="text-[10px] text-muted-foreground w-16 shrink-0">Updated</span>
-                      <span className="text-[10px] font-medium flex-1 text-right">{formatDate(thread.updatedAt)}</span>
+                      <span className="text-xs text-muted-foreground w-16 shrink-0">Updated</span>
+                      <span className="text-xs font-medium flex-1 text-right">{formatDate(thread.updatedAt)}</span>
                     </div>
                   </div>
 
@@ -916,10 +916,10 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
 
                   {/* SLA */}
                   <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">SLA</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">SLA</p>
                     <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${sla.urgent ? "bg-red-50 dark:bg-red-500/10" : "bg-emerald-50 dark:bg-emerald-500/10"}`}>
                       <Clock className={`w-3.5 h-3.5 ${sla.urgent ? "text-red-500" : "text-emerald-500"}`} />
-                      <span className={`text-[10px] font-medium ${sla.urgent ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}>{sla.label}</span>
+                      <span className={`text-xs font-medium ${sla.urgent ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}>{sla.label}</span>
                     </div>
                   </div>
 
@@ -927,12 +927,12 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
 
                   {/* Tags */}
                   <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Tags</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Tags</p>
                     <div className="flex flex-wrap gap-1">
                       {thread.tags.map(tag => (
-                        <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-muted/50 text-muted-foreground border border-border/30">#{tag}</span>
+                        <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-muted/50 text-muted-foreground border border-border/30">#{tag}</span>
                       ))}
-                      <button className="text-[10px] px-2 py-0.5 rounded-full border border-dashed border-border/40 text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors" data-testid="button-add-tag">
+                      <button className="text-xs px-2 py-0.5 rounded-full border border-dashed border-border/40 text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors" data-testid="button-add-tag">
                         + Add
                       </button>
                     </div>
@@ -1077,7 +1077,7 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
                 </div>
               </div>
               <ScrollArea className="flex-1 px-3 pb-3">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Suggested Articles</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Suggested Articles</p>
                 <div className="space-y-2">
                   {kbArticles.map(a => (
                     <KBArticleCard key={a.id} article={a} onInsert={() => toast({ title: "Article added to reply" })} />
@@ -1092,7 +1092,7 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
                 <div className="p-3 space-y-4">
                   {/* Summary */}
                   <CollapsibleBlock title="AI Summary">
-                    <p className="text-[10px] text-muted-foreground leading-relaxed p-2.5 rounded-lg bg-primary/5 border border-primary/15">
+                    <p className="text-xs text-muted-foreground leading-relaxed p-2.5 rounded-lg bg-primary/5 border border-primary/15">
                       Customer reports {thread.category.toLowerCase()} — ticket {thread.ticketId} is currently {statusConfig[thread.status].label.toLowerCase()} with {thread.priority} priority. {thread.messages.length} message{thread.messages.length !== 1 ? "s" : ""} in thread.
                     </p>
                   </CollapsibleBlock>
@@ -1105,12 +1105,12 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
                         <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
                           <div className="h-full rounded-full bg-gradient-to-r from-red-400 to-amber-400" style={{ width: "65%" }} />
                         </div>
-                        <span className="text-[10px] font-medium text-amber-600">Frustrated</span>
+                        <span className="text-xs font-medium text-amber-600">Frustrated</span>
                       </div>
                       <div className="grid grid-cols-3 gap-1.5">
                         {[["Urgency", "High", "text-red-500"], ["Tone", "Formal", "text-amber-500"], ["Risk", "Medium", "text-orange-500"]].map(([l, v, c]) => (
                           <div key={l} className="text-center p-1.5 rounded bg-muted/20">
-                            <p className="text-[10px] font-semibold">{l}</p>
+                            <p className="text-xs font-semibold">{l}</p>
                             <p className={`text-xs font-bold ${c}`}>{v}</p>
                           </div>
                         ))}
@@ -1125,7 +1125,7 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
                       {["Prioritise immediate resolution — customer is affected during business hours.", "SLA breach risk detected. Escalate to L2 if unresolved within 30 minutes.", "Consider offering a temporary workaround while investigating root cause."].map((s, i) => (
                         <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-muted/10 border border-border/20">
                           <Zap className="w-3 h-3 text-primary shrink-0 mt-0.5" />
-                          <p className="text-[10px] text-muted-foreground leading-relaxed">{s}</p>
+                          <p className="text-xs text-muted-foreground leading-relaxed">{s}</p>
                         </div>
                       ))}
                     </div>
@@ -1134,14 +1134,14 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
 
                   {/* AI chat with KB */}
                   <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Ask Wingman AI</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Ask Wingman AI</p>
                     <div className="space-y-2 mb-2 max-h-48 overflow-y-auto">
                       {aiChat.length === 0 && (
-                        <p className="text-[10px] text-muted-foreground italic">Ask anything about this ticket or search the knowledge base...</p>
+                        <p className="text-xs text-muted-foreground italic">Ask anything about this ticket or search the knowledge base...</p>
                       )}
                       {aiChat.map((msg, i) => (
                         <div key={i} className={`flex gap-2 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-                          <div className={`text-[10px] leading-relaxed p-2 rounded-lg max-w-[85%] ${msg.role === "ai" ? "bg-primary/5 border border-primary/15 text-foreground" : "bg-muted/50 text-foreground"}`}>
+                          <div className={`text-xs leading-relaxed p-2 rounded-lg max-w-[85%] ${msg.role === "ai" ? "bg-primary/5 border border-primary/15 text-foreground" : "bg-muted/50 text-foreground"}`}>
                             {msg.text}
                           </div>
                         </div>
