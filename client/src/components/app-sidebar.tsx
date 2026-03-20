@@ -1,5 +1,5 @@
 import { useLocation, Link } from "wouter";
-import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon, Home, BarChart3, FileText, Shield, Activity, History, ChevronRight, Mail } from "lucide-react";
+import { Phone, MessageSquare, ThumbsUp, LogOut, Sun, Moon, Home, BarChart3, FileText, Shield, Activity, History, ChevronRight, ChevronLeft, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   Sidebar,
@@ -308,7 +308,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
             className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
             data-testid="button-toggle-sidebar"
           >
-            {open ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+            {open ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
           </button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

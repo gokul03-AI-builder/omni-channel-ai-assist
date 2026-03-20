@@ -23,7 +23,7 @@ import {
   BookOpen,
   Headphones,
   Volume2,
-  PanelRightOpen,
+  ChevronLeft,
   UserCircle,
   ThumbsUp,
   ThumbsDown,
@@ -1858,7 +1858,7 @@ export default function CallsPage() {
                             className="p-1 rounded-md hover:bg-muted/40 transition-colors"
                             data-testid="button-expand-right-panel"
                           >
-                            <PanelRightOpen className="w-4 h-4 text-muted-foreground" />
+                            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
                           </button>
                         </div>
                       </motion.div>

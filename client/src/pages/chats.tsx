@@ -15,8 +15,6 @@ import {
   ChevronLeft,
   Sparkles,
   BookOpen,
-  PanelRightClose,
-  PanelRightOpen,
   UserCircle,
   ThumbsUp,
   ThumbsDown,
@@ -751,7 +749,7 @@ function ChatInfoPanel({
           <div className="flex items-center gap-2">
             {onCollapse && (
               <button onClick={onCollapse} className="shrink-0 p-1 rounded-md hover:bg-muted/40 transition-colors" data-testid="button-collapse-right-panel">
-                <PanelRightClose className="w-3.5 h-3.5 text-muted-foreground" />
+                <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
               </button>
             )}
             <TabsList className="flex-1 glass-subtle">
@@ -2067,7 +2065,7 @@ export default function ChatsPage() {
                           className="p-1 rounded-md hover:bg-muted/40 transition-colors"
                           data-testid="button-expand-right-panel"
                         >
-                          <PanelRightOpen className="w-4 h-4 text-muted-foreground" />
+                          <ChevronLeft className="w-4 h-4 text-muted-foreground" />
                         </button>
                       </div>
                     </motion.div>
