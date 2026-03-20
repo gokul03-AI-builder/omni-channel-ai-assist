@@ -1974,12 +1974,12 @@ export default function ChatsPage() {
                     <motion.div
                       key="right-panel-expanded"
                       initial={{ width: 0, opacity: 0 }}
-                      animate={{ width: 360, opacity: 1 }}
+                      animate={{ width: 320, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
                       className="overflow-hidden"
                     >
-                      <div className="h-full w-[360px] glass-panel rounded-xl overflow-hidden">
+                      <div className="h-full w-[320px] glass-panel rounded-xl overflow-hidden">
                         <ChatInfoPanel
                           session={selectedSession}
                           customer={currentCustomer}
