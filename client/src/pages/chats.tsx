@@ -315,23 +315,41 @@ function QueueItem({
   session,
   isSelected,
   onClick,
+  slaRemainingSec,
 }: {
   session: ChatSession;
   isSelected: boolean;
   onClick: () => void;
+  slaRemainingSec?: number;
 }) {
+  const initials = session.customerName.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+  const slaColor = slaRemainingSec !== undefined
+    ? slaRemainingSec < 60 ? "text-red-400" : slaRemainingSec < 120 ? "text-amber-400" : "text-muted-foreground"
+    : "text-muted-foreground";
+  const slaLabel = slaRemainingSec !== undefined
+    ? `${Math.floor(slaRemainingSec / 60)}:${String(slaRemainingSec % 60).padStart(2, "0")}`
+    : null;
+
   return (
     <div
-      className={`px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 shrink-0 min-w-[180px] max-w-[220px] ${isSelected ? "glass-bubble-primary" : "hover-elevate"}`}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? "glass-bubble-primary" : "hover-elevate"}`}
       onClick={onClick}
       data-testid={`card-chat-${session.id}`}
     >
-      <div className="min-w-0">
+      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 text-[11px] font-bold text-primary">
+        {initials}
+      </div>
+      <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-1">
           <p className="text-xs font-medium truncate" data-testid={`text-name-${session.id}`}>{session.customerName}</p>
           <span className="text-muted-foreground shrink-0">{channelIcon(session.channel, "w-3 h-3")}</span>
         </div>
-        <p className="text-[10px] text-muted-foreground truncate" data-testid={`text-email-${session.id}`}>{session.customerEmail}</p>
+        <div className="flex items-center justify-between gap-1 mt-0.5">
+          <p className="text-[10px] text-muted-foreground truncate" data-testid={`text-email-${session.id}`}>{session.topic || session.customerEmail}</p>
+          {slaLabel && (
+            <span className={`text-[10px] font-mono shrink-0 ${slaColor}`}>{slaLabel}</span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -1765,37 +1783,39 @@ export default function ChatsPage() {
       <>
 
       <div className="shrink-0 glass-panel rounded-xl overflow-hidden">
-        <div className="px-3 py-2 flex items-center gap-3 flex-nowrap">
-          <div className="flex items-center gap-2 shrink-0">
+        {/* Header */}
+        <div className="px-4 py-2.5 flex items-center justify-between border-b border-white/5">
+          <div className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-semibold" data-testid="text-chats-title">Chats</h2>
+            <h2 className="text-sm font-semibold" data-testid="text-chats-title">Chat Queue</h2>
           </div>
-          <div className="flex items-center gap-2 flex-1">
-            <span className="flex items-center gap-1 text-xs text-muted-foreground" data-testid="label-waiting">
-              Waiting
-              <Badge className="text-[10px] px-1.5 h-4 bg-primary/15 text-primary">{waitingSessions.length}</Badge>
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 text-[11px] px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium" data-testid="label-waiting">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              {waitingSessions.length} Waiting
             </span>
-            <span className="text-muted-foreground/40 text-xs">·</span>
-            <span className="text-xs text-muted-foreground" data-testid="label-active">
-              Active <span className="font-semibold text-foreground">{activeCount}</span>/{MAX_ACTIVE}
+            <span className="flex items-center gap-1.5 text-[11px] px-2.5 py-0.5 rounded-full glass-subtle font-medium text-muted-foreground" data-testid="label-active">
+              <span className={`w-1.5 h-1.5 rounded-full ${activeCount > 0 ? "bg-status-online" : "bg-muted-foreground/30"}`} />
+              {activeCount}/{MAX_ACTIVE} Active
             </span>
           </div>
         </div>
 
         {queueTab === "queue" ? (
-          <div className="px-3 pb-2">
+          <div className="px-2 py-2 space-y-1">
             {filteredWaiting.length > 0 && (
-              <div className="mb-1">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider pb-1">
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 pb-1">
                   Waiting ({filteredWaiting.length})
                 </p>
-                <div className="flex gap-2 overflow-x-auto pb-1" data-testid="queue-waiting-row">
+                <div className="space-y-0.5" data-testid="queue-waiting-row">
                   {filteredWaiting.map((session) => (
                     <QueueItem
                       key={session.id}
                       session={session}
                       isSelected={selectedId === session.id}
                       onClick={() => handleAccept(session.id)}
+                      slaRemainingSec={slaTimers[session.id]}
                     />
                   ))}
                 </div>
@@ -1803,10 +1823,10 @@ export default function ChatsPage() {
             )}
             {filteredActive.length > 0 && (
               <div>
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider pb-1">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 pb-1 pt-1">
                   Active ({filteredActive.length})
                 </p>
-                <div className="flex gap-2 overflow-x-auto pb-1" data-testid="queue-active-row">
+                <div className="space-y-0.5" data-testid="queue-active-row">
                   {filteredActive.map((session) => (
                     <QueueItem
                       key={session.id}
