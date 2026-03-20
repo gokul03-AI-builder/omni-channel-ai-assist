@@ -427,6 +427,14 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
   const replyRef = useRef<HTMLTextAreaElement>(null);
   const sla = slaRemaining(thread.slaDeadline);
 
+  // Auto-resize textarea whenever replyText changes programmatically
+  useEffect(() => {
+    const el = replyRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [replyText]);
+
   const handleRephrase = () => {
     if (!replyText.trim()) { toast({ title: "Write something first" }); return; }
     setAiLoading(true);
@@ -580,8 +588,20 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
               </button>
             </div>
 
-            <Textarea ref={replyRef} value={replyText} onChange={e => { setReplyText(e.target.value); setIsDraft(false); }}
-              placeholder="Type your reply..." className="glass-input text-xs resize-none min-h-[90px]" data-testid="textarea-reply" />
+            <Textarea
+              ref={replyRef}
+              value={replyText}
+              onChange={e => {
+                setReplyText(e.target.value);
+                setIsDraft(false);
+                const el = e.target;
+                el.style.height = "auto";
+                el.style.height = `${el.scrollHeight}px`;
+              }}
+              placeholder="Type your reply..."
+              className="glass-input text-xs resize-none min-h-[90px] overflow-hidden transition-all duration-150"
+              data-testid="textarea-reply"
+            />
 
             <div className="flex items-center justify-between">
               <Select defaultValue="reply">
