@@ -78,13 +78,15 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col h-full" data-testid="page-home">
-      <div className="px-6 py-4 glass-header max-w-4xl mx-auto mt-4 rounded-2xl flex items-center gap-3" data-testid="section-welcome">
-        <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
-          <Globe className="w-4 h-4 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold" data-testid="text-welcome-name">Welcome, <span className="text-primary">{firstName}</span></h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Your daily support overview</p>
+      <div className="px-8 max-w-4xl mx-auto mt-4 w-full">
+        <div className="px-6 py-4 glass-header rounded-2xl flex items-center gap-3" data-testid="section-welcome">
+          <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+            <Globe className="w-4 h-4 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold" data-testid="text-welcome-name">Welcome, <span className="text-primary">{firstName}</span></h2>
+            <p className="text-sm text-muted-foreground mt-0.5">Your daily support overview</p>
+          </div>
         </div>
       </div>
 
