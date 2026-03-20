@@ -448,8 +448,8 @@ function CollapsibleSection({ title, icon, open, onToggle, children }: {
 function InfoRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-start justify-between gap-2">
-      <span className="text-xs text-muted-foreground shrink-0">{label}</span>
-      <span className={`text-xs text-foreground text-right ${mono ? "font-mono" : ""}`}>{value}</span>
+      <span className="text-sm text-muted-foreground shrink-0">{label}</span>
+      <span className={`text-sm text-foreground text-right ${mono ? "font-mono" : ""}`}>{value}</span>
     </div>
   );
 }
