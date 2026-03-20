@@ -13,6 +13,7 @@ import CallsPage from "@/pages/calls";
 import ChatsPage from "@/pages/chats";
 import CallHistoryPage from "@/pages/call-history";
 import ChatHistoryPage from "@/pages/chat-history";
+import EmailPage from "@/pages/email";
 import FeedbackPage from "@/pages/feedback";
 import AnalyticsPage from "@/pages/analytics";
 import ReportsPage from "@/pages/reports";
@@ -31,6 +32,7 @@ function AuthenticatedRouter() {
       </Route>
       <Route path="/calls" component={CallsPage} />
       <Route path="/calls/history" component={CallHistoryPage} />
+      <Route path="/email" component={EmailPage} />
       <Route path="/chats" component={ChatsPage} />
       <Route path="/chats/history" component={ChatHistoryPage} />
       <Route path="/feedback" component={FeedbackPage} />

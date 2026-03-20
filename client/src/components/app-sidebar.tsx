@@ -1,5 +1,5 @@
 import { useLocation, Link } from "wouter";
-import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon, Home, BarChart3, FileText, Shield, Activity, History, ChevronRight } from "lucide-react";
+import { Phone, MessageSquare, ThumbsUp, LogOut, PanelLeftClose, PanelLeftOpen, Sun, Moon, Home, BarChart3, FileText, Shield, Activity, History, ChevronRight, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   Sidebar,
@@ -68,6 +68,7 @@ const navGroups: NavGroup[] = [
           { title: "History", url: "/chats/history", icon: History },
         ],
       },
+      { title: "Email", url: "/email", icon: Mail },
     ],
   },
   {
