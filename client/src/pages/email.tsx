@@ -1070,13 +1070,7 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
 
             {/* ── KB Assist Tab ── */}
             <TabsContent value="kb" className="absolute inset-0 mt-0 overflow-hidden flex flex-col">
-              <div className="px-3 pt-3 pb-2 shrink-0">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                  <Input placeholder="Search knowledge base..." className="pl-8 h-7 text-xs glass-input" data-testid="input-kb-search" />
-                </div>
-              </div>
-              <ScrollArea className="flex-1 px-3 pb-3">
+              <ScrollArea className="flex-1 px-3 pb-3 pt-3">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Suggested Articles</p>
                 <div className="space-y-2">
                   {kbArticles.map(a => (
