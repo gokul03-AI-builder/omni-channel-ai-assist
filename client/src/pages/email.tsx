@@ -802,7 +802,7 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
               <TabsList className="w-full glass-subtle">
                 {[
                   { value: "properties", icon: Ticket, label: "Properties" },
-                  { value: "customer", icon: UserCircle, label: "Customer" },
+                  { value: "customer", icon: UserCircle, label: "Info" },
                   { value: "kb", icon: BookOpen, label: "KB" },
                   { value: "ai", icon: Bot, label: "AI" },
                 ].map(tab => (
