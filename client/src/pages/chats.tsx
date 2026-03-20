@@ -315,42 +315,19 @@ function QueueItem({
   session,
   isSelected,
   onClick,
-  slaRemainingSec,
 }: {
   session: ChatSession;
   isSelected: boolean;
   onClick: () => void;
-  slaRemainingSec?: number;
 }) {
-  const initials = session.customerName.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
-  const slaColor = slaRemainingSec !== undefined
-    ? slaRemainingSec < 60 ? "text-red-400" : slaRemainingSec < 120 ? "text-amber-400" : "text-muted-foreground"
-    : "text-muted-foreground";
-  const slaLabel = slaRemainingSec !== undefined
-    ? `${Math.floor(slaRemainingSec / 60)}:${String(slaRemainingSec % 60).padStart(2, "0")}`
-    : null;
-
   return (
     <div
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? "glass-bubble-primary" : "hover-elevate"}`}
+      className={`px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${isSelected ? "glass-bubble-primary" : "hover-elevate"}`}
       onClick={onClick}
       data-testid={`card-chat-${session.id}`}
     >
-      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 text-[11px] font-bold text-primary">
-        {initials}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-1">
-          <p className="text-xs font-medium truncate" data-testid={`text-name-${session.id}`}>{session.customerName}</p>
-          <span className="text-muted-foreground shrink-0">{channelIcon(session.channel, "w-3 h-3")}</span>
-        </div>
-        <div className="flex items-center justify-between gap-1 mt-0.5">
-          <p className="text-[10px] text-muted-foreground truncate" data-testid={`text-email-${session.id}`}>{session.topic || session.customerEmail}</p>
-          {slaLabel && (
-            <span className={`text-[10px] font-mono shrink-0 ${slaColor}`}>{slaLabel}</span>
-          )}
-        </div>
-      </div>
+      <p className="text-xs font-medium truncate" data-testid={`text-name-${session.id}`}>{session.customerName}</p>
+      <p className="text-[10px] text-muted-foreground truncate mt-0.5" data-testid={`text-email-${session.id}`}>{session.customerEmail}</p>
     </div>
   );
 }
@@ -1755,7 +1732,7 @@ export default function ChatsPage() {
 
   return (
     <div className="h-full flex flex-col" data-testid="page-chats">
-      <div className="flex flex-col flex-1 overflow-hidden gap-2 p-2">
+      <div className="flex flex-row flex-1 overflow-hidden gap-2 p-2">
 
       {summarySession ? (
         <div className="flex-1 flex flex-col gap-2">
@@ -1782,30 +1759,33 @@ export default function ChatsPage() {
       ) : (
       <>
 
-      <div className="shrink-0 glass-panel rounded-xl overflow-hidden">
+      {/* ── Left queue panel ── */}
+      <div className="w-[220px] shrink-0 glass-panel rounded-xl overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="px-4 py-2.5 flex items-center justify-between border-b border-white/5">
+        <div className="px-3 py-2.5 flex flex-col gap-2 border-b border-white/5 shrink-0">
           <div className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-primary" />
             <h2 className="text-sm font-semibold" data-testid="text-chats-title">Chat Queue</h2>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 text-[11px] px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium" data-testid="label-waiting">
+          <div className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium" data-testid="label-waiting">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               {waitingSessions.length} Waiting
             </span>
-            <span className="flex items-center gap-1.5 text-[11px] px-2.5 py-0.5 rounded-full glass-subtle font-medium text-muted-foreground" data-testid="label-active">
+            <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full glass-subtle font-medium text-muted-foreground" data-testid="label-active">
               <span className={`w-1.5 h-1.5 rounded-full ${activeCount > 0 ? "bg-status-online" : "bg-muted-foreground/30"}`} />
               {activeCount}/{MAX_ACTIVE} Active
             </span>
           </div>
         </div>
 
+        {/* Body — scrollable */}
+        <div className="flex-1 overflow-y-auto">
         {queueTab === "queue" ? (
           <div className="px-2 py-2 space-y-1">
             {filteredWaiting.length > 0 && (
               <div>
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 pb-1">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1 pb-1">
                   Waiting ({filteredWaiting.length})
                 </p>
                 <div className="space-y-0.5" data-testid="queue-waiting-row">
@@ -1815,7 +1795,6 @@ export default function ChatsPage() {
                       session={session}
                       isSelected={selectedId === session.id}
                       onClick={() => handleAccept(session.id)}
-                      slaRemainingSec={slaTimers[session.id]}
                     />
                   ))}
                 </div>
@@ -1823,7 +1802,7 @@ export default function ChatsPage() {
             )}
             {filteredActive.length > 0 && (
               <div>
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 pb-1 pt-1">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1 pb-1 pt-2">
                   Active ({filteredActive.length})
                 </p>
                 <div className="space-y-0.5" data-testid="queue-active-row">
@@ -1839,15 +1818,15 @@ export default function ChatsPage() {
               </div>
             )}
             {filteredWaiting.length === 0 && filteredActive.length === 0 && (
-              <div className="flex items-center justify-center py-2 text-muted-foreground">
+              <div className="flex items-center justify-center py-4 text-muted-foreground">
                 <Filter className="w-4 h-4 mr-2 opacity-30" />
                 <p className="text-xs">No matching chats</p>
               </div>
             )}
           </div>
         ) : (
-          <div className="px-3 pb-2">
-            <div className="flex gap-2 items-start">
+          <div className="px-2 py-2">
+            <div className="flex flex-col gap-2">
               <div className="relative shrink-0">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <Input
@@ -1890,7 +1869,8 @@ export default function ChatsPage() {
             </div>
           </div>
         )}
-      </div>
+      </div>{/* end flex-1 overflow-y-auto */}
+      </div>{/* end w-[220px] queue panel */}
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {!selectedSession || (selectedSession.status === "waiting") ? (
@@ -1902,7 +1882,7 @@ export default function ChatsPage() {
               {selectedSession ? "Accept chat to start" : "Select a chat"}
             </h3>
             <p className="text-sm">
-              {selectedSession ? `${selectedSession.customerName} is waiting` : "Choose from the queue above"}
+              {selectedSession ? `${selectedSession.customerName} is waiting` : "Choose from the queue on the left"}
             </p>
           </div>
         ) : (
