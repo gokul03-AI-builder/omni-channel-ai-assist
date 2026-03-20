@@ -12,6 +12,7 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronRight,
+  ChevronLeft,
   Sparkles,
   BookOpen,
   PanelRightClose,
@@ -1409,6 +1410,7 @@ export default function ChatsPage() {
   const [summaryDuration, setSummaryDuration] = useState(0);
   const [searchFilter, setSearchFilter] = useState("");
   const [queueTab, setQueueTab] = useState<"queue" | "history">("queue");
+  const [queueExpanded, setQueueExpanded] = useState(true);
   const [closedHistory, setClosedHistory] = useState(getClosedChatSessions);
   const [elapsedTimes, setElapsedTimes] = useState<Record<string, number>>({});
   const [slaTimers, setSlaTimers] = useState<Record<string, number>>({});
@@ -1559,6 +1561,7 @@ export default function ChatsPage() {
     }));
     setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, unreadCount: 0 } : s));
     setSidebarOpen(false);
+    setQueueExpanded(false);
     toast({ title: "Chat accepted", description: `You're now chatting with ${sessions.find(s => s.id === sessionId)?.customerName}` });
   }, [activeCount, sessions, setSidebarOpen]);
 
@@ -1591,6 +1594,7 @@ export default function ChatsPage() {
     setCannedOpen(false);
     setKbCopyText(undefined);
     setSidebarOpen(false);
+    setQueueExpanded(false);
   }, [setSidebarOpen]);
 
   const handleHoldToggle = useCallback(() => {
@@ -1761,7 +1765,7 @@ export default function ChatsPage() {
       <>
 
       {/* ── Left queue panel — collapses to mini strip when a session is active ── */}
-      {selectedSession && selectedSession.status !== "waiting" ? (
+      {!queueExpanded && selectedSession && selectedSession.status !== "waiting" ? (
         /* ── Collapsed mini strip ── */
         <div className="w-14 shrink-0 glass-panel rounded-xl overflow-hidden flex flex-col items-center py-3 gap-3" data-testid="queue-mini-strip">
           {/* Waiting count */}
@@ -1797,15 +1801,39 @@ export default function ChatsPage() {
               </div>
             );
           })}
+
+          {/* Expand button */}
+          <div className="mt-auto pt-2">
+            <button
+              onClick={() => setQueueExpanded(true)}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+              title="Expand queue"
+              data-testid="button-expand-queue"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       ) : (
       /* ── Full queue panel ── */
       <div className="w-[220px] shrink-0 glass-panel rounded-xl overflow-hidden flex flex-col">
         {/* Header */}
         <div className="px-3 py-2.5 flex flex-col gap-2 border-b border-white/5 shrink-0">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-semibold" data-testid="text-chats-title">Chat Queue</h2>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-primary" />
+              <h2 className="text-sm font-semibold" data-testid="text-chats-title">Chat Queue</h2>
+            </div>
+            {selectedSession && selectedSession.status !== "waiting" && (
+              <button
+                onClick={() => setQueueExpanded(false)}
+                className="w-6 h-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors shrink-0"
+                title="Collapse queue"
+                data-testid="button-collapse-queue"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-1.5">
             <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium" data-testid="label-waiting">
