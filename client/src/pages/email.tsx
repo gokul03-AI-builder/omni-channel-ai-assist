@@ -916,20 +916,6 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
                   </div>
                   <Separator className="bg-border/20" />
 
-                  {/* Suggested reply */}
-                  <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Suggested Reply</p>
-                    <p className="text-[10px] text-muted-foreground leading-relaxed p-2.5 rounded-lg bg-muted/10 border border-border/20 mb-2">
-                      "Thank you for reaching out. I've reviewed your case and escalated to our specialist team. Expect a response within 2 hours. Ref: {thread.ticketId}."
-                    </p>
-                    <button className="w-full text-[10px] py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
-                      onClick={() => { setReplyText(`Thank you for reaching out. I've reviewed your case and escalated to our specialist team. Expect a response within 2 hours. Ref: ${thread.ticketId}.`); setIsDraft(false); toast({ title: "Applied to reply box" }); }}
-                      data-testid="button-apply-suggestion">
-                      Use this reply
-                    </button>
-                  </div>
-                  <Separator className="bg-border/20" />
-
                   {/* AI chat with KB */}
                   <div>
                     <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Ask Wingman AI</p>
