@@ -89,7 +89,7 @@ export default function HomePage() {
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="px-6 py-4 space-y-6 max-w-4xl mx-auto">
+        <div className="px-8 py-8 space-y-6 max-w-4xl mx-auto">
 
           {/* AI Summary card */}
           <Card className="p-5 border-primary/15 bg-primary/5" data-testid="card-ai-summary">
