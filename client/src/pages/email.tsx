@@ -3,10 +3,10 @@ import {
   Mail, Search, Star, StarOff, Inbox, Send, Archive, Trash2,
   Paperclip, RefreshCw, Plus, Bold, Italic, Underline, Strikethrough,
   List, ListOrdered, Link, Image, Code, Sparkles, Languages, Bot,
-  UserCircle, Clock, Tag, User, Phone, Globe, CheckCircle2, Circle,
+  UserCircle, Clock, Tag, User, Phone, Globe, CheckCircle2,
   Reply, ReplyAll, Forward, Copy, Ticket, Building2, CalendarDays,
-  Hash, Flag, Zap, ChevronLeft, BookOpen, ChevronDown, ChevronUp,
-  ExternalLink, MapPin, Briefcase, ShieldCheck,
+  Hash, Zap, ChevronLeft, BookOpen, ChevronDown, ChevronUp,
+  MapPin, Briefcase, ShieldCheck, PenLine, Lock,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useSidebar } from "@/components/ui/sidebar";
 
@@ -369,6 +370,29 @@ function MessageBubble({ message }: { message: EmailMessage }) {
   );
 }
 
+// ─── Collapsible Section ──────────────────────────────────────────────────────
+
+function CollapsibleSection({ title, children, defaultOpen = true }: {
+  title: string; children: React.ReactNode; defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(p => !p)}
+        className="flex items-center justify-between w-full text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 hover:text-foreground transition-colors group"
+        data-testid={`section-toggle-${title.toLowerCase().replace(/\s+/g, "-")}`}
+      >
+        <span>{title}</span>
+        {open
+          ? <ChevronUp className="w-3 h-3 opacity-50 group-hover:opacity-100" />
+          : <ChevronDown className="w-3 h-3 opacity-50 group-hover:opacity-100" />}
+      </button>
+      {open && children}
+    </div>
+  );
+}
+
 // ─── KB Article Card ──────────────────────────────────────────────────────────
 
 function KBArticleCard({ article, onInsert }: { article: typeof kbArticles[0]; onInsert: () => void }) {
@@ -421,6 +445,7 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
   const [replyBcc, setReplyBcc] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [showTranslate, setShowTranslate] = useState(false);
+  const [replyMode, setReplyMode] = useState<"reply" | "note">("reply");
   const [aiQuery, setAiQuery] = useState("");
   const [aiChat, setAiChat] = useState<{ role: "user" | "ai"; text: string }[]>([]);
   const [aiChatLoading, setAiChatLoading] = useState(false);
@@ -490,14 +515,36 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
         <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusConfig[thread.status].color}`}>{statusConfig[thread.status].label}</span>
         <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${priorityConfig[thread.priority].color}`}>{priorityConfig[thread.priority].label}</span>
         <span className="flex-1 text-sm font-semibold truncate">{thread.subject}</span>
-        <div className="flex items-center gap-1 shrink-0">
-          <button onClick={() => onUpdateThread({ starred: !thread.starred })} className="p-1.5 rounded-md hover:bg-muted/30 transition-colors" data-testid="button-star">
-            {thread.starred ? <Star className="w-4 h-4 text-amber-400 fill-amber-400" /> : <StarOff className="w-4 h-4 text-muted-foreground" />}
-          </button>
-          <button onClick={() => toast({ title: "Archived" })} className="p-1.5 rounded-md hover:bg-muted/30 transition-colors text-muted-foreground" data-testid="button-archive"><Archive className="w-4 h-4" /></button>
-          <button onClick={() => toast({ title: "Forwarded" })} className="p-1.5 rounded-md hover:bg-muted/30 transition-colors text-muted-foreground" data-testid="button-forward"><Forward className="w-4 h-4" /></button>
-          <button onClick={() => toast({ title: "Deleted" })} className="p-1.5 rounded-md hover:bg-muted/30 transition-colors text-muted-foreground" data-testid="button-delete"><Trash2 className="w-4 h-4" /></button>
-        </div>
+        <TooltipProvider delayDuration={300}>
+          <div className="flex items-center gap-1 shrink-0">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button onClick={() => onUpdateThread({ starred: !thread.starred })} className="p-1.5 rounded-md hover:bg-muted/30 transition-colors" data-testid="button-star">
+                  {thread.starred ? <Star className="w-4 h-4 text-amber-400 fill-amber-400" /> : <StarOff className="w-4 h-4 text-muted-foreground" />}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">{thread.starred ? "Unstar" : "Star"}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button onClick={() => toast({ title: "Archived" })} className="p-1.5 rounded-md hover:bg-muted/30 transition-colors text-muted-foreground" data-testid="button-archive"><Archive className="w-4 h-4" /></button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Archive</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button onClick={() => toast({ title: "Forwarded" })} className="p-1.5 rounded-md hover:bg-muted/30 transition-colors text-muted-foreground" data-testid="button-forward"><Forward className="w-4 h-4" /></button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Forward</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button onClick={() => toast({ title: "Deleted" })} className="p-1.5 rounded-md hover:bg-muted/30 transition-colors text-muted-foreground" data-testid="button-delete"><Trash2 className="w-4 h-4" /></button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Delete</TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
       </div>
 
       {/* Content row */}
@@ -517,9 +564,35 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
           </ScrollArea>
 
           {/* Reply composer */}
-          <div className="border-t border-border/20 px-4 py-3 shrink-0 space-y-2">
+          <div className={`border-t px-4 py-3 shrink-0 space-y-2 ${replyMode === "note" ? "border-amber-300/30 dark:border-amber-500/20 bg-amber-50/30 dark:bg-amber-500/5" : "border-border/20"}`}>
+            {/* Mode toggle */}
+            <div className="flex items-center gap-1 p-0.5 rounded-lg bg-muted/20 border border-border/20 w-fit">
+              <button
+                onClick={() => setReplyMode("reply")}
+                className={`flex items-center gap-1.5 text-[10px] px-3 py-1 rounded-md font-medium transition-colors ${replyMode === "reply" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                data-testid="button-mode-reply"
+              >
+                <Reply className="w-3 h-3" />Reply
+              </button>
+              <button
+                onClick={() => setReplyMode("note")}
+                className={`flex items-center gap-1.5 text-[10px] px-3 py-1 rounded-md font-medium transition-colors ${replyMode === "note" ? "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                data-testid="button-mode-note"
+              >
+                <Lock className="w-3 h-3" />Internal Note
+              </button>
+            </div>
+
+            {/* Note mode info banner */}
+            {replyMode === "note" && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <p className="text-[10px] text-amber-700 dark:text-amber-400">Internal note — visible only to your team, not sent to the customer.</p>
+              </div>
+            )}
+
             {/* Draft indicator */}
-            {isDraft && (
+            {isDraft && replyMode === "reply" && (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                 <p className="text-[10px] text-amber-700 dark:text-amber-400 flex-1">AI drafted a suggested reply — review, edit, and send when ready.</p>
@@ -527,27 +600,29 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
               </div>
             )}
 
-            {/* To/CC/BCC */}
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-muted-foreground w-7 shrink-0 font-medium">To</span>
-                <Input value={replyTo} onChange={e => setReplyTo(e.target.value)} className="h-6 text-xs glass-input flex-1" data-testid="input-reply-to" />
-                <button onClick={() => setShowCc(p => !p)} className="text-[10px] text-muted-foreground hover:text-primary">Cc</button>
-                <button onClick={() => setShowBcc(p => !p)} className="text-[10px] text-muted-foreground hover:text-primary">Bcc</button>
+            {/* To/CC/BCC — reply mode only */}
+            {replyMode === "reply" && (
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-muted-foreground w-7 shrink-0 font-medium">To</span>
+                  <Input value={replyTo} onChange={e => setReplyTo(e.target.value)} className="h-6 text-xs glass-input flex-1" data-testid="input-reply-to" />
+                  <button onClick={() => setShowCc(p => !p)} className="text-[10px] text-muted-foreground hover:text-primary">Cc</button>
+                  <button onClick={() => setShowBcc(p => !p)} className="text-[10px] text-muted-foreground hover:text-primary">Bcc</button>
+                </div>
+                {showCc && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-muted-foreground w-7 shrink-0 font-medium">Cc</span>
+                    <Input value={replyCc} onChange={e => setReplyCc(e.target.value)} placeholder="Add CC..." className="h-6 text-xs glass-input flex-1" data-testid="input-reply-cc" />
+                  </div>
+                )}
+                {showBcc && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-muted-foreground w-7 shrink-0 font-medium">Bcc</span>
+                    <Input value={replyBcc} onChange={e => setReplyBcc(e.target.value)} placeholder="Add BCC..." className="h-6 text-xs glass-input flex-1" data-testid="input-reply-bcc" />
+                  </div>
+                )}
               </div>
-              {showCc && (
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-muted-foreground w-7 shrink-0 font-medium">Cc</span>
-                  <Input value={replyCc} onChange={e => setReplyCc(e.target.value)} placeholder="Add CC..." className="h-6 text-xs glass-input flex-1" data-testid="input-reply-cc" />
-                </div>
-              )}
-              {showBcc && (
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-muted-foreground w-7 shrink-0 font-medium">Bcc</span>
-                  <Input value={replyBcc} onChange={e => setReplyBcc(e.target.value)} placeholder="Add BCC..." className="h-6 text-xs glass-input flex-1" data-testid="input-reply-bcc" />
-                </div>
-              )}
-            </div>
+            )}
 
             {/* Formatting toolbar */}
             <div className="flex items-center gap-0.5 border border-border/20 rounded-lg px-2 py-1 bg-muted/10 flex-wrap">
@@ -598,25 +673,32 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
                 el.style.height = "auto";
                 el.style.height = `${el.scrollHeight}px`;
               }}
-              placeholder="Type your reply..."
-              className="glass-input text-xs resize-none min-h-[90px] overflow-hidden transition-all duration-150"
+              placeholder={replyMode === "note" ? "Add an internal note for your team..." : "Type your reply..."}
+              className={`text-xs resize-none min-h-[90px] overflow-hidden transition-all duration-150 ${replyMode === "note" ? "glass-input border-amber-300/40 dark:border-amber-500/30 bg-amber-50/50 dark:bg-amber-500/5" : "glass-input"}`}
               data-testid="textarea-reply"
             />
 
             <div className="flex items-center justify-between">
-              <Select defaultValue="reply">
-                <SelectTrigger className="h-7 text-xs glass-input w-[110px]" data-testid="select-reply-type"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="reply"><div className="flex items-center gap-1.5"><Reply className="w-3 h-3" />Reply</div></SelectItem>
-                  <SelectItem value="reply-all"><div className="flex items-center gap-1.5"><ReplyAll className="w-3 h-3" />Reply All</div></SelectItem>
-                  <SelectItem value="forward"><div className="flex items-center gap-1.5"><Forward className="w-3 h-3" />Forward</div></SelectItem>
-                </SelectContent>
-              </Select>
+              {replyMode === "reply" ? (
+                <Select defaultValue="reply">
+                  <SelectTrigger className="h-7 text-xs glass-input w-[110px]" data-testid="select-reply-type"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="reply"><div className="flex items-center gap-1.5"><Reply className="w-3 h-3" />Reply</div></SelectItem>
+                    <SelectItem value="reply-all"><div className="flex items-center gap-1.5"><ReplyAll className="w-3 h-3" />Reply All</div></SelectItem>
+                    <SelectItem value="forward"><div className="flex items-center gap-1.5"><Forward className="w-3 h-3" />Forward</div></SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="flex items-center gap-1.5 text-[10px] text-amber-600 dark:text-amber-400">
+                  <Lock className="w-3 h-3" />Team-only note
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <button onClick={() => { setReplyText(""); setIsDraft(false); }} className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded-md hover:bg-muted/30 transition-colors" data-testid="button-discard-reply">Discard</button>
                 <Button size="sm" onClick={handleSend} disabled={!replyText.trim()}
-                  className="h-7 text-xs px-4 bg-primary text-primary-foreground hover:bg-primary/90" data-testid="button-send-reply">
-                  <Send className="w-3 h-3 mr-1" />Send
+                  className={`h-7 text-xs px-4 ${replyMode === "note" ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
+                  data-testid="button-send-reply">
+                  {replyMode === "note" ? <><PenLine className="w-3 h-3 mr-1" />Add Note</> : <><Send className="w-3 h-3 mr-1" />Send</>}
                 </Button>
               </div>
             </div>
@@ -769,60 +851,61 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
             <TabsContent value="customer" className="flex-1 overflow-hidden mt-0">
               <ScrollArea className="h-full">
                 <div className="p-4 space-y-4">
-                  {/* Avatar + name — centred like Chat */}
-                  <div className="flex flex-col items-center text-center gap-3 pb-2">
-                    <div className="relative">
-                      <Avatar className="h-16 w-16 border-2 border-primary/20">
-                        <AvatarFallback className={`text-lg font-bold ${thread.avatarColor}`}>
-                          {thread.avatarInitials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-background" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-sm">{thread.customerName}</h3>
-                      <p className="text-xs text-muted-foreground">{thread.customerCompany}</p>
-                    </div>
-                    <Badge className="bg-primary/15 text-primary text-[10px] px-2">{thread.customerAccountType}</Badge>
-                  </div>
-
-                  <Separator className="bg-border/30" />
-
-                  {/* Contact info rows */}
-                  <div className="space-y-3">
-                    {[
-                      { icon: Mail,     label: "Email",    value: thread.customerEmail },
-                      { icon: Phone,    label: "Phone",    value: thread.customerPhone },
-                      { icon: MapPin,   label: "Location", value: thread.customerLocation },
-                      { icon: Briefcase,label: "Company",  value: thread.customerCompany },
-                      { icon: ShieldCheck, label: "Since", value: thread.customerSince },
-                    ].map((row, i) => (
-                      <div key={i} className="flex items-start gap-2.5">
-                        <div className="w-7 h-7 rounded-md bg-muted/30 flex items-center justify-center shrink-0">
-                          <row.icon className="w-3.5 h-3.5 text-muted-foreground" />
+                  <CollapsibleSection title="Customer Profile">
+                    <div className="space-y-4">
+                      {/* Avatar + name */}
+                      <div className="flex flex-col items-center text-center gap-3 pb-2">
+                        <div className="relative">
+                          <Avatar className="h-16 w-16 border-2 border-primary/20">
+                            <AvatarFallback className={`text-lg font-bold ${thread.avatarColor}`}>
+                              {thread.avatarInitials}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-background" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[10px] text-muted-foreground">{row.label}</p>
-                          <p className="text-xs font-medium truncate">{row.value}</p>
+                        <div>
+                          <h3 className="font-semibold text-sm">{thread.customerName}</h3>
+                          <p className="text-xs text-muted-foreground">{thread.customerCompany}</p>
                         </div>
+                        <Badge className="bg-primary/15 text-primary text-[10px] px-2">{thread.customerAccountType}</Badge>
                       </div>
-                    ))}
-                  </div>
 
-                  <Separator className="bg-border/30" />
+                      <Separator className="bg-border/30" />
 
-                  {/* Account stats */}
-                  <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Account Overview</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[["12", "Total"], ["10", "Resolved"], ["4.3", "CSAT"]].map(([v, l]) => (
-                        <div key={l} className="text-center p-2 rounded-lg bg-muted/20 border border-border/20">
-                          <p className="text-sm font-bold text-primary">{v}</p>
-                          <p className="text-[10px] text-muted-foreground">{l}</p>
-                        </div>
-                      ))}
+                      {/* Contact info rows */}
+                      <div className="space-y-3">
+                        {[
+                          { icon: Mail,     label: "Email",    value: thread.customerEmail },
+                          { icon: Phone,    label: "Phone",    value: thread.customerPhone },
+                          { icon: MapPin,   label: "Location", value: thread.customerLocation },
+                          { icon: Briefcase,label: "Company",  value: thread.customerCompany },
+                          { icon: ShieldCheck, label: "Since", value: thread.customerSince },
+                        ].map((row, i) => (
+                          <div key={i} className="flex items-start gap-2.5">
+                            <div className="w-7 h-7 rounded-md bg-muted/30 flex items-center justify-center shrink-0">
+                              <row.icon className="w-3.5 h-3.5 text-muted-foreground" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] text-muted-foreground">{row.label}</p>
+                              <p className="text-xs font-medium truncate">{row.value}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <Separator className="bg-border/30" />
+
+                      {/* Account stats */}
+                      <div className="grid grid-cols-3 gap-2">
+                        {[["12", "Total"], ["10", "Resolved"], ["4.3", "CSAT"]].map(([v, l]) => (
+                          <div key={l} className="text-center p-2 rounded-lg bg-muted/20 border border-border/20">
+                            <p className="text-sm font-bold text-primary">{v}</p>
+                            <p className="text-[10px] text-muted-foreground">{l}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  </CollapsibleSection>
 
                   <Separator className="bg-border/30" />
 
@@ -873,47 +956,45 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
               <ScrollArea className="flex-1">
                 <div className="p-3 space-y-4">
                   {/* Summary */}
-                  <div>
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <Sparkles className="w-3.5 h-3.5 text-primary" />
-                      <p className="text-[10px] font-semibold uppercase tracking-wider">AI Summary</p>
-                    </div>
+                  <CollapsibleSection title="AI Summary">
                     <p className="text-[10px] text-muted-foreground leading-relaxed p-2.5 rounded-lg bg-primary/5 border border-primary/15">
                       Customer reports {thread.category.toLowerCase()} — ticket {thread.ticketId} is currently {statusConfig[thread.status].label.toLowerCase()} with {thread.priority} priority. {thread.messages.length} message{thread.messages.length !== 1 ? "s" : ""} in thread.
                     </p>
-                  </div>
+                  </CollapsibleSection>
                   <Separator className="bg-border/20" />
 
                   {/* Sentiment */}
-                  <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Sentiment</p>
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-                        <div className="h-full rounded-full bg-gradient-to-r from-red-400 to-amber-400" style={{ width: "65%" }} />
-                      </div>
-                      <span className="text-[10px] font-medium text-amber-600">Frustrated</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {[["Urgency", "High", "text-red-500"], ["Tone", "Formal", "text-amber-500"], ["Risk", "Medium", "text-orange-500"]].map(([l, v, c]) => (
-                        <div key={l} className="text-center p-1.5 rounded bg-muted/20">
-                          <p className="text-[10px] font-semibold">{l}</p>
-                          <p className={`text-xs font-bold ${c}`}>{v}</p>
+                  <CollapsibleSection title="Sentiment">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                          <div className="h-full rounded-full bg-gradient-to-r from-red-400 to-amber-400" style={{ width: "65%" }} />
                         </div>
-                      ))}
+                        <span className="text-[10px] font-medium text-amber-600">Frustrated</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {[["Urgency", "High", "text-red-500"], ["Tone", "Formal", "text-amber-500"], ["Risk", "Medium", "text-orange-500"]].map(([l, v, c]) => (
+                          <div key={l} className="text-center p-1.5 rounded bg-muted/20">
+                            <p className="text-[10px] font-semibold">{l}</p>
+                            <p className={`text-xs font-bold ${c}`}>{v}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  </CollapsibleSection>
                   <Separator className="bg-border/20" />
 
                   {/* Recommendations */}
-                  <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Recommendations</p>
-                    {["Prioritise immediate resolution — customer is affected during business hours.", "SLA breach risk detected. Escalate to L2 if unresolved within 30 minutes.", "Consider offering a temporary workaround while investigating root cause."].map((s, i) => (
-                      <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-muted/10 border border-border/20 mb-2">
-                        <Zap className="w-3 h-3 text-primary shrink-0 mt-0.5" />
-                        <p className="text-[10px] text-muted-foreground leading-relaxed">{s}</p>
-                      </div>
-                    ))}
-                  </div>
+                  <CollapsibleSection title="Recommendations">
+                    <div className="space-y-2">
+                      {["Prioritise immediate resolution — customer is affected during business hours.", "SLA breach risk detected. Escalate to L2 if unresolved within 30 minutes.", "Consider offering a temporary workaround while investigating root cause."].map((s, i) => (
+                        <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-muted/10 border border-border/20">
+                          <Zap className="w-3 h-3 text-primary shrink-0 mt-0.5" />
+                          <p className="text-[10px] text-muted-foreground leading-relaxed">{s}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </CollapsibleSection>
                   <Separator className="bg-border/20" />
 
                   {/* AI chat with KB */}
