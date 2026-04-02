@@ -95,6 +95,7 @@ export interface KbFeedback {
   vote: "up" | "down";
   timestamp: string;
   callTopic?: string;
+  channel?: "calls" | "chats" | "email";
 }
 
 export interface ChatMessage {

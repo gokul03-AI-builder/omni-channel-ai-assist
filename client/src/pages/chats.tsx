@@ -203,6 +203,7 @@ function KbArticleModal({
         vote: newVote,
         timestamp: new Date().toISOString(),
         callTopic: chatTopic,
+        channel: "chats",
       });
       toast({ title: newVote === "up" ? "Marked as helpful" : "Feedback recorded", description: "Your feedback improves AI accuracy." });
     }
@@ -569,6 +570,7 @@ function KbAssistPanel({
         vote: newVote,
         timestamp: new Date().toISOString(),
         callTopic: chatTopic,
+        channel: "chats",
       });
       toast({ title: newVote === "up" ? "Marked as helpful" : "Feedback recorded", description: "Your feedback improves AI accuracy." });
     }

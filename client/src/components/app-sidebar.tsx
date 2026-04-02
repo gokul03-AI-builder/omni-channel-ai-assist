@@ -33,6 +33,7 @@ interface NavItem {
   title: string;
   url: string;
   icon: typeof Home;
+  comingSoon?: boolean;
   children?: { title: string; url: string; icon: typeof Home }[];
 }
 
@@ -68,14 +69,14 @@ const navGroups: NavGroup[] = [
           { title: "History", url: "/chats/history", icon: History },
         ],
       },
-      { title: "Email", url: "/email", icon: Mail },
+      { title: "Email", url: "/email", icon: Mail, comingSoon: true },
     ],
   },
   {
     label: "INTELLIGENCE",
     items: [
-      { title: "Analytics", url: "/analytics", icon: BarChart3 },
-      { title: "Reports", url: "/reports", icon: FileText },
+      { title: "Analytics", url: "/analytics", icon: BarChart3, comingSoon: true },
+      { title: "Reports", url: "/reports", icon: FileText, comingSoon: true },
     ],
   },
 ];
@@ -83,7 +84,7 @@ const navGroups: NavGroup[] = [
 const adminGroup: NavGroup = {
   label: "SYSTEM",
   items: [
-    { title: "Permissions", url: "/permissions", icon: Shield },
+    { title: "Permissions", url: "/permissions", icon: Shield, comingSoon: true },
   ],
 };
 
@@ -151,6 +152,18 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
                   const hasChildren = item.children && item.children.length > 0;
                   const isExpanded = expandedItems[item.title] || false;
                   const isChildActive = hasChildren && item.children!.some((c) => location === c.url);
+
+                  if (item.comingSoon) {
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <div className="flex items-center gap-2 px-2 py-1.5 rounded-md text-muted-foreground/50 cursor-default select-none group-data-[collapsible=icon]:justify-center" data-testid={`nav-coming-soon-${item.title.toLowerCase()}`}>
+                          <item.icon className="w-4 h-4 shrink-0 opacity-40" />
+                          <span className="flex-1 text-sm group-data-[collapsible=icon]:hidden">{item.title}</span>
+                          <span className="text-[10px] italic text-muted-foreground/40 group-data-[collapsible=icon]:hidden">Coming soon</span>
+                        </div>
+                      </SidebarMenuItem>
+                    );
+                  }
 
                   const menuButton = hasChildren ? (
                     <div className="flex items-center">

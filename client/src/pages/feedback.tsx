@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ThumbsUp, ThumbsDown, Star, MessageCircle, TrendingUp, Sparkles } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Star, MessageCircle, TrendingUp, Sparkles, Phone, MessageSquare, Mail, Filter } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,7 +8,9 @@ import { Separator } from "@/components/ui/separator";
 import type { KbFeedback } from "@shared/schema";
 import { getKbFeedback } from "@/lib/store";
 
-const feedbackItems = [
+type ChannelType = "calls" | "chats" | "email";
+
+const feedbackItems: { id: string; customer: string; rating: number; comment: string; date: string; callTopic: string; channel: ChannelType }[] = [
   {
     id: "fb-001",
     customer: "James Wilson",
@@ -16,6 +18,7 @@ const feedbackItems = [
     comment: "Agent resolved my terminal issue quickly. Very professional and knowledgeable about P400 firmware updates.",
     date: "2026-03-04",
     callTopic: "P400 Firmware Update",
+    channel: "calls",
   },
   {
     id: "fb-002",
@@ -24,6 +27,7 @@ const feedbackItems = [
     comment: "Good support overall. Took a bit long to diagnose the connectivity issue, but the resolution worked perfectly.",
     date: "2026-03-03",
     callTopic: "V240m Wi-Fi Setup",
+    channel: "chats",
   },
   {
     id: "fb-003",
@@ -32,6 +36,7 @@ const feedbackItems = [
     comment: "Excellent service! Agent walked me through the entire batch processing setup step by step. Very patient.",
     date: "2026-03-02",
     callTopic: "Batch Settlement Configuration",
+    channel: "calls",
   },
   {
     id: "fb-004",
@@ -40,19 +45,35 @@ const feedbackItems = [
     comment: "Issue was eventually resolved but had to call back twice. The second agent was more helpful.",
     date: "2026-03-01",
     callTopic: "Card Reader Malfunction",
+    channel: "chats",
   },
 ];
 
+const channelMeta: Record<ChannelType | "all", { label: string; icon: React.ElementType }> = {
+  all: { label: "All", icon: Filter },
+  calls: { label: "Calls", icon: Phone },
+  chats: { label: "Chats", icon: MessageSquare },
+  email: { label: "Email", icon: Mail },
+};
+
 export default function FeedbackPage() {
   const [kbFeedback, setKbFeedback] = useState<KbFeedback[]>([]);
+  const [customerChannelFilter, setCustomerChannelFilter] = useState<ChannelType | "all">("all");
+  const [kbChannelFilter, setKbChannelFilter] = useState<ChannelType | "all">("all");
   const avgRating = (feedbackItems.reduce((sum, f) => sum + f.rating, 0) / feedbackItems.length).toFixed(1);
 
   useEffect(() => {
     setKbFeedback(getKbFeedback());
   }, []);
 
-  const kbHelpful = kbFeedback.filter((f) => f.vote === "up").length;
-  const kbUnhelpful = kbFeedback.filter((f) => f.vote === "down").length;
+  const filteredCustomerItems = customerChannelFilter === "all" ? feedbackItems : feedbackItems.filter(f => f.channel === customerChannelFilter);
+  const filteredKbFeedback = kbChannelFilter === "all" ? kbFeedback : kbFeedback.filter(f => f.channel === kbChannelFilter);
+
+  const kbHelpful = filteredKbFeedback.filter((f) => f.vote === "up").length;
+  const kbUnhelpful = filteredKbFeedback.filter((f) => f.vote === "down").length;
+
+  const getCustomerChannelCount = (ch: ChannelType | "all") => ch === "all" ? feedbackItems.length : feedbackItems.filter(f => f.channel === ch).length;
+  const getKbChannelCount = (ch: ChannelType | "all") => ch === "all" ? kbFeedback.length : kbFeedback.filter(f => f.channel === ch).length;
 
   return (
     <div className="flex flex-col h-full" data-testid="page-feedback">
@@ -111,38 +132,92 @@ export default function FeedbackPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="customer" className="flex-1 min-h-0 mt-0">
-            <ScrollArea className="h-full">
+          <TabsContent value="customer" className="flex-1 min-h-0 mt-0 flex flex-col gap-3">
+            <div className="flex items-center gap-2 shrink-0" data-testid="channel-filter-customer">
+              <span className="text-xs text-muted-foreground font-medium shrink-0">Channel:</span>
+              <div className="flex items-center gap-1 flex-wrap">
+                {(["all", "calls", "chats", "email"] as const).map((ch) => {
+                  const meta = channelMeta[ch];
+                  const count = getCustomerChannelCount(ch);
+                  const isActive = customerChannelFilter === ch;
+                  return (
+                    <button
+                      key={ch}
+                      onClick={() => setCustomerChannelFilter(ch)}
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors border ${isActive ? "bg-primary/15 text-primary border-primary/30" : "bg-muted/30 text-muted-foreground border-border/30 hover:bg-primary/5 hover:text-primary/80"}`}
+                      data-testid={`button-customer-filter-${ch}`}
+                    >
+                      <meta.icon className="w-3 h-3" />
+                      {meta.label} <span className={`${isActive ? "text-primary/70" : "text-muted-foreground/70"}`}>{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <ScrollArea className="flex-1 min-h-0">
               <div className="space-y-3 pr-1">
-                {feedbackItems.map((item) => (
-                  <Card key={item.id} className="p-4" data-testid={`card-feedback-${item.id}`}>
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-medium">{item.customer}</span>
-                          <Badge variant="secondary" className="text-xs">{item.callTopic}</Badge>
+                {filteredCustomerItems.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                    <MessageCircle className="w-8 h-8 mb-2 opacity-20" />
+                    <p className="text-sm">No feedback for this channel</p>
+                  </div>
+                ) : filteredCustomerItems.map((item) => {
+                  const chMeta = channelMeta[item.channel];
+                  return (
+                    <Card key={item.id} className="p-4" data-testid={`card-feedback-${item.id}`}>
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-medium">{item.customer}</span>
+                            <Badge variant="secondary" className="text-xs">{item.callTopic}</Badge>
+                            <span className="flex items-center gap-1 text-[10px] text-primary/70 bg-primary/10 border border-primary/20 rounded-full px-1.5 py-0.5">
+                              <chMeta.icon className="w-2.5 h-2.5" />
+                              {chMeta.label}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-0.5 mt-1.5">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-3.5 h-3.5 ${i < item.rating ? "text-yellow-500 fill-yellow-500" : "text-muted/60"}`}
+                              />
+                            ))}
+                            <span className="text-xs text-muted-foreground ml-2">{item.date}</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{item.comment}</p>
                         </div>
-                        <div className="flex items-center gap-0.5 mt-1.5">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-3.5 h-3.5 ${i < item.rating ? "text-yellow-500 fill-yellow-500" : "text-muted/60"}`}
-                            />
-                          ))}
-                          <span className="text-xs text-muted-foreground ml-2">{item.date}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{item.comment}</p>
                       </div>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  );
+                })}
               </div>
             </ScrollArea>
           </TabsContent>
 
-          <TabsContent value="ai-kb" className="flex-1 min-h-0 mt-0">
-            {kbFeedback.length > 0 && (
-              <div className="flex items-center gap-4 mb-3 p-3 glass-panel rounded-lg">
+          <TabsContent value="ai-kb" className="flex-1 min-h-0 mt-0 flex flex-col gap-3">
+            <div className="flex items-center gap-2 shrink-0" data-testid="channel-filter-kb">
+              <span className="text-xs text-muted-foreground font-medium shrink-0">Channel:</span>
+              <div className="flex items-center gap-1 flex-wrap">
+                {(["all", "calls", "chats", "email"] as const).map((ch) => {
+                  const meta = channelMeta[ch];
+                  const count = getKbChannelCount(ch);
+                  const isActive = kbChannelFilter === ch;
+                  return (
+                    <button
+                      key={ch}
+                      onClick={() => setKbChannelFilter(ch)}
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors border ${isActive ? "bg-primary/15 text-primary border-primary/30" : "bg-muted/30 text-muted-foreground border-border/30 hover:bg-primary/5 hover:text-primary/80"}`}
+                      data-testid={`button-kb-filter-${ch}`}
+                    >
+                      <meta.icon className="w-3 h-3" />
+                      {meta.label} <span className={`${isActive ? "text-primary/70" : "text-muted-foreground/70"}`}>{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {filteredKbFeedback.length > 0 && (
+              <div className="flex items-center gap-4 shrink-0 p-3 glass-panel rounded-lg">
                 <div className="flex items-center gap-1.5 text-emerald-400">
                   <ThumbsUp className="w-4 h-4" />
                   <span className="text-sm font-semibold">{kbHelpful}</span>
@@ -154,55 +229,65 @@ export default function FeedbackPage() {
                   <span className="text-sm font-semibold">{kbUnhelpful}</span>
                   <span className="text-xs text-muted-foreground">not helpful</span>
                 </div>
-                {kbFeedback.length > 0 && (
-                  <>
-                    <Separator orientation="vertical" className="h-5" />
-                    <span className="text-xs text-muted-foreground">
-                      {kbHelpful > 0 ? Math.round((kbHelpful / kbFeedback.length) * 100) : 0}% accuracy rate
-                    </span>
-                  </>
-                )}
+                <Separator orientation="vertical" className="h-5" />
+                <span className="text-xs text-muted-foreground">
+                  {filteredKbFeedback.length > 0 && kbHelpful > 0 ? Math.round((kbHelpful / filteredKbFeedback.length) * 100) : 0}% accuracy rate
+                </span>
               </div>
             )}
-            <ScrollArea className="h-full">
+            <ScrollArea className="flex-1 min-h-0">
               <div className="space-y-3 pr-1">
                 {kbFeedback.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                     <Sparkles className="w-10 h-10 mb-3 opacity-20 text-primary" />
                     <p className="text-sm font-medium text-foreground">No KB feedback yet</p>
                     <p className="text-xs mt-1 text-center max-w-xs">
-                      Rate KB articles during a call using the thumbs up / down buttons on each suggestion card.
+                      Rate KB articles during calls or chats using the thumbs up / down buttons on each suggestion card.
                     </p>
                   </div>
+                ) : filteredKbFeedback.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                    <Sparkles className="w-8 h-8 mb-2 opacity-20 text-primary" />
+                    <p className="text-sm">No KB feedback for this channel</p>
+                  </div>
                 ) : (
-                  kbFeedback.map((item) => (
-                    <Card key={item.id} className="p-4" data-testid={`card-kb-feedback-${item.id}`}>
-                      <div className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${item.vote === "up" ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"}`}>
-                          {item.vote === "up" ? <ThumbsUp className="w-4 h-4" /> : <ThumbsDown className="w-4 h-4" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{item.suggestionTitle}</p>
-                          <div className="flex items-center gap-2 mt-1 flex-wrap">
-                            <Badge variant="secondary" className="text-xs">{item.source}</Badge>
-                            {item.callTopic && (
-                              <span className="text-xs text-muted-foreground">{item.callTopic}</span>
-                            )}
+                  filteredKbFeedback.map((item) => {
+                    const chMeta = item.channel ? channelMeta[item.channel] : null;
+                    return (
+                      <Card key={item.id} className="p-4" data-testid={`card-kb-feedback-${item.id}`}>
+                        <div className="flex items-start gap-3">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${item.vote === "up" ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"}`}>
+                            {item.vote === "up" ? <ThumbsUp className="w-4 h-4" /> : <ThumbsDown className="w-4 h-4" />}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(item.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}{" "}
-                            at {new Date(item.timestamp).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
-                          </p>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{item.suggestionTitle}</p>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <Badge variant="secondary" className="text-xs">{item.source}</Badge>
+                              {item.callTopic && (
+                                <span className="text-xs text-muted-foreground">{item.callTopic}</span>
+                              )}
+                              {chMeta && (
+                                <span className="flex items-center gap-1 text-[10px] text-primary/70 bg-primary/10 border border-primary/20 rounded-full px-1.5 py-0.5">
+                                  <chMeta.icon className="w-2.5 h-2.5" />
+                                  {chMeta.label}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(item.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}{" "}
+                              at {new Date(item.timestamp).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                            </p>
+                          </div>
+                          <Badge
+                            variant="secondary"
+                            className={`text-xs shrink-0 ${item.vote === "up" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}
+                          >
+                            {item.vote === "up" ? "Helpful" : "Not Helpful"}
+                          </Badge>
                         </div>
-                        <Badge
-                          variant="secondary"
-                          className={`text-xs shrink-0 ${item.vote === "up" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}
-                        >
-                          {item.vote === "up" ? "Helpful" : "Not Helpful"}
-                        </Badge>
-                      </div>
-                    </Card>
-                  ))
+                      </Card>
+                    );
+                  })
                 )}
               </div>
             </ScrollArea>
