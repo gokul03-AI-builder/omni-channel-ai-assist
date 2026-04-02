@@ -41,6 +41,7 @@ import {
   FileText,
   ChevronDown,
   ChevronUp,
+  Search,
   Pencil,
   Check,
   MessageSquare,
@@ -492,22 +493,24 @@ function LiveTranscription({
 }
 
 function AISuggestionsPanel({
-  suggestions,
-  onOpenArticle,
+  messagePairs,
   callTopic,
+  onCopyToChat,
 }: {
-  suggestions: AISuggestion[];
-  onOpenArticle: (s: AISuggestion) => void;
+  messagePairs: { customerMessage: string; suggestion: AISuggestion }[];
   callTopic?: string;
+  onCopyToChat: (text: string) => void;
 }) {
+  const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
   const [votes, setVotes] = useState<Record<string, "up" | "down" | null>>({});
+  const [kbSearch, setKbSearch] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
     const initialVotes: Record<string, "up" | "down" | null> = {};
-    suggestions.forEach((s) => { initialVotes[s.id] = getKbVote(s.id); });
+    messagePairs.forEach(({ suggestion: s }) => { initialVotes[s.id] = getKbVote(s.id); });
     setVotes(initialVotes);
-  }, [suggestions.length]);
+  }, [messagePairs.map(p => p.suggestion.id).join(",")]);
 
   const handleVote = (s: AISuggestion, v: "up" | "down", e: React.MouseEvent) => {
     e.stopPropagation();
@@ -528,6 +531,9 @@ function AISuggestionsPanel({
     setVotes((prev) => ({ ...prev, [s.id]: newVote }));
   };
 
+  const toggleExpanded = (id: string) => setExpandedIds(prev => ({ ...prev, [id]: !prev[id] }));
+  const displayPairs = kbSearch.trim() ? [] : messagePairs;
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between gap-2 px-4 py-3 glass-header mx-2 mt-2 rounded-xl">
@@ -537,62 +543,88 @@ function AISuggestionsPanel({
         </div>
         <Badge variant="secondary" className="text-xs">RAG</Badge>
       </div>
-
+      <div className="px-3 pt-2">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <Input value={kbSearch} onChange={e => setKbSearch(e.target.value)} placeholder="Search knowledge base..." className="glass-input pl-8 h-8 text-xs" data-testid="input-kb-search-calls" />
+        </div>
+      </div>
       <ScrollArea className="flex-1">
-        <div className="p-3 space-y-3">
-          {suggestions.length === 0 && (
+        <div className="p-3 space-y-4">
+          {displayPairs.length === 0 && (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <Bot className="w-8 h-8 mb-2 opacity-20" />
-              <p className="text-sm text-center">AI suggestions will appear here based on the conversation</p>
+              <p className="text-sm text-center">{kbSearch ? "No articles found" : "AI suggestions will appear here based on the conversation"}</p>
             </div>
           )}
           <AnimatePresence>
-            {suggestions.map((suggestion) => (
-              <motion.div
-                key={suggestion.id}
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card
-                  className="p-3 space-y-2 cursor-pointer hover-elevate transition-all"
-                  onClick={() => onOpenArticle(suggestion)}
-                  data-testid={`card-suggestion-${suggestion.id}`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                      <BookOpen className="w-3.5 h-3.5 text-primary shrink-0" />
-                      <span className="text-xs font-semibold text-primary leading-snug">{suggestion.title}</span>
+            {displayPairs.map(({ customerMessage, suggestion }) => (
+              <motion.div key={suggestion.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+                <div className="space-y-2">
+                  {/* Customer message bubble */}
+                  <div className="flex items-start gap-2">
+                    <div className="w-7 h-7 rounded-full bg-muted/50 border border-border/30 flex items-center justify-center shrink-0 mt-0.5">
+                      <User className="w-3.5 h-3.5 text-muted-foreground" />
                     </div>
-                    <ExternalLink className="w-3 h-3 text-muted-foreground shrink-0 mt-0.5" />
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                    {suggestion.content}
-                  </p>
-                  <div className="flex items-center justify-between gap-1 flex-wrap">
-                    <div className="flex items-center gap-1.5">
-                      <Badge variant="secondary" className="text-xs">{suggestion.source}</Badge>
-                      <Badge variant="secondary" className="text-xs">{suggestion.category}</Badge>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-primary font-medium mr-1">{Math.round(suggestion.confidence * 100)}%</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground mb-1.5">Customer</p>
+                      <div className="rounded-xl p-3 bg-muted/20 border border-border/20">
+                        <p className="text-sm leading-relaxed">{customerMessage}</p>
+                      </div>
                       <button
-                        className={`p-0.5 rounded hover:bg-muted transition-colors ${votes[suggestion.id] === "up" ? "text-emerald-400" : "text-muted-foreground/50 hover:text-emerald-400"}`}
-                        onClick={(e) => handleVote(suggestion, "up", e)}
-                        data-testid={`button-vote-up-${suggestion.id}`}
+                        className="flex items-center gap-1.5 text-xs text-primary mt-2 hover:opacity-75 transition-opacity"
+                        onClick={() => toggleExpanded(suggestion.id)}
+                        data-testid={`button-kb-toggle-${suggestion.id}`}
                       >
-                        <ThumbsUp className="w-3 h-3" />
-                      </button>
-                      <button
-                        className={`p-0.5 rounded hover:bg-muted transition-colors ${votes[suggestion.id] === "down" ? "text-red-400" : "text-muted-foreground/50 hover:text-red-400"}`}
-                        onClick={(e) => handleVote(suggestion, "down", e)}
-                        data-testid={`button-vote-down-${suggestion.id}`}
-                      >
-                        <ThumbsDown className="w-3 h-3" />
+                        {expandedIds[suggestion.id]
+                          ? <><ChevronUp className="w-3.5 h-3.5" />Collapse KB Article</>
+                          : <><BookOpen className="w-3.5 h-3.5" />Show KB Article</>}
                       </button>
                     </div>
                   </div>
-                </Card>
+
+                  {/* Expanded article */}
+                  {expandedIds[suggestion.id] && (
+                    <div className="ml-9 glass-panel rounded-xl p-3 space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-1.5 flex-1 min-w-0">
+                          <BookOpen className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                          <span className="text-sm font-bold text-primary leading-snug">{suggestion.title}</span>
+                        </div>
+                        <span className="text-sm font-bold text-primary shrink-0">{Math.round(suggestion.confidence * 100)}%</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-semibold text-muted-foreground">{suggestion.source}</span>
+                        <span className="text-xs text-muted-foreground">{suggestion.category}</span>
+                      </div>
+                      <div className="space-y-0.5">{renderArticleContent(suggestion.fullContent || suggestion.content)}</div>
+                      {suggestion.references && suggestion.references.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">References</p>
+                          <div className="space-y-1">
+                            {suggestion.references.map(ref => (
+                              <a key={ref.label} href={ref.url} className="flex items-center gap-1.5 text-xs text-primary hover:underline">
+                                <ExternalLink className="w-3 h-3 shrink-0" />{ref.label}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between pt-2 border-t border-border/20">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-muted-foreground">Helpful?</span>
+                          <button className={`p-0.5 rounded transition-colors ${votes[suggestion.id] === "up" ? "text-emerald-400" : "text-muted-foreground/50 hover:text-emerald-400"}`} onClick={(e) => handleVote(suggestion, "up", e)} data-testid={`button-vote-up-${suggestion.id}`}><ThumbsUp className="w-3.5 h-3.5" /></button>
+                          <button className={`p-0.5 rounded transition-colors ${votes[suggestion.id] === "down" ? "text-red-400" : "text-muted-foreground/50 hover:text-red-400"}`} onClick={(e) => handleVote(suggestion, "down", e)} data-testid={`button-vote-down-${suggestion.id}`}><ThumbsDown className="w-3.5 h-3.5" /></button>
+                        </div>
+                        {suggestion.suggestedResponse && (
+                          <Button size="sm" className="h-7 gap-1 text-xs" onClick={() => onCopyToChat(suggestion.suggestedResponse!)} data-testid={`button-kb-copy-${suggestion.id}`}>
+                            <Copy className="w-3 h-3" /> Copy to Chat
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </motion.div>
             ))}
           </AnimatePresence>
@@ -1558,6 +1590,7 @@ export default function CallsPage() {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
+  const [aiSuggestionPairs, setAiSuggestionPairs] = useState<{ customerMessage: string; suggestion: AISuggestion }[]>([]);
   const [aiChatMessages, setAiChatMessages] = useState<ChatMessage[]>(() => getChatHistory());
   const [isMuted, setIsMuted] = useState(false);
   const [isOnHold, setIsOnHold] = useState(false);
@@ -1607,7 +1640,15 @@ export default function CallsPage() {
 
       const suggestions = getSuggestionsForCall(selectedCallId);
       if (suggestions[newEntry.id]) {
-        setAiSuggestions((prev) => [...prev, suggestions[newEntry.id]]);
+        const suggestion = suggestions[newEntry.id];
+        setAiSuggestions((prev) => [...prev, suggestion]);
+        setTranscript((prevTranscript) => {
+          const allEntries = [...prevTranscript, newEntry];
+          const lastCustomer = allEntries.filter(e => e.speaker === "customer").pop();
+          const customerMessage = lastCustomer?.text ?? newEntry.text;
+          setAiSuggestionPairs((prev) => [...prev, { customerMessage, suggestion }]);
+          return prevTranscript;
+        });
       }
 
       setTranscriptIndex((prev) => prev + 1);
@@ -1643,6 +1684,7 @@ export default function CallsPage() {
     setCallElapsed((prev) => ({ ...prev, [callId]: 0 }));
     setTranscript([]);
     setAiSuggestions([]);
+    setAiSuggestionPairs([]);
     setTranscriptIndex(0);
     setSidebarOpen(false);
   };
@@ -1657,6 +1699,7 @@ export default function CallsPage() {
     setIsOnHold(false);
     setTranscript([]);
     setAiSuggestions([]);
+    setAiSuggestionPairs([]);
     setTranscriptIndex(0);
     setAiChatMessages(getChatHistory());
     setCalls(initialCalls.map((c) => ({ ...c, status: c.status === "active" ? "incoming" as const : c.status })));
@@ -1678,6 +1721,7 @@ export default function CallsPage() {
     setSelectedCallId(null);
     setTranscript([]);
     setAiSuggestions([]);
+    setAiSuggestionPairs([]);
     setTranscriptIndex(0);
     setEndedCallSummary(summaryData);
     setAiChatMessages(getChatHistory());
@@ -1790,9 +1834,9 @@ export default function CallsPage() {
 
               <div className="flex-1 flex flex-col min-w-0 glass-panel rounded-xl overflow-hidden">
                 <AISuggestionsPanel
-                  suggestions={aiSuggestions}
-                  onOpenArticle={handleOpenArticle}
+                  messagePairs={aiSuggestionPairs}
                   callTopic={selectedCall?.topic}
+                  onCopyToChat={(text) => setChatPrefill(text)}
                 />
               </div>
 

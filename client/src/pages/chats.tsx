@@ -533,28 +533,27 @@ function ChatThread({
 }
 
 function KbAssistPanel({
-  suggestions,
-  onOpenArticle,
+  messagePairs,
   onCopyToChat,
   chatTopic,
   searchQuery,
   setSearchQuery,
 }: {
-  suggestions: AISuggestion[];
-  onOpenArticle: (s: AISuggestion) => void;
+  messagePairs: { customerMessage: string; suggestion: AISuggestion }[];
   onCopyToChat: (text: string) => void;
   chatTopic?: string;
   searchQuery: string;
   setSearchQuery: (v: string) => void;
 }) {
+  const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
   const [votes, setVotes] = useState<Record<string, "up" | "down" | null>>({});
   const { toast } = useToast();
 
   useEffect(() => {
     const initialVotes: Record<string, "up" | "down" | null> = {};
-    suggestions.forEach((s) => { initialVotes[s.id] = getKbVote(s.id); });
+    messagePairs.forEach(({ suggestion: s }) => { initialVotes[s.id] = getKbVote(s.id); });
     setVotes(initialVotes);
-  }, [suggestions.map(s => s.id).join(",")]);
+  }, [messagePairs.map(p => p.suggestion.id).join(",")]);
 
   const handleVote = (s: AISuggestion, v: "up" | "down", e: React.MouseEvent) => {
     e.stopPropagation();
@@ -575,9 +574,10 @@ function KbAssistPanel({
     setVotes((prev) => ({ ...prev, [s.id]: newVote }));
   };
 
-  const allSuggestions = searchQuery.trim()
-    ? matchKbSuggestions(searchQuery)
-    : suggestions;
+  const toggleExpanded = (id: string) => setExpandedIds(prev => ({ ...prev, [id]: !prev[id] }));
+
+  const searchResults = searchQuery.trim() ? matchKbSuggestions(searchQuery) : [];
+  const displayPairs = searchQuery.trim() ? [] : messagePairs;
 
   return (
     <div className="flex flex-col h-full">
@@ -601,8 +601,8 @@ function KbAssistPanel({
         </div>
       </div>
       <ScrollArea className="flex-1">
-        <div className="p-3 space-y-3">
-          {allSuggestions.length === 0 && (
+        <div className="p-3 space-y-4">
+          {displayPairs.length === 0 && searchResults.length === 0 && (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <Bot className="w-8 h-8 mb-2 opacity-20" />
               <p className="text-sm text-center">
@@ -610,56 +610,122 @@ function KbAssistPanel({
               </p>
             </div>
           )}
+
+          {/* Search results: flat expandable cards */}
           <AnimatePresence>
-            {allSuggestions.map((suggestion) => (
-              <motion.div key={suggestion.id} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
-                <Card
-                  className="p-3 space-y-2 cursor-pointer hover-elevate transition-all"
-                  onClick={() => onOpenArticle(suggestion)}
-                  data-testid={`card-kb-${suggestion.id}`}
-                >
+            {searchResults.map((suggestion) => (
+              <motion.div key={suggestion.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+                <div className="glass-panel rounded-xl p-3 space-y-2">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                      <BookOpen className="w-3.5 h-3.5 text-primary shrink-0" />
-                      <span className="text-xs font-semibold text-primary leading-snug">{suggestion.title}</span>
+                    <div className="flex items-start gap-1.5 flex-1 min-w-0">
+                      <BookOpen className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm font-bold text-primary leading-snug">{suggestion.title}</span>
                     </div>
-                    <ExternalLink className="w-3 h-3 text-muted-foreground shrink-0 mt-0.5" />
+                    <span className="text-sm font-bold text-primary shrink-0">{Math.round(suggestion.confidence * 100)}%</span>
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{suggestion.content}</p>
-                  <div className="flex items-center justify-between gap-1 flex-wrap">
-                    <div className="flex items-center gap-1.5">
-                      <Badge variant="secondary" className="text-xs">{suggestion.source}</Badge>
-                      <Badge variant="secondary" className="text-xs">{suggestion.category}</Badge>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-primary font-medium mr-1">{Math.round(suggestion.confidence * 100)}%</span>
-                      <button
-                        className={`p-0.5 rounded hover:bg-muted transition-colors ${votes[suggestion.id] === "up" ? "text-emerald-400" : "text-muted-foreground/50 hover:text-emerald-400"}`}
-                        onClick={(e) => handleVote(suggestion, "up", e)}
-                        data-testid={`button-vote-up-${suggestion.id}`}
-                      >
-                        <ThumbsUp className="w-3 h-3" />
-                      </button>
-                      <button
-                        className={`p-0.5 rounded hover:bg-muted transition-colors ${votes[suggestion.id] === "down" ? "text-red-400" : "text-muted-foreground/50 hover:text-red-400"}`}
-                        onClick={(e) => handleVote(suggestion, "down", e)}
-                        data-testid={`button-vote-down-${suggestion.id}`}
-                      >
-                        <ThumbsDown className="w-3 h-3" />
-                      </button>
-                    </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-muted-foreground">{suggestion.source}</span>
+                    <span className="text-xs text-muted-foreground">{suggestion.category}</span>
                   </div>
-                  {suggestion.suggestedResponse && (
-                    <Button
-                      size="sm" variant="ghost"
-                      className="w-full h-6 text-xs gap-1 text-primary hover:bg-primary/10 mt-1"
-                      onClick={(e) => { e.stopPropagation(); onCopyToChat(suggestion.suggestedResponse!); }}
-                      data-testid={`button-kb-copy-${suggestion.id}`}
-                    >
-                      <Copy className="w-3 h-3" /> Copy to Chat
-                    </Button>
+                  <div className="space-y-0.5">{renderArticleContent(suggestion.fullContent || suggestion.content)}</div>
+                  {suggestion.references && suggestion.references.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">References</p>
+                      <div className="space-y-1">
+                        {suggestion.references.map(ref => (
+                          <a key={ref.label} href={ref.url} className="flex items-center gap-1.5 text-xs text-primary hover:underline">
+                            <ExternalLink className="w-3 h-3 shrink-0" />{ref.label}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
                   )}
-                </Card>
+                  <div className="flex items-center justify-between pt-2 border-t border-border/20">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-muted-foreground">Helpful?</span>
+                      <button className={`p-0.5 rounded transition-colors ${votes[suggestion.id] === "up" ? "text-emerald-400" : "text-muted-foreground/50 hover:text-emerald-400"}`} onClick={(e) => handleVote(suggestion, "up", e)} data-testid={`button-vote-up-${suggestion.id}`}><ThumbsUp className="w-3.5 h-3.5" /></button>
+                      <button className={`p-0.5 rounded transition-colors ${votes[suggestion.id] === "down" ? "text-red-400" : "text-muted-foreground/50 hover:text-red-400"}`} onClick={(e) => handleVote(suggestion, "down", e)} data-testid={`button-vote-down-${suggestion.id}`}><ThumbsDown className="w-3.5 h-3.5" /></button>
+                    </div>
+                    {suggestion.suggestedResponse && (
+                      <Button size="sm" className="h-7 gap-1 text-xs" onClick={(e) => { e.stopPropagation(); onCopyToChat(suggestion.suggestedResponse!); }} data-testid={`button-kb-copy-${suggestion.id}`}>
+                        <Copy className="w-3 h-3" /> Copy to Chat
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+          {/* Conversation-triggered pairs: message bubble + expandable article */}
+          <AnimatePresence>
+            {displayPairs.map(({ customerMessage, suggestion }) => (
+              <motion.div key={suggestion.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+                <div className="space-y-2">
+                  {/* Customer message bubble */}
+                  <div className="flex items-start gap-2">
+                    <div className="w-7 h-7 rounded-full bg-muted/50 border border-border/30 flex items-center justify-center shrink-0 mt-0.5">
+                      <User className="w-3.5 h-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground mb-1.5">Customer</p>
+                      <div className="rounded-xl p-3 bg-muted/20 border border-border/20">
+                        <p className="text-sm leading-relaxed">{customerMessage}</p>
+                      </div>
+                      <button
+                        className="flex items-center gap-1.5 text-xs text-primary mt-2 hover:opacity-75 transition-opacity"
+                        onClick={() => toggleExpanded(suggestion.id)}
+                        data-testid={`button-kb-toggle-${suggestion.id}`}
+                      >
+                        {expandedIds[suggestion.id]
+                          ? <><ChevronUp className="w-3.5 h-3.5" />Collapse KB Article</>
+                          : <><BookOpen className="w-3.5 h-3.5" />Show KB Article</>}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Expanded article */}
+                  {expandedIds[suggestion.id] && (
+                    <div className="ml-9 glass-panel rounded-xl p-3 space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-1.5 flex-1 min-w-0">
+                          <BookOpen className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                          <span className="text-sm font-bold text-primary leading-snug">{suggestion.title}</span>
+                        </div>
+                        <span className="text-sm font-bold text-primary shrink-0">{Math.round(suggestion.confidence * 100)}%</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-semibold text-muted-foreground">{suggestion.source}</span>
+                        <span className="text-xs text-muted-foreground">{suggestion.category}</span>
+                      </div>
+                      <div className="space-y-0.5">{renderArticleContent(suggestion.fullContent || suggestion.content)}</div>
+                      {suggestion.references && suggestion.references.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">References</p>
+                          <div className="space-y-1">
+                            {suggestion.references.map(ref => (
+                              <a key={ref.label} href={ref.url} className="flex items-center gap-1.5 text-xs text-primary hover:underline">
+                                <ExternalLink className="w-3 h-3 shrink-0" />{ref.label}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between pt-2 border-t border-border/20">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-muted-foreground">Helpful?</span>
+                          <button className={`p-0.5 rounded transition-colors ${votes[suggestion.id] === "up" ? "text-emerald-400" : "text-muted-foreground/50 hover:text-emerald-400"}`} onClick={(e) => handleVote(suggestion, "up", e)} data-testid={`button-vote-up-${suggestion.id}`}><ThumbsUp className="w-3.5 h-3.5" /></button>
+                          <button className={`p-0.5 rounded transition-colors ${votes[suggestion.id] === "down" ? "text-red-400" : "text-muted-foreground/50 hover:text-red-400"}`} onClick={(e) => handleVote(suggestion, "down", e)} data-testid={`button-vote-down-${suggestion.id}`}><ThumbsDown className="w-3.5 h-3.5" /></button>
+                        </div>
+                        {suggestion.suggestedResponse && (
+                          <Button size="sm" className="h-7 gap-1 text-xs" onClick={() => onCopyToChat(suggestion.suggestedResponse!)} data-testid={`button-kb-copy-${suggestion.id}`}>
+                            <Copy className="w-3 h-3" /> Copy to Chat
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </motion.div>
             ))}
           </AnimatePresence>
@@ -1419,6 +1485,7 @@ export default function ChatsPage() {
   const [cannedOpen, setCannedOpen] = useState(false);
   const [kbSearchQuery, setKbSearchQuery] = useState("");
   const [kbSuggestions, setKbSuggestions] = useState<Record<string, AISuggestion[]>>({});
+  const [kbTriggeringMsg, setKbTriggeringMsg] = useState<Record<string, string>>({});
   const [articleModalOpen, setArticleModalOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<AISuggestion | null>(null);
   const [kbCopyText, setKbCopyText] = useState<string | undefined>(undefined);
@@ -1533,6 +1600,7 @@ export default function ChatsPage() {
               const suggestions = matchKbSuggestions(lastCustomer.text);
               if (suggestions.length > 0) {
                 setKbSuggestions(p => ({ ...p, [session.id]: suggestions }));
+                setKbTriggeringMsg(p => ({ ...p, [session.id]: lastCustomer.text }));
               }
             }
             return prev;
@@ -1558,6 +1626,7 @@ export default function ChatsPage() {
         const suggestions = matchKbSuggestions(lastCustomer.text);
         if (suggestions.length > 0) {
           setKbSuggestions(prev => ({ ...prev, [selectedId]: suggestions }));
+          setKbTriggeringMsg(prev => ({ ...prev, [selectedId]: lastCustomer.text }));
         }
       }
     }
@@ -1739,6 +1808,8 @@ export default function ChatsPage() {
   const currentPastCalls = selectedSession ? (customerPastCalls[selectedSession.customerId] || []) : [];
   const currentMessages = selectedId ? (messages[selectedId] || []) : [];
   const currentKbSuggestions = selectedId ? (kbSuggestions[selectedId] || []) : [];
+  const currentKbTriggeringMsg = selectedId ? (kbTriggeringMsg[selectedId] || "") : "";
+  const currentKbMessagePairs = currentKbSuggestions.map(s => ({ customerMessage: currentKbTriggeringMsg, suggestion: s }));
   const currentAiMessages = selectedId ? (aiChatMessages[selectedId] || []) : [];
   const isCustomerTyping = selectedId ? (customerTyping[selectedId] || false) : false;
   const currentInputValue = selectedId ? (inputValues[selectedId] || "") : "";
@@ -2008,8 +2079,7 @@ export default function ChatsPage() {
 
             <div className="w-[320px] shrink-0 glass-panel rounded-xl overflow-hidden">
               <KbAssistPanel
-                suggestions={currentKbSuggestions}
-                onOpenArticle={(s) => { setSelectedArticle(s); setArticleModalOpen(true); }}
+                messagePairs={currentKbMessagePairs}
                 onCopyToChat={(text) => { setInputValues(prev => ({ ...prev, [selectedId!]: text })); }}
                 chatTopic={selectedSession.topic}
                 searchQuery={kbSearchQuery}
