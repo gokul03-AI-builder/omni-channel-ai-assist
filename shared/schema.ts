@@ -46,6 +46,14 @@ export interface DeviceInfo {
   hierarchyId: string;
   hierarchyPath: string | null;
   refSetId: string | null;
+  serviceId?: string | null;
+  tunnelIp?: string | null;
+  hardwareType?: string | null;
+  contractType?: string | null;
+  contractEndDate?: string | null;
+  commanderApp?: string | null;
+  commanderVersion?: string | null;
+  connectionStatusCSit?: string | null;
 }
 
 export interface Call {

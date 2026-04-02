@@ -5,7 +5,7 @@ import {
   List, ListOrdered, Link, Image, Code, Sparkles, Languages, Bot,
   UserCircle, Clock, Tag, User, Phone, Globe, CheckCircle2,
   Reply, ReplyAll, Forward, Copy, Ticket, Building2, CalendarDays,
-  Hash, Zap, ChevronLeft, BookOpen, ChevronDown, ChevronUp,
+  Hash, Zap, ChevronLeft, ChevronRight, BookOpen, ChevronDown, ChevronUp,
   MapPin, Briefcase, ShieldCheck, PenLine, Lock, Cpu,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -162,18 +162,39 @@ const kbArticles = [
 
 // ─── Email-channel Device Info ────────────────────────────────────────────────
 
-const emailDeviceInfo: Record<string, {
+interface EmailDeviceInfo {
   model: string; serialNumber: string; deviceId: string; mid: string; tid: string;
   status: "active" | "maintenance" | "offline";
   softwareVersion: string; agentVersion: string;
   network: string; ipAddress: string; macAddress: string;
   lastHeartbeat: string; lastCommunication: string;
-}> = {
-  "em-001": { model: "Verifone P400", serialNumber: "P400-SN-884721", deviceId: "DEV-P400-001", mid: "MID-884721", tid: "TID-2201", status: "active", softwareVersion: "5.4.2", agentVersion: "3.1.0", network: "Wi-Fi", ipAddress: "192.168.1.42", macAddress: "AA:BB:CC:11:22:33", lastHeartbeat: "2026-03-17T09:00:00Z", lastCommunication: "2026-03-17T09:15:00Z" },
-  "em-002": { model: "Verifone V240m", serialNumber: "V240M-SN-339821", deviceId: "DEV-V240M-003", mid: "MID-339821", tid: "TID-5503", status: "maintenance", softwareVersion: "2.1.5", agentVersion: "2.8.1", network: "Wi-Fi", ipAddress: "192.168.2.15", macAddress: "DD:EE:FF:44:55:66", lastHeartbeat: "2026-03-16T13:55:00Z", lastCommunication: "2026-03-16T14:00:00Z" },
-  "em-003": { model: "Verifone e285", serialNumber: "E285-SN-221347", deviceId: "DEV-E285-012", mid: "MID-221347", tid: "TID-7712", status: "offline", softwareVersion: "3.2.1", agentVersion: "2.5.0", network: "4G LTE", ipAddress: "10.0.0.34", macAddress: "11:22:33:AA:BB:CC", lastHeartbeat: "2026-03-15T09:45:00Z", lastCommunication: "2026-03-15T10:00:00Z" },
-  "em-004": { model: "Verifone VX520", serialNumber: "VX520-SN-112233", deviceId: "DEV-VX520-007", mid: "MID-112233", tid: "TID-3308", status: "active", softwareVersion: "4.8.3", agentVersion: "3.0.2", network: "Ethernet", ipAddress: "10.10.0.22", macAddress: "CC:DD:EE:77:88:99", lastHeartbeat: "2026-03-17T06:55:00Z", lastCommunication: "2026-03-17T07:00:00Z" },
-  "em-005": { model: "Verifone MX915", serialNumber: "MX915-SN-998877", deviceId: "DEV-MX915-050", mid: "MID-998877", tid: "TID-1104", status: "active", softwareVersion: "3.6.0", agentVersion: "2.9.0", network: "USB", ipAddress: "—", macAddress: "—", lastHeartbeat: "2026-03-13T10:55:00Z", lastCommunication: "2026-03-13T11:00:00Z" },
+  serviceId: string; tunnelIp: string | null; hardwareType: string;
+  contractType: string; contractEndDate: string;
+  commanderApp: string; commanderVersion: string;
+  connectionStatusCSit: string;
+}
+
+const emailDeviceInfo: Record<string, EmailDeviceInfo[]> = {
+  "em-001": [
+    { model: "Verifone P400", serialNumber: "P400-SN-884721", deviceId: "DEV-P400-001", mid: "MID-884721", tid: "TID-2201", status: "active", softwareVersion: "5.4.2", agentVersion: "3.1.0", network: "Wi-Fi", ipAddress: "192.168.1.42", macAddress: "AA:BB:CC:11:22:33", lastHeartbeat: "2026-03-17T09:00:00Z", lastCommunication: "2026-03-17T09:15:00Z", serviceId: "SVC-E1001", tunnelIp: null, hardwareType: "PIN Pad", contractType: "Premium Support", contractEndDate: "2027-08-31", commanderApp: "Commander", commanderVersion: "3.5.1", connectionStatusCSit: "Connected" },
+    { model: "Verifone V400m-A", serialNumber: "V400M-SN-112211", deviceId: "DEV-V400M-099", mid: "MID-884722", tid: "TID-2202", status: "active", softwareVersion: "5.4.1.0", agentVersion: "4.2.38.1", network: "Ethernet", ipAddress: "192.168.1.43", macAddress: "AA:BB:CC:11:22:44", lastHeartbeat: "2026-03-17T08:45:00Z", lastCommunication: "2026-03-17T08:50:00Z", serviceId: "SVC-E1002", tunnelIp: null, hardwareType: "Mobile POS", contractType: "Standard", contractEndDate: "2026-11-30", commanderApp: "Commander", commanderVersion: "3.4.0", connectionStatusCSit: "Connected" },
+  ],
+  "em-002": [
+    { model: "Verifone V240m", serialNumber: "V240M-SN-339821", deviceId: "DEV-V240M-003", mid: "MID-339821", tid: "TID-5503", status: "maintenance", softwareVersion: "2.1.5", agentVersion: "2.8.1", network: "Wi-Fi", ipAddress: "192.168.2.15", macAddress: "DD:EE:FF:44:55:66", lastHeartbeat: "2026-03-16T13:55:00Z", lastCommunication: "2026-03-16T14:00:00Z", serviceId: "SVC-E2001", tunnelIp: null, hardwareType: "Portable POS", contractType: "Premium Support", contractEndDate: "2028-01-15", commanderApp: "Commander", commanderVersion: "3.5.0", connectionStatusCSit: "Pending" },
+    { model: "Verifone MX915", serialNumber: "MX915-SN-229900", deviceId: "DEV-MX915-011", mid: "MID-339822", tid: "TID-5504", status: "active", softwareVersion: "3.6.1", agentVersion: "2.9.1", network: "USB", ipAddress: "—", macAddress: "—", lastHeartbeat: "2026-03-17T07:30:00Z", lastCommunication: "2026-03-17T07:35:00Z", serviceId: "SVC-E2002", tunnelIp: null, hardwareType: "PIN Pad", contractType: "Basic", contractEndDate: "2027-05-31", commanderApp: "Commander", commanderVersion: "3.3.0", connectionStatusCSit: "Connected" },
+  ],
+  "em-003": [
+    { model: "Verifone e285", serialNumber: "E285-SN-221347", deviceId: "DEV-E285-012", mid: "MID-221347", tid: "TID-7712", status: "offline", softwareVersion: "3.2.1", agentVersion: "2.5.0", network: "4G LTE", ipAddress: "10.0.0.34", macAddress: "11:22:33:AA:BB:CC", lastHeartbeat: "2026-03-15T09:45:00Z", lastCommunication: "2026-03-15T10:00:00Z", serviceId: "SVC-E3001", tunnelIp: null, hardwareType: "Mobile POS", contractType: "Standard", contractEndDate: "2026-07-20", commanderApp: "Commander", commanderVersion: "3.3.2", connectionStatusCSit: "Disconnected" },
+    { model: "Verifone V660c-A", serialNumber: "V660C-SN-445566", deviceId: "DEV-V660C-008", mid: "MID-221348", tid: "TID-7713", status: "active", softwareVersion: "6.8.2.1", agentVersion: "4.3.40.2", network: "WIFI", ipAddress: "10.0.0.35", macAddress: "11:22:33:AA:BB:DD", lastHeartbeat: "2026-03-17T05:00:00Z", lastCommunication: "2026-03-17T05:00:00Z", serviceId: "SVC-E3002", tunnelIp: null, hardwareType: "POS Terminal", contractType: "Premium Support", contractEndDate: "2027-12-31", commanderApp: "Commander", commanderVersion: "3.5.1", connectionStatusCSit: "Connected" },
+  ],
+  "em-004": [
+    { model: "Verifone VX520", serialNumber: "VX520-SN-112233", deviceId: "DEV-VX520-007", mid: "MID-112233", tid: "TID-3308", status: "active", softwareVersion: "4.8.3", agentVersion: "3.0.2", network: "Ethernet", ipAddress: "10.10.0.22", macAddress: "CC:DD:EE:77:88:99", lastHeartbeat: "2026-03-17T06:55:00Z", lastCommunication: "2026-03-17T07:00:00Z", serviceId: "SVC-E4001", tunnelIp: null, hardwareType: "POS Terminal", contractType: "Premium Support", contractEndDate: "2027-10-31", commanderApp: "Commander", commanderVersion: "3.5.2", connectionStatusCSit: "Connected" },
+    { model: "Verifone P630", serialNumber: "P630-SN-667788", deviceId: "DEV-P630-002", mid: "MID-112234", tid: "TID-3309", status: "active", softwareVersion: "2.3.0", agentVersion: "3.0.0", network: "4G LTE", ipAddress: "10.10.0.23", macAddress: "CC:DD:EE:77:88:AA", lastHeartbeat: "2026-03-16T22:10:00Z", lastCommunication: "2026-03-16T22:15:00Z", serviceId: "SVC-E4002", tunnelIp: null, hardwareType: "Handheld POS", contractType: "Standard", contractEndDate: "2027-03-31", commanderApp: "Commander", commanderVersion: "3.4.1", connectionStatusCSit: "Connected" },
+  ],
+  "em-005": [
+    { model: "Verifone MX915", serialNumber: "MX915-SN-998877", deviceId: "DEV-MX915-050", mid: "MID-998877", tid: "TID-1104", status: "active", softwareVersion: "3.6.0", agentVersion: "2.9.0", network: "USB", ipAddress: "—", macAddress: "—", lastHeartbeat: "2026-03-13T10:55:00Z", lastCommunication: "2026-03-13T11:00:00Z", serviceId: "SVC-E5001", tunnelIp: null, hardwareType: "PIN Pad", contractType: "Basic", contractEndDate: "2026-09-30", commanderApp: "Commander", commanderVersion: "3.2.1", connectionStatusCSit: "Connected" },
+    { model: "Verifone e285", serialNumber: "E285-SN-771122", deviceId: "DEV-E285-055", mid: "MID-998878", tid: "TID-1105", status: "maintenance", softwareVersion: "3.2.0", agentVersion: "2.5.0", network: "Bluetooth", ipAddress: "10.1.0.11", macAddress: "77:88:99:AA:BB:CC", lastHeartbeat: "2026-03-12T14:00:00Z", lastCommunication: "2026-03-12T14:05:00Z", serviceId: "SVC-E5002", tunnelIp: null, hardwareType: "Mobile POS", contractType: "Standard", contractEndDate: "2027-06-30", commanderApp: "Commander", commanderVersion: "3.3.1", connectionStatusCSit: "Pending" },
+  ],
 };
 
 const emailSupportTickets: Record<string, { id: string; subject: string; status: EmailStatus; resolution?: string }[]> = {
@@ -633,7 +654,13 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
   const [profileOpen, setProfileOpen] = useState(true);
   const [deviceOpen, setDeviceOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const device = emailDeviceInfo[thread.id];
+  const [selectedDeviceIdx, setSelectedDeviceIdx] = useState<number | null>(null);
+  const emailDevices = emailDeviceInfo[thread.id] || [];
+  const selectedEmailDevice = selectedDeviceIdx !== null ? emailDevices[selectedDeviceIdx] : null;
+
+  const eDStatusColor = (s: string) => s === "active" ? "text-status-online" : s === "maintenance" ? "text-status-away" : "text-status-offline";
+  const eDStatusDot = (s: string) => s === "active" ? "bg-status-online" : s === "maintenance" ? "bg-status-away" : "bg-status-offline";
+  const eDStatusBadge = (s: string) => s === "active" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/20" : s === "maintenance" ? "bg-yellow-500/15 text-yellow-400 border-yellow-500/20" : "bg-red-500/15 text-red-400 border-red-500/20";
   const supportTickets = emailSupportTickets[thread.id] || [];
   const pastInteractions = emailPastInteractions[thread.id] || [];
 
@@ -1070,45 +1097,92 @@ function DetailScreen({ thread, onBack, onUpdateThread, onSendReply }: {
                   </CollapsibleSection>
 
                   {/* Device */}
-                  {device && (
-                    <CollapsibleSection title="Device" icon={<Cpu className="w-3.5 h-3.5" />} open={deviceOpen} onToggle={() => setDeviceOpen(!deviceOpen)}>
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center">
-                            <Cpu className="w-5 h-5 text-primary" />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-sm" data-testid="text-email-device-model">{device.model}</h4>
-                            <div className="flex items-center gap-1.5">
-                              <span className={`w-2 h-2 rounded-full ${device.status === "active" ? "bg-status-online" : device.status === "maintenance" ? "bg-status-away" : "bg-status-offline"}`} />
-                              <span className={`text-xs capitalize ${device.status === "active" ? "text-status-online" : device.status === "maintenance" ? "text-status-away" : "text-status-offline"}`}>{device.status}</span>
+                  {emailDevices.length > 0 && (
+                    <CollapsibleSection title="Device" icon={<Cpu className="w-3.5 h-3.5" />} open={deviceOpen} onToggle={() => { setDeviceOpen(!deviceOpen); if (deviceOpen) setSelectedDeviceIdx(null); }}>
+                      {selectedEmailDevice ? (
+                        <div className="space-y-4">
+                          <button onClick={() => setSelectedDeviceIdx(null)} className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors" data-testid="button-email-device-back">
+                            <ChevronLeft className="w-3.5 h-3.5" /> All Devices
+                          </button>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center shrink-0">
+                              <Cpu className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-sm" data-testid="text-email-device-model">{selectedEmailDevice.model}</h4>
+                              <div className="flex items-center gap-1.5">
+                                <span className={`w-2 h-2 rounded-full ${eDStatusDot(selectedEmailDevice.status)}`} />
+                                <span className={`text-xs capitalize ${eDStatusColor(selectedEmailDevice.status)}`}>{selectedEmailDevice.status}</span>
+                              </div>
                             </div>
                           </div>
+                          <Separator className="bg-border/50" />
+                          <div className="space-y-3">
+                            <InfoRow label="Service ID" value={selectedEmailDevice.serviceId} mono />
+                            <InfoRow label="Serial Number" value={selectedEmailDevice.serialNumber} mono />
+                            <InfoRow label="Device ID" value={selectedEmailDevice.deviceId} mono />
+                            <InfoRow label="MID" value={selectedEmailDevice.mid} mono />
+                            <InfoRow label="TID" value={selectedEmailDevice.tid} mono />
+                            <InfoRow label="Hardware Type" value={selectedEmailDevice.hardwareType} />
+                          </div>
+                          <Separator className="bg-border/50" />
+                          <div className="space-y-3">
+                            <InfoRow label="Software Version" value={selectedEmailDevice.softwareVersion} mono />
+                            <InfoRow label="Agent Version" value={selectedEmailDevice.agentVersion} mono />
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs text-muted-foreground shrink-0">Commander App & Version</span>
+                              <span className="text-xs font-mono text-right truncate max-w-[150px]">{selectedEmailDevice.commanderApp} v{selectedEmailDevice.commanderVersion}</span>
+                            </div>
+                          </div>
+                          <Separator className="bg-border/50" />
+                          <div className="space-y-3">
+                            <InfoRow label="Network" value={selectedEmailDevice.network} />
+                            <InfoRow label="IP Address" value={selectedEmailDevice.ipAddress} mono />
+                            <InfoRow label="MAC Address" value={selectedEmailDevice.macAddress} mono />
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs text-muted-foreground shrink-0">Tunnel IP</span>
+                              <Badge className="text-[10px] px-1.5 py-0 h-4 bg-muted/50 text-muted-foreground border border-border/50">Coming Soon</Badge>
+                            </div>
+                          </div>
+                          <Separator className="bg-border/50" />
+                          <div className="space-y-3">
+                            <InfoRow label="Contract Type" value={selectedEmailDevice.contractType} />
+                            <InfoRow label="Contract End Date" value={selectedEmailDevice.contractEndDate} />
+                          </div>
+                          <Separator className="bg-border/50" />
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs text-muted-foreground shrink-0">Connection (C-Sit)</span>
+                            <Badge className={`text-[10px] px-1.5 py-0 h-4 border ${selectedEmailDevice.connectionStatusCSit === "Connected" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/20" : selectedEmailDevice.connectionStatusCSit === "Disconnected" ? "bg-red-500/15 text-red-400 border-red-500/20" : "bg-yellow-500/15 text-yellow-400 border-yellow-500/20"}`}>{selectedEmailDevice.connectionStatusCSit}</Badge>
+                          </div>
+                          <Separator className="bg-border/50" />
+                          <div className="space-y-3">
+                            <InfoRow label="Last Heartbeat" value={new Date(selectedEmailDevice.lastHeartbeat).toLocaleString()} />
+                            <InfoRow label="Last Communication" value={new Date(selectedEmailDevice.lastCommunication).toLocaleString()} />
+                          </div>
                         </div>
-                        <Separator className="bg-border/50" />
-                        <div className="space-y-3">
-                          <InfoRow label="Serial Number" value={device.serialNumber} mono />
-                          <InfoRow label="Device ID" value={device.deviceId} mono />
-                          <InfoRow label="MID" value={device.mid} mono />
-                          <InfoRow label="TID" value={device.tid} mono />
+                      ) : (
+                        <div className="space-y-2">
+                          {emailDevices.map((d, i) => (
+                            <button key={i} onClick={() => setSelectedDeviceIdx(i)} className="w-full text-left glass-subtle rounded-lg p-3 hover:bg-primary/5 transition-colors group" data-testid={`button-email-device-select-${i}`}>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-8 h-8 rounded-md glass-bubble-primary flex items-center justify-center shrink-0">
+                                    <Cpu className="w-4 h-4 text-primary" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium">{d.model}</p>
+                                    <p className="text-[11px] text-muted-foreground">{d.hardwareType}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge className={`text-[10px] px-1.5 py-0 h-4 border ${eDStatusBadge(d.status)}`}>{d.status}</Badge>
+                                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                </div>
+                              </div>
+                            </button>
+                          ))}
                         </div>
-                        <Separator className="bg-border/50" />
-                        <div className="space-y-3">
-                          <InfoRow label="Software Version" value={device.softwareVersion} mono />
-                          <InfoRow label="Agent Version" value={device.agentVersion} mono />
-                        </div>
-                        <Separator className="bg-border/50" />
-                        <div className="space-y-3">
-                          <InfoRow label="Network" value={device.network} />
-                          <InfoRow label="IP Address" value={device.ipAddress} mono />
-                          <InfoRow label="MAC Address" value={device.macAddress} mono />
-                        </div>
-                        <Separator className="bg-border/50" />
-                        <div className="space-y-3">
-                          <InfoRow label="Last Heartbeat" value={new Date(device.lastHeartbeat).toLocaleString()} />
-                          <InfoRow label="Last Communication" value={new Date(device.lastCommunication).toLocaleString()} />
-                        </div>
-                      </div>
+                      )}
                     </CollapsibleSection>
                   )}
 

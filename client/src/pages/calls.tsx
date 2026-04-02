@@ -827,7 +827,7 @@ function CollapsibleSection({
 
 function RightPanel({
   customer,
-  device,
+  devices,
   tickets,
   pastCalls,
   aiChatMessages,
@@ -840,7 +840,7 @@ function RightPanel({
   onCollapse,
 }: {
   customer: Customer;
-  device: DeviceInfo;
+  devices: DeviceInfo[];
   tickets: Ticket[];
   pastCalls: PastCall[];
   aiChatMessages: ChatMessage[];
@@ -852,14 +852,6 @@ function RightPanel({
   onNewChat?: () => void;
   onCollapse?: () => void;
 }) {
-  const devStatus = device.status.toLowerCase();
-  const statusColor =
-    devStatus === "active"
-      ? "text-status-online"
-      : devStatus === "maintenance"
-        ? "text-status-away"
-        : "text-status-offline";
-
   const ticketStatusColor = (status: string) => {
     switch (status) {
       case "open": return "bg-blue-500/15 text-blue-400";
@@ -874,6 +866,12 @@ function RightPanel({
   const [profileOpen, setProfileOpen] = useState(true);
   const [deviceOpen, setDeviceOpen] = useState(true);
   const [historyOpen, setHistoryOpen] = useState(true);
+  const [selectedDeviceIdx, setSelectedDeviceIdx] = useState<number | null>(null);
+
+  const dStatusColor = (s: string) => s.toLowerCase() === "active" ? "text-status-online" : s.toLowerCase() === "maintenance" ? "text-status-away" : "text-status-offline";
+  const dStatusDot = (s: string) => s.toLowerCase() === "active" ? "bg-status-online" : s.toLowerCase() === "maintenance" ? "bg-status-away" : "bg-status-offline";
+  const dStatusBadge = (s: string) => s.toLowerCase() === "active" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/20" : s.toLowerCase() === "maintenance" ? "bg-yellow-500/15 text-yellow-400 border-yellow-500/20" : "bg-red-500/15 text-red-400 border-red-500/20";
+  const selectedDevice = selectedDeviceIdx !== null ? devices[selectedDeviceIdx] : null;
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -961,52 +959,93 @@ function RightPanel({
                   </div>
                 </CollapsibleSection>
 
-                <CollapsibleSection title="Device" icon={<Cpu className="w-3.5 h-3.5" />} open={deviceOpen} onToggle={() => setDeviceOpen(!deviceOpen)}>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center">
-                        <Cpu className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-sm" data-testid="text-device-model">{device.model}</h4>
-                        <div className="flex items-center gap-1.5">
-                          <span className={`w-2 h-2 rounded-full ${devStatus === "active" ? "bg-status-online" : devStatus === "maintenance" ? "bg-status-away" : "bg-status-offline"}`} />
-                          <span className={`text-xs capitalize ${statusColor}`}>{device.status}</span>
+                <CollapsibleSection title="Device" icon={<Cpu className="w-3.5 h-3.5" />} open={deviceOpen} onToggle={() => { setDeviceOpen(!deviceOpen); if (deviceOpen) setSelectedDeviceIdx(null); }}>
+                  {selectedDevice ? (
+                    <div className="space-y-4">
+                      <button onClick={() => setSelectedDeviceIdx(null)} className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors" data-testid="button-device-back">
+                        <ChevronLeft className="w-3.5 h-3.5" /> All Devices
+                      </button>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center shrink-0">
+                          <Cpu className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-sm" data-testid="text-device-model">{selectedDevice.model}</h4>
+                          <div className="flex items-center gap-1.5">
+                            <span className={`w-2 h-2 rounded-full ${dStatusDot(selectedDevice.status)}`} />
+                            <span className={`text-xs capitalize ${dStatusColor(selectedDevice.status)}`}>{selectedDevice.status}</span>
+                          </div>
                         </div>
                       </div>
+                      <Separator className="bg-border/50" />
+                      <div className="space-y-3">
+                        <InfoRow label="Service ID" value={selectedDevice.serviceId || "—"} mono />
+                        <InfoRow label="Serial Number" value={selectedDevice.serialNumber} mono />
+                        <InfoRow label="Device ID" value={selectedDevice.deviceId || "—"} mono />
+                        <InfoRow label="MID" value={selectedDevice.mid} mono />
+                        <InfoRow label="TID" value={selectedDevice.tid || "—"} mono />
+                        <InfoRow label="Hardware Type" value={selectedDevice.hardwareType || "—"} />
+                      </div>
+                      <Separator className="bg-border/50" />
+                      <div className="space-y-3">
+                        <InfoRow label="Software Version" value={selectedDevice.softwareVersion} mono />
+                        <InfoRow label="Agent Version" value={selectedDevice.agentVersion} mono />
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs text-muted-foreground shrink-0">Commander App & Version</span>
+                          <span className="text-xs font-mono text-right truncate max-w-[160px]">{selectedDevice.commanderApp && selectedDevice.commanderVersion ? `${selectedDevice.commanderApp} v${selectedDevice.commanderVersion}` : "—"}</span>
+                        </div>
+                      </div>
+                      <Separator className="bg-border/50" />
+                      <div className="space-y-3">
+                        <InfoRow label="Network" value={selectedDevice.network} />
+                        <InfoRow label="IP Address" value={selectedDevice.ipAddress} mono />
+                        <InfoRow label="MAC Address" value={selectedDevice.macAddress || "—"} mono />
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs text-muted-foreground shrink-0">Tunnel IP</span>
+                          <Badge className="text-[10px] px-1.5 py-0 h-4 bg-muted/50 text-muted-foreground border border-border/50">Coming Soon</Badge>
+                        </div>
+                      </div>
+                      <Separator className="bg-border/50" />
+                      <div className="space-y-3">
+                        <InfoRow label="Contract Type" value={selectedDevice.contractType || "—"} />
+                        <InfoRow label="Contract End Date" value={selectedDevice.contractEndDate || "—"} />
+                      </div>
+                      <Separator className="bg-border/50" />
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs text-muted-foreground shrink-0">Connection (C-Sit)</span>
+                        {selectedDevice.connectionStatusCSit ? (
+                          <Badge className={`text-[10px] px-1.5 py-0 h-4 border ${selectedDevice.connectionStatusCSit === "Connected" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/20" : selectedDevice.connectionStatusCSit === "Disconnected" ? "bg-red-500/15 text-red-400 border-red-500/20" : "bg-yellow-500/15 text-yellow-400 border-yellow-500/20"}`}>{selectedDevice.connectionStatusCSit}</Badge>
+                        ) : <span className="text-xs">—</span>}
+                      </div>
+                      <Separator className="bg-border/50" />
+                      <div className="space-y-3">
+                        <InfoRow label="Last Heartbeat" value={new Date(selectedDevice.lastHeartbeat).toLocaleString()} />
+                        <InfoRow label="Last Communication" value={new Date(selectedDevice.lastCommunication).toLocaleString()} />
+                      </div>
                     </div>
-
-                    <Separator className="bg-border/50" />
-
-                    <div className="space-y-3">
-                      <InfoRow label="Serial Number" value={device.serialNumber} mono />
-                      <InfoRow label="Device ID" value={device.deviceId || "—"} mono />
-                      <InfoRow label="MID" value={device.mid} mono />
-                      <InfoRow label="TID" value={device.tid || "—"} mono />
+                  ) : (
+                    <div className="space-y-2">
+                      {devices.map((d, i) => (
+                        <button key={i} onClick={() => setSelectedDeviceIdx(i)} className="w-full text-left glass-subtle rounded-lg p-3 hover:bg-primary/5 transition-colors group" data-testid={`button-device-select-${i}`}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 rounded-md glass-bubble-primary flex items-center justify-center shrink-0">
+                                <Cpu className="w-4 h-4 text-primary" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{d.model}</p>
+                                <p className="text-[11px] text-muted-foreground">{d.hardwareType || "—"}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge className={`text-[10px] px-1.5 py-0 h-4 border ${dStatusBadge(d.status)}`}>{d.status}</Badge>
+                              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                            </div>
+                          </div>
+                        </button>
+                      ))}
                     </div>
-
-                    <Separator className="bg-border/50" />
-
-                    <div className="space-y-3">
-                      <InfoRow label="Software Version" value={device.softwareVersion} mono />
-                      <InfoRow label="Agent Version" value={device.agentVersion} mono />
-                    </div>
-
-                    <Separator className="bg-border/50" />
-
-                    <div className="space-y-3">
-                      <InfoRow label="Network" value={device.network} />
-                      <InfoRow label="IP Address" value={device.ipAddress} mono />
-                      <InfoRow label="MAC Address" value={device.macAddress || "—"} mono />
-                    </div>
-
-                    <Separator className="bg-border/50" />
-
-                    <div className="space-y-3">
-                      <InfoRow label="Last Heartbeat" value={new Date(device.lastHeartbeat).toLocaleString()} />
-                      <InfoRow label="Last Communication" value={new Date(device.lastCommunication).toLocaleString()} />
-                    </div>
-                  </div>
+                  )}
                 </CollapsibleSection>
 
                 <CollapsibleSection title="History" icon={<Clock className="w-3.5 h-3.5" />} open={historyOpen} onToggle={() => setHistoryOpen(!historyOpen)}>
@@ -1855,7 +1894,7 @@ export default function CallsPage() {
                         <div className="h-full w-[380px] glass-panel rounded-xl overflow-hidden">
                           <RightPanel
                             customer={currentCustomer}
-                            device={currentDevice}
+                            devices={currentDevice || []}
                             tickets={currentTickets}
                             pastCalls={currentPastCalls}
                             aiChatMessages={aiChatMessages}
