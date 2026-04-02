@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { ThumbsUp, ThumbsDown, Star, MessageCircle, TrendingUp, Sparkles, Phone, MessageSquare, Mail, Filter } from "lucide-react";
+
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -58,7 +59,6 @@ const channelMeta: Record<ChannelType | "all", { label: string; icon: React.Elem
 
 export default function FeedbackPage() {
   const [kbFeedback, setKbFeedback] = useState<KbFeedback[]>([]);
-  const [customerChannelFilter, setCustomerChannelFilter] = useState<ChannelType | "all">("all");
   const [kbChannelFilter, setKbChannelFilter] = useState<ChannelType | "all">("all");
   const avgRating = (feedbackItems.reduce((sum, f) => sum + f.rating, 0) / feedbackItems.length).toFixed(1);
 
@@ -66,13 +66,11 @@ export default function FeedbackPage() {
     setKbFeedback(getKbFeedback());
   }, []);
 
-  const filteredCustomerItems = customerChannelFilter === "all" ? feedbackItems : feedbackItems.filter(f => f.channel === customerChannelFilter);
   const filteredKbFeedback = kbChannelFilter === "all" ? kbFeedback : kbFeedback.filter(f => f.channel === kbChannelFilter);
 
   const kbHelpful = filteredKbFeedback.filter((f) => f.vote === "up").length;
   const kbUnhelpful = filteredKbFeedback.filter((f) => f.vote === "down").length;
 
-  const getCustomerChannelCount = (ch: ChannelType | "all") => ch === "all" ? feedbackItems.length : feedbackItems.filter(f => f.channel === ch).length;
   const getKbChannelCount = (ch: ChannelType | "all") => ch === "all" ? kbFeedback.length : kbFeedback.filter(f => f.channel === ch).length;
 
   return (
@@ -132,66 +130,21 @@ export default function FeedbackPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="customer" className="flex-1 min-h-0 mt-0 flex flex-col gap-3">
-            <div className="flex items-center gap-2 shrink-0" data-testid="channel-filter-customer">
-              <span className="text-xs text-muted-foreground font-medium shrink-0">Channel:</span>
-              <div className="flex items-center gap-1 flex-wrap">
-                {(["all", "calls", "chats", "email"] as const).map((ch) => {
-                  const meta = channelMeta[ch];
-                  const count = getCustomerChannelCount(ch);
-                  const isActive = customerChannelFilter === ch;
-                  return (
-                    <button
-                      key={ch}
-                      onClick={() => setCustomerChannelFilter(ch)}
-                      className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors border ${isActive ? "bg-primary/15 text-primary border-primary/30" : "bg-muted/30 text-muted-foreground border-border/30 hover:bg-primary/5 hover:text-primary/80"}`}
-                      data-testid={`button-customer-filter-${ch}`}
-                    >
-                      <meta.icon className="w-3 h-3" />
-                      {meta.label} <span className={`${isActive ? "text-primary/70" : "text-muted-foreground/70"}`}>{count}</span>
-                    </button>
-                  );
-                })}
+          <TabsContent value="customer" className="flex-1 min-h-0 mt-0 flex flex-col">
+            <div className="flex-1 flex flex-col items-center justify-center gap-4" data-testid="customer-feedback-coming-soon">
+              <div className="w-16 h-16 rounded-2xl glass-bubble-primary flex items-center justify-center">
+                <Star className="w-8 h-8 text-primary opacity-60" />
               </div>
+              <div className="text-center">
+                <p className="text-base font-semibold text-foreground">Coming Soon</p>
+                <p className="text-sm text-muted-foreground mt-1 max-w-xs">
+                  Customer satisfaction scores and post-interaction ratings will appear here once the integration is live.
+                </p>
+              </div>
+              <span className="text-xs italic text-muted-foreground/50 border border-border/30 rounded-full px-3 py-1 bg-muted/20">
+                In development
+              </span>
             </div>
-            <ScrollArea className="flex-1 min-h-0">
-              <div className="space-y-3 pr-1">
-                {filteredCustomerItems.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                    <MessageCircle className="w-8 h-8 mb-2 opacity-20" />
-                    <p className="text-sm">No feedback for this channel</p>
-                  </div>
-                ) : filteredCustomerItems.map((item) => {
-                  const chMeta = channelMeta[item.channel];
-                  return (
-                    <Card key={item.id} className="p-4" data-testid={`card-feedback-${item.id}`}>
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-medium">{item.customer}</span>
-                            <Badge variant="secondary" className="text-xs">{item.callTopic}</Badge>
-                            <span className="flex items-center gap-1 text-[10px] text-primary/70 bg-primary/10 border border-primary/20 rounded-full px-1.5 py-0.5">
-                              <chMeta.icon className="w-2.5 h-2.5" />
-                              {chMeta.label}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-0.5 mt-1.5">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-3.5 h-3.5 ${i < item.rating ? "text-yellow-500 fill-yellow-500" : "text-muted/60"}`}
-                              />
-                            ))}
-                            <span className="text-xs text-muted-foreground ml-2">{item.date}</span>
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{item.comment}</p>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-            </ScrollArea>
           </TabsContent>
 
           <TabsContent value="ai-kb" className="flex-1 min-h-0 mt-0 flex flex-col gap-3">
