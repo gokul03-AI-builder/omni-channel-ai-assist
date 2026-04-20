@@ -272,13 +272,13 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
                                   data-active={isSubActive}
                                   className={
                                     isSubActive
-                                      ? "!bg-primary/15 text-primary font-medium"
-                                      : "text-muted-foreground hover:text-primary/80"
+                                      ? "!bg-primary/15 text-primary font-medium text-xs"
+                                      : "text-muted-foreground hover:text-primary/80 text-xs"
                                   }
                                 >
                                   <Link href={child.url} data-testid={`link-nav-${item.title.toLowerCase()}-${child.title.toLowerCase()}`}>
-                                    <child.icon className={`w-3.5 h-3.5 ${isSubActive ? "text-primary" : "opacity-50"}`} />
-                                    <span>{child.title}</span>
+                                    <child.icon className={`w-3 h-3 ${isSubActive ? "text-primary" : "opacity-50"}`} />
+                                    <span className="text-xs">{child.title}</span>
                                   </Link>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
