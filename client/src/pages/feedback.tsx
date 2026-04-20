@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ThumbsUp, ThumbsDown, Star, MessageCircle, TrendingUp, Sparkles, Phone, MessageSquare, Mail, Filter, Brain } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Star, MessageCircle, Sparkles, Phone, MessageSquare, Mail, Filter, Brain } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -61,7 +61,6 @@ const channelMeta: Record<ChannelType | "all", { label: string; icon: React.Elem
 export default function FeedbackPage() {
   const [kbFeedback, setKbFeedback] = useState<KbFeedback[]>([]);
   const [kbChannelFilter, setKbChannelFilter] = useState<ChannelType | "all">("all");
-  const avgRating = (feedbackItems.reduce((sum, f) => sum + f.rating, 0) / feedbackItems.length).toFixed(1);
 
   useEffect(() => {
     setKbFeedback(getKbFeedback());
@@ -79,44 +78,6 @@ export default function FeedbackPage() {
       <div className="px-6 py-4 glass-header mx-4 mt-4 rounded-2xl">
         <h2 className="text-lg font-semibold">Feedback</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Customer satisfaction & knowledge base ratings</p>
-      </div>
-
-      <div className="px-6 py-4 grid grid-cols-3 gap-4 shrink-0">
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center">
-              <Star className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold" data-testid="text-avg-rating">{avgRating}</p>
-              <p className="text-xs text-muted-foreground">Avg. CSAT</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold" data-testid="text-total-feedback">{feedbackItems.length}</p>
-              <p className="text-xs text-muted-foreground">Total Reviews</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg glass-bubble-primary flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold" data-testid="text-satisfaction-rate">
-                {Math.round((feedbackItems.filter(f => f.rating >= 4).length / feedbackItems.length) * 100)}%
-              </p>
-              <p className="text-xs text-muted-foreground">Satisfaction</p>
-            </div>
-          </div>
-        </Card>
       </div>
 
       <div className="flex-1 min-h-0 px-6 pb-4">
