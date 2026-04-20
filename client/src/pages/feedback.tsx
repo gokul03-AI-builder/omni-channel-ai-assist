@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ThumbsUp, ThumbsDown, Star, MessageCircle, TrendingUp, Sparkles, Phone, MessageSquare, Mail, Filter } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Star, MessageCircle, TrendingUp, Sparkles, Phone, MessageSquare, Mail, Filter, Brain } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import type { KbFeedback } from "@shared/schema";
 import { getKbFeedback } from "@/lib/store";
+import RLApproval from "@/components/rl-approval";
 
 type ChannelType = "calls" | "chats" | "email";
 
@@ -119,8 +120,12 @@ export default function FeedbackPage() {
       </div>
 
       <div className="flex-1 min-h-0 px-6 pb-4">
-        <Tabs defaultValue="customer" className="flex flex-col h-full">
+        <Tabs defaultValue="rl-approval" className="flex flex-col h-full">
           <TabsList className="glass-subtle mb-3 shrink-0 w-fit">
+            <TabsTrigger value="rl-approval" className="text-xs gap-1.5" data-testid="tab-rl-approval">
+              <Brain className="w-3 h-3" />
+              RL Approval
+            </TabsTrigger>
             <TabsTrigger value="customer" className="text-xs">Customer Feedback</TabsTrigger>
             <TabsTrigger value="ai-kb" className="text-xs" data-testid="tab-ai-kb-feedback">
               KB Feedback
@@ -129,6 +134,10 @@ export default function FeedbackPage() {
               )}
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="rl-approval" className="flex-1 min-h-0 mt-0">
+            <RLApproval />
+          </TabsContent>
 
           <TabsContent value="customer" className="flex-1 min-h-0 mt-0 flex flex-col">
             <div className="flex-1 flex flex-col items-center justify-center gap-4" data-testid="customer-feedback-coming-soon">

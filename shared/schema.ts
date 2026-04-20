@@ -178,6 +178,29 @@ export interface CallHistoryRecord {
   agentName: string;
 }
 
+export interface RLKbLink {
+  id: string;
+  title: string;
+  source: string;
+  url?: string;
+}
+
+export interface RLSession {
+  id: string;
+  channel: "calls" | "chats";
+  customerName: string;
+  customerCompany: string;
+  agentName: string;
+  timestamp: string;
+  status: "pending" | "approved" | "rejected";
+  topic: string;
+  issueSummary: string;
+  aiResolution: string;
+  agentResolution: string;
+  editedAiResolution?: string;
+  kbLinks: RLKbLink[];
+}
+
 export interface ChatHistoryRecord {
   id: string;
   customerId: string;
