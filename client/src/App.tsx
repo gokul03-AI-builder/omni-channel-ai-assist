@@ -14,7 +14,9 @@ import ChatsPage from "@/pages/chats";
 import CallHistoryPage from "@/pages/call-history";
 import ChatHistoryPage from "@/pages/chat-history";
 import EmailPage from "@/pages/email";
-import FeedbackPage from "@/pages/feedback";
+import FeedbackRLApprovalPage from "@/pages/feedback-rl-approval";
+import FeedbackKBPage from "@/pages/feedback-kb";
+import FeedbackCustomerPage from "@/pages/feedback-customer";
 import AnalyticsPage from "@/pages/analytics";
 import ReportsPage from "@/pages/reports";
 import PermissionsPage from "@/pages/permissions";
@@ -35,7 +37,12 @@ function AuthenticatedRouter() {
       <Route path="/email" component={EmailPage} />
       <Route path="/chats" component={ChatsPage} />
       <Route path="/chats/history" component={ChatHistoryPage} />
-      <Route path="/feedback" component={FeedbackPage} />
+      <Route path="/feedback">
+        <Redirect to="/feedback/rl-approval" />
+      </Route>
+      <Route path="/feedback/rl-approval" component={FeedbackRLApprovalPage} />
+      <Route path="/feedback/kb" component={FeedbackKBPage} />
+      <Route path="/feedback/customer" component={FeedbackCustomerPage} />
       <Route path="/analytics" component={AnalyticsPage} />
       <Route path="/reports" component={ReportsPage} />
       {isAdmin && <Route path="/permissions" component={PermissionsPage} />}

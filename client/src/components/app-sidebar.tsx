@@ -1,5 +1,5 @@
 import { useLocation, Link } from "wouter";
-import { Phone, MessageSquare, ThumbsUp, LogOut, Sun, Moon, Home, BarChart3, FileText, Shield, Activity, History, ChevronRight, ChevronLeft, Mail } from "lucide-react";
+import { Phone, MessageSquare, ThumbsUp, LogOut, Sun, Moon, Home, BarChart3, FileText, Shield, Activity, History, ChevronRight, ChevronLeft, Mail, Brain, Star } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   Sidebar,
@@ -47,7 +47,16 @@ const navGroups: NavGroup[] = [
     label: "OVERVIEW",
     items: [
       { title: "Home", url: "/", icon: Home },
-      { title: "Feedback", url: "/feedback", icon: ThumbsUp },
+      {
+        title: "Feedback",
+        url: "/feedback",
+        icon: ThumbsUp,
+        children: [
+          { title: "RL Approval", url: "/feedback/rl-approval", icon: Brain },
+          { title: "Customer Feedback", url: "/feedback/customer", icon: Star },
+          { title: "KB Feedback", url: "/feedback/kb", icon: ThumbsUp },
+        ],
+      },
     ],
   },
   {
@@ -95,6 +104,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
     Calls: location.startsWith("/calls"),
     Chats: location.startsWith("/chats"),
+    Feedback: location.startsWith("/feedback"),
   });
 
   useEffect(() => {
@@ -102,6 +112,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
       ...prev,
       Calls: location.startsWith("/calls") ? true : prev.Calls,
       Chats: location.startsWith("/chats") ? true : prev.Chats,
+      Feedback: location.startsWith("/feedback") ? true : prev.Feedback,
     }));
   }, [location]);
 
